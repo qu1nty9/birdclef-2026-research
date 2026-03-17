@@ -1,0 +1,102 @@
+# =========================
+# DATASETS
+# =========================
+
+data/
+datasets/
+
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+*.wav
+*.mp3
+*.flac
+*.ogg
+
+# =========================
+# MODEL WEIGHTS
+# =========================
+
+models/
+checkpoints/
+weights/
+
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.h5
+*.onnx
+*.pkl
+
+# =========================
+# TRAINING OUTPUT
+# =========================
+
+logs/
+tensorboard/
+wandb/
+
+*.log
+*.out
+
+# =========================
+# KAGGLE SUBMISSIONS
+# =========================
+
+submissions/
+
+# =========================
+# REFERENCE NOTEBOOKS
+# (external implementations)
+# =========================
+
+references/
+
+# =========================
+# NOTEBOOK CHECKPOINTS
+# =========================
+
+.ipynb_checkpoints/
+
+# =========================
+# PYTHON CACHE
+# =========================
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# =========================
+# ENVIRONMENTS
+# =========================
+
+.env
+.env.*
+venv/
+.venv/
+env/
+
+# =========================
+# OS FILES
+# =========================
+
+.DS_Store
+Thumbs.db
+
+# =========================
+# EDITOR FILES
+# =========================
+
+.vscode/
+.idea/
+
+# =========================
+# PRIVATE PROJECT FILES
+# =========================
+
+BIRDCLEF_RESEARCH_PROTOCOL.md
+PROJECT_STATE.md
