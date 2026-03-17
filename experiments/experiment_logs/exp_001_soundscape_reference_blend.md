@@ -54,7 +54,7 @@ Validation Strategy:
 
 Results:
 - Validation score: pending
-- Leaderboard score: pending
+- Leaderboard score: `0.890` on `2026-03-18`
 
 Training Time:
 - Not applicable
@@ -62,15 +62,20 @@ Training Time:
 Runtime Notes:
 - The repository now includes a dry-run mode for verifying local labels and file coverage without Torch.
 - Full inference still needs a Torch-enabled environment.
+- A Kaggle submission notebook was created at `notebooks/kaggle_submission_reference_blend.ipynb` and produced the first public leaderboard score.
 
 Observations:
 - The local label file contains duplicated identical segment rows, so naïve evaluation would double-count the same target segment.
 - Soundscape labels cover only 75 classes, so any local metric must report how many classes were actually scored.
+- The reference blend is already competitive enough to establish a stable public baseline before any repository-native training.
+- The next priority is no longer “can we submit?” but “which part of the score is reproducible locally and improvable through training?”
 
 Failure Cases:
-- Pending execution
+- Local CV is still missing, so leaderboard movement remains only partially interpretable.
+- The current public score depends on external checkpoints rather than a repository-trained model.
 
 Next Experiment Ideas:
-- Train a clean soundscape-aware finetuning stage initialized from the best reference checkpoint
+- Train a clean `train_audio` reproduction of the same architecture to establish a repository-native baseline
+- Train a clean soundscape-aware finetuning stage initialized from the best repository-native checkpoint
 - Validate heuristics separately from checkpoint blending
 - Compare `n_mels=128` vs `n_mels=224`

@@ -50,3 +50,22 @@ Source: `references/private-notebooks/birdclef-2026-smart-audio-bird-detector.ip
 - The strongest first training baseline should likely be a two-stage recipe:
   - pretrain on isolated `train_audio`
   - finetune on labeled soundscape segments
+
+## 2026-03-18 First Kaggle Score
+
+### Confirmed Outcome
+
+- The Kaggle submission notebook based on the reference blend produced a public leaderboard score of `0.890`.
+- This establishes the first end-to-end working baseline for the repository.
+
+### Interpretation
+
+- The project now has a real competitive anchor, not just a dry-run or local scaffold.
+- At the same time, the score is still tied to borrowed reference checkpoints, so it does not yet tell us how strong our own training pipeline is.
+- The most informative next step is to reproduce the same architecture on local `train_audio` and then finetune on labeled soundscapes.
+
+### Updated Priority
+
+1. Recover interpretability through local CV for `exp_001`.
+2. Build a repository-native `train_audio` baseline in `exp_002`.
+3. Use soundscape finetuning as the first genuinely novel training improvement over the `0.890` public baseline.

@@ -9,10 +9,11 @@
 
 ## Immediate Next Steps
 
+- [x] Submit the reference blend baseline to Kaggle and record the first public LB
 - [ ] Run `exp_001_soundscape_reference_blend` in a Torch-enabled environment and record local macro ROC-AUC for all strategies
-- [ ] Update `MASTER_EXPERIMENT_TABLE.md` with measured CV values from `exp_001`
 - [ ] Decide whether notebook heuristics help local validation or only public LB ranking
-- [ ] Promote the best local inference recipe into a reusable submission pipeline
+- [ ] Start `exp_002_train_audio_reproduction` and train the same architecture on isolated `train_audio`
+- [ ] Promote the best locally validated inference recipe into the default Kaggle submission notebook
 
 ## Data And Validation
 
