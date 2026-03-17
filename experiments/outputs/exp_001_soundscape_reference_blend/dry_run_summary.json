@@ -1,0 +1,36 @@
+{
+  "data_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/birdclef-2026",
+  "first_row_ids": [
+    "BC2026_Train_0001_S08_20250606_030007_5",
+    "BC2026_Train_0001_S08_20250606_030007_10",
+    "BC2026_Train_0001_S08_20250606_030007_15",
+    "BC2026_Train_0001_S08_20250606_030007_20",
+    "BC2026_Train_0001_S08_20250606_030007_25",
+    "BC2026_Train_0001_S08_20250606_030007_30",
+    "BC2026_Train_0001_S08_20250606_030007_35",
+    "BC2026_Train_0001_S08_20250606_030007_40",
+    "BC2026_Train_0001_S08_20250606_030007_45",
+    "BC2026_Train_0001_S08_20250606_030007_50"
+  ],
+  "first_soundscape_files": [
+    "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/birdclef-2026/train_soundscapes/BC2026_Train_0001_S08_20250606_030007.ogg",
+    "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/birdclef-2026/train_soundscapes/BC2026_Train_0002_S08_20250607_030007.ogg",
+    "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/birdclef-2026/train_soundscapes/BC2026_Train_0003_S08_20250607_070007.ogg",
+    "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/birdclef-2026/train_soundscapes/BC2026_Train_0004_S08_20250607_070007.ogg",
+    "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/birdclef-2026/train_soundscapes/BC2026_Train_0005_S08_20250607_070007.ogg",
+    "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/birdclef-2026/train_soundscapes/BC2026_Train_0006_S09_20250828_000000.ogg",
+    "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/birdclef-2026/train_soundscapes/BC2026_Train_0007_S09_20250829_000000.ogg",
+    "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/birdclef-2026/train_soundscapes/BC2026_Train_0008_S09_20250831_000000.ogg",
+    "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/birdclef-2026/train_soundscapes/BC2026_Train_0009_S09_20250828_000000.ogg",
+    "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/birdclef-2026/train_soundscapes/BC2026_Train_0010_S09_20250828_000000.ogg"
+  ],
+  "model_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/BirdCLEF-2026-model",
+  "targets_summary": {
+    "deduped_label_rows": 739,
+    "labeled_soundscape_files": 66,
+    "max_segment_end_sec": 60,
+    "raw_label_rows": 1478,
+    "scored_species_with_local_positives": 75,
+    "unique_segment_rows": 739
+  }
+}
