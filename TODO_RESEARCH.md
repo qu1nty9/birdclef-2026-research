@@ -13,6 +13,8 @@
 - [ ] Run `exp_001_soundscape_reference_blend` in a Torch-enabled environment and record local macro ROC-AUC for all strategies
 - [ ] Decide whether notebook heuristics help local validation or only public LB ranking
 - [ ] Start `exp_002_train_audio_reproduction` and train the same architecture on isolated `train_audio`
+- [ ] Create a notebook-only reproduction of the Perch downstream stack using the cached `perch_meta` arrays
+- [ ] Test whether site/hour priors and texture smoothing transfer to our non-Perch baselines
 - [ ] Promote the best locally validated inference recipe into the default Kaggle submission notebook
 
 ## Data And Validation
@@ -21,6 +23,7 @@
 - [ ] Quantify performance on the 28 soundscape-only classes
 - [ ] Inspect whether duplicate labels in `train_soundscapes_labels.csv` are a packaging artifact or intentional redundancy
 - [ ] Evaluate how much performance changes if training ignores `secondary_labels`
+- [ ] Evaluate fully labeled files as a dedicated trusted adaptation subset for second-stage models
 
 ## Training Ideas
 
@@ -36,6 +39,8 @@
 - [ ] Test lower `fmin` for amphibians and insects
 - [ ] Compare EfficientNet-B0 against a stronger timm backbone once the baseline is stable
 - [ ] Evaluate whether segmentwise logits from the attention head can improve sound event localization
+- [ ] Test frozen embedding stackers on top of model outputs instead of only end-to-end finetuning
+- [ ] Separate texture-style classes (`Amphibia`, `Insecta`) from bird/event classes in postprocessing or auxiliary heads
 
 ## Inference And Ensemble Ideas
 
@@ -43,3 +48,5 @@
 - [ ] Compare probability blending vs logit blending
 - [ ] Try class-aware thresholds only for diagnostic analysis, not as the main AUC optimization target
 - [ ] Build a CPU-safe submission script that mirrors the best validated inference recipe
+- [ ] Add metadata priors based on `site`, `hour_utc`, and `site-hour` combinations
+- [ ] Compare plain logits against logits plus file-context features (`prev`, `next`, `mean`, `max`) in a second-stage classifier
