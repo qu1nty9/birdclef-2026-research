@@ -454,3 +454,32 @@ Source: `references/private-notebooks/birdclef-training/birdclef-2026-target-dom
 - The preprocessing notebook is strong operationally, but it is a large infrastructure commitment; we should only port the full mmap pipeline if our current notebook training becomes I/O-bound.
 - The training notebook's validation protocol still appears too close to isolated-recording CV to be trusted as a leaderboard proxy.
 - The pseudo-labeling notebook uses `train_soundscapes`, so any local evaluation must remain fold-safe to avoid leakage.
+
+## 2026-03-21 Exp_004 Launch
+
+### Notebook Prepared
+
+- A new experiment notebook now exists at `notebooks/exp_004_soundscape_finetuning.ipynb`.
+- The experiment is intentionally the first native soundscape adaptation branch rather than another isolated-audio baseline.
+
+### Design Choices
+
+- Initialization comes from `exp_002` through `experiments/outputs/exp_002_train_audio_reproduction/best_model.pt`.
+- Training data is shifted to labeled `train_soundscapes` segments.
+- Validation is grouped by soundscape file and restricted to fully labeled files.
+- The notebook adds:
+  - soundscape background mixing with soft target blending
+  - a masked-BCE-compatible loss wrapper
+  - optional capped replay from `train_audio` so true `secondary_labels` can be exercised without turning the whole run back into isolated-audio training
+
+### Why This Is The Right Next Step
+
+- `exp_002` showed that isolated-audio CV is not enough.
+- `exp_003` showed that soundscape-aware adaptation is the main path to better leaderboard behavior.
+- The newest training references suggest that the highest-value transferable ideas before pseudo-labeling are:
+  - background mixing
+  - careful treatment of secondary labels
+
+### Open Question
+
+- The first `exp_004` run should answer whether native soundscape finetuning alone can move materially toward the `exp_003` local soundscape baseline, or whether priors must be added immediately in the next step.
