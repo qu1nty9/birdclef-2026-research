@@ -1,0 +1,40 @@
+{
+  "best_checkpoint_exists": true,
+  "best_epoch": 8,
+  "best_valid_macro_auc": 0.9135256778226852,
+  "config": {
+    "batch_size": 24,
+    "clip_duration": 5.0,
+    "epochs": 8,
+    "learning_rate": 0.001,
+    "max_rows": null,
+    "max_samples_per_class": null,
+    "num_workers": 0,
+    "sample_rate": 32000,
+    "save_every_epoch": false,
+    "seed": 42,
+    "use_amp": true,
+    "use_secondary_labels": false,
+    "valid_frac": 0.15,
+    "weight_decay": 0.0001
+  },
+  "dataset_summary": {
+    "max_count": 499,
+    "median_count": 125.0,
+    "min_count": 1,
+    "rows": 35549,
+    "rows_with_secondary_labels": 4372,
+    "taxonomy_classes": 234,
+    "unique_primary_labels": 206
+  },
+  "experiment_id": "exp_002",
+  "last_checkpoint_exists": true,
+  "split_summary": {
+    "classes_missing_from_valid": 4,
+    "train_classes": 206,
+    "train_rows": 30215,
+    "valid_classes": 202,
+    "valid_rows": 5334
+  },
+  "status": "completed_or_in_progress"
+}

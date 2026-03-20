@@ -216,3 +216,13 @@ Source: `data/models/bird-vocalization-classifier-tensorflow2-perch_v2_cpu-v1.ta
 - The next decision is operational rather than scientific:
   - either accept epoch 6 as the current endpoint for `exp_002`
   - or patch the notebook with proper resume support and finish epochs 7 and 8 from the saved checkpoint state
+
+### Final Outcome After Resume
+
+- Resume support was added to the notebook and the run completed successfully through epoch `8 / 8`.
+- Final validation trajectory:
+  - epoch 7: `0.9095`
+  - epoch 8: `0.9135`
+- The final `exp_002` result is therefore a completed repository-native isolated-audio baseline rather than a partial run.
+- The experiment now exceeds the repository's first public baseline score contextually in local validation strength, though local hold-out AUC and public Kaggle LB remain different metrics.
+- The next research step should move from isolated-audio reproduction to soundscape adaptation.

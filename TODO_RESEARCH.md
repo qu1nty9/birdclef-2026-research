@@ -12,7 +12,7 @@
 - [x] Submit the reference blend baseline to Kaggle and record the first public LB
 - [ ] Run `exp_001_soundscape_reference_blend` in a Torch-enabled environment and record local macro ROC-AUC for all strategies
 - [ ] Decide whether notebook heuristics help local validation or only public LB ranking
-- [ ] Start `exp_002_train_audio_reproduction` and train the same architecture on isolated `train_audio`
+- [x] Start `exp_002_train_audio_reproduction` and train the same architecture on isolated `train_audio`
 - [ ] Create a notebook-only reproduction of the Perch downstream stack using the cached `perch_meta` arrays
 - [ ] Test whether site/hour priors and texture smoothing transfer to our non-Perch baselines
 - [ ] Promote the best locally validated inference recipe into the default Kaggle submission notebook

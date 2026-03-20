@@ -51,11 +51,11 @@ Validation Strategy:
 - Macro ROC-AUC over classes with both positive and negative examples
 
 Results:
-- Best validation score so far: `0.9093025611` macro ROC-AUC at epoch `6`
+- Final best validation score: `0.9135256778` macro ROC-AUC at epoch `8`
 - Leaderboard score: pending
 
 Training Time:
-- Long CPU / local notebook run; the first full attempt was manually interrupted after epoch `6 / 8`
+- The initial run was interrupted after epoch `6 / 8`, then resumed successfully and completed through epoch `8 / 8`
 
 Observations:
 - This experiment is necessary to separate external checkpoint quality from the underlying architecture quality.
@@ -67,15 +67,19 @@ Observations:
   - epoch 4: `0.8577`
   - epoch 5: `0.8958`
   - epoch 6: `0.9093`
+- Resume-to-completion added:
+  - epoch 7: `0.9095`
+  - epoch 8: `0.9135`
 - The best checkpoint and training history were written to `experiments/outputs/exp_002_train_audio_reproduction/`.
-- Because `save_every_epoch=False`, the run currently preserves the best model rather than every epoch state.
+- The resumed notebook now writes `last_model.pt` after every completed epoch and still preserves `best_model.pt`.
+- The final curve suggests the cosine schedule was still productive at the end rather than obviously overfitting.
 
 Failure Cases:
 - The first long run was interrupted manually before epochs 7 and 8 completed.
-- Resume-from-checkpoint support is not yet built into the notebook, so a true continuation would require a notebook patch.
+- This was fixed by adding notebook-native resume support plus checkpoint loading for model, optimizer, scheduler, and scaler state.
 
 Next Experiment Ideas:
 - Finetune the best `exp_002` checkpoint on labeled soundscape segments
 - Add secondary labels as weak supervision
 - Compare 128-bin and 224-bin mel settings once the reproduction baseline is stable
-- Add notebook-native resume support and modernize AMP calls away from deprecated `torch.cuda.amp.autocast(...)`
+- Transfer `site/hour` priors and texture-aware postprocessing into the repository-native stack
