@@ -19,8 +19,10 @@
 - [ ] Test whether site/hour priors and texture smoothing transfer to our non-Perch baselines
 - [ ] Promote the best locally validated inference recipe into the default Kaggle submission notebook
 - [x] Create `exp_004_soundscape_finetuning` starting from the `exp_002` checkpoint because the pure isolated-audio model scored only `0.647` on Kaggle
-- [ ] Run `exp_004_soundscape_finetuning` and record the first local soundscape macro ROC-AUC
-- [ ] Compare `exp_004` against `exp_003_perch_downstream_reproduction` on local soundscape metrics before another Kaggle submission
+- [x] Run `exp_004_soundscape_finetuning` and record the first local soundscape macro ROC-AUC
+- [ ] Improve `exp_004` validation coverage with additional folds or OOF aggregation because the first fold scored only `29` classes
+- [ ] Build `exp_005_native_priors_texture_postproc` on top of `exp_004`
+- [ ] Compare `exp_004` and `exp_005` against `exp_003_perch_downstream_reproduction` on local soundscape metrics before another Kaggle submission
 
 ## Data And Validation
 

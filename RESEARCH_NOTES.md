@@ -483,3 +483,41 @@ Source: `references/private-notebooks/birdclef-training/birdclef-2026-target-dom
 ### Open Question
 
 - The first `exp_004` run should answer whether native soundscape finetuning alone can move materially toward the `exp_003` local soundscape baseline, or whether priors must be added immediately in the next step.
+
+## 2026-03-21 Exp_004 First Run
+
+### Confirmed Result
+
+- The first run of `exp_004_soundscape_finetuning` completed through `6 / 6` epochs.
+- Best validation score: `0.779605` macro ROC-AUC at epoch `4`.
+- Full trajectory:
+  - epoch 1: `0.686650`
+  - epoch 2: `0.758403`
+  - epoch 3: `0.768842`
+  - epoch 4: `0.779605`
+  - epoch 5: `0.778186`
+  - epoch 6: `0.772404`
+- Validation scored `29` classes and skipped `205` classes without positives in the held-out fold.
+
+### Interpretation
+
+- The result is directionally good:
+  - the model adapts to soundscape supervision
+  - the metric improves quickly in the first few epochs
+  - the best epoch arrives before the run ends, so more epochs alone are unlikely to be the main source of the next gain
+- The result is not yet a clean head-to-head against `exp_003`.
+- The current validation fold is too sparse:
+  - only `29` classes contribute to the metric
+  - fold variance is likely to be high
+- Even with that limitation, the run still supports the main research story:
+  - native soundscape finetuning is much more meaningful than more isolated-audio-only training
+  - priors and texture-aware postprocessing are the most logical next additions
+
+### Practical Conclusion
+
+- `exp_004` is a successful first native soundscape branch, but not yet the strongest local soundscape recipe.
+- The next best step is not a Kaggle submission of raw `exp_004`.
+- The next best step is a native hybrid:
+  - `exp_004` predictions
+  - plus `site/hour` priors
+  - plus texture-aware postprocessing

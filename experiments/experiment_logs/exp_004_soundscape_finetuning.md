@@ -51,11 +51,19 @@ Validation Strategy:
 - Macro ROC-AUC over classes with both positive and negative examples
 
 Results:
-- Pending first run
+- Best validation score in the first run: `0.779605` macro ROC-AUC at epoch `4 / 6`
+- Full first-run trajectory:
+  - epoch 1: `0.686650`
+  - epoch 2: `0.758403`
+  - epoch 3: `0.768842`
+  - epoch 4: `0.779605`
+  - epoch 5: `0.778186`
+  - epoch 6: `0.772404`
+- Validation scored `29` classes and skipped `205` classes without positives in the held-out fold
 - Kaggle leaderboard score: `n/a`
 
 Training Time:
-- Pending first run
+- Much shorter than `exp_002` because this is a targeted finetuning stage on labeled 5-second soundscape windows rather than a full isolated-audio pretraining run
 
 Observations:
 - The notebook has been created at `notebooks/exp_004_soundscape_finetuning.ipynb`.
@@ -64,11 +72,21 @@ Observations:
   - masked secondary-label handling
   - soundscape background mixing
 - Heavier ideas such as full mmap preprocessing, PCEN replacement, and target-domain pseudo-labeling are intentionally deferred to later experiments.
+- The first run is encouraging but not yet definitive:
+  - the soundscape metric improved clearly through epoch 4
+  - the best epoch arrived before the end of the cosine schedule
+  - later epochs drifted slightly downward, suggesting the first finetuning stage may already be close to saturation
+- The biggest current limitation of the metric is coverage:
+  - only `29` classes were scored in the validation fold
+  - this is much noisier than the `exp_003` OOF setup and should not yet be treated as a final native-vs-Perch verdict
+- Even with that caveat, the first run supports the broader hypothesis that soundscape finetuning is materially more relevant than another isolated-audio-only experiment.
 
 Failure Cases:
-- Pending first run
+- The first grouped validation fold is too sparse to support a strong class-coverage comparison against `exp_003`.
+- Because `205` classes had no positives in the held-out fold, fold-to-fold variance is expected to be high.
 
 Next Experiment Ideas:
-- Compare the best `exp_004` checkpoint directly against `exp_003`
+- Run additional soundscape folds or an honest OOF pass before making strong conclusions
 - Add `site/hour` priors and texture-aware postprocessing as the next native hybrid step
+- Compare `exp_004 + priors` against `exp_003` on the same soundscape validation protocol
 - Decide later whether a pseudo-label branch is worth the added submission complexity
