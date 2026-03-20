@@ -13,9 +13,13 @@
 - [ ] Run `exp_001_soundscape_reference_blend` in a Torch-enabled environment and record local macro ROC-AUC for all strategies
 - [ ] Decide whether notebook heuristics help local validation or only public LB ranking
 - [x] Start `exp_002_train_audio_reproduction` and train the same architecture on isolated `train_audio`
-- [ ] Create a notebook-only reproduction of the Perch downstream stack using the cached `perch_meta` arrays
+- [x] Submit the pure `exp_002` checkpoint through a dedicated Kaggle notebook and record the public LB
+- [x] Create a notebook-only reproduction of the Perch downstream stack using the cached `perch_meta` arrays
+- [ ] Submit the dedicated Perch `exp_003` Kaggle notebook and record the public LB
 - [ ] Test whether site/hour priors and texture smoothing transfer to our non-Perch baselines
 - [ ] Promote the best locally validated inference recipe into the default Kaggle submission notebook
+- [ ] Create `exp_004_soundscape_finetuning` starting from the `exp_002` checkpoint because the pure isolated-audio model scored only `0.647` on Kaggle
+- [ ] Compare `exp_004` against `exp_003_perch_downstream_reproduction` on local soundscape metrics before another Kaggle submission
 
 ## Data And Validation
 
@@ -31,7 +35,10 @@
 - [ ] Train a soundscape-aware finetuning stage on labeled `train_soundscapes`
 - [ ] Compare BCE vs focal-style loss for long-tail classes
 - [ ] Test adding `secondary_labels` as weak multi-label supervision
+- [ ] Port masked BCE for primary-plus-secondary labels from the training references and compare it against the current loss
 - [ ] Test class-balanced sampling for species with `<= 20` isolated recordings
+- [ ] Add a background-bank mixing augmentation stage using soundscape clips or trusted background windows
+- [ ] Test whether a PCEN frontend improves soundscape transfer over the current mel frontend
 
 ## Feature And Architecture Ideas
 
@@ -50,3 +57,4 @@
 - [ ] Build a CPU-safe submission script that mirrors the best validated inference recipe
 - [ ] Add metadata priors based on `site`, `hour_utc`, and `site-hour` combinations
 - [ ] Compare plain logits against logits plus file-context features (`prev`, `next`, `mean`, `max`) in a second-stage classifier
+- [ ] Reproduce target-domain pseudo-labeling with overlapping `5s` windows, `2.5s` hop, temporal smoothing, and classwise quantile filtering in a notebook-only experiment

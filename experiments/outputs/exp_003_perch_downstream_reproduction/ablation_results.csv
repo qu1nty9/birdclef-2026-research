@@ -1,0 +1,7 @@
+name,lambda_event,lambda_texture,lambda_proxy_texture,smooth_texture,suppress_unmapped_inactive,macro_auc
+event_texture_priors_smooth,0.4,1.0,0.8,0.35,True,0.8044348179842165
+event_texture_priors,0.4,1.0,0.8,0.0,True,0.8031079075979553
+texture_priors_only,0.0,1.0,0.8,0.0,True,0.8017017794269388
+event_priors_only,0.4,0.0,0.0,0.0,True,0.7404239724004472
+raw_scores,0.0,0.0,0.0,0.0,False,0.7390178442294307
+inactive_unmapped_suppression_only,0.0,0.0,0.0,0.0,True,0.7390178442294307

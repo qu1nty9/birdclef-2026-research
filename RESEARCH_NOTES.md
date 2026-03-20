@@ -226,3 +226,231 @@ Source: `data/models/bird-vocalization-classifier-tensorflow2-perch_v2_cpu-v1.ta
 - The final `exp_002` result is therefore a completed repository-native isolated-audio baseline rather than a partial run.
 - The experiment now exceeds the repository's first public baseline score contextually in local validation strength, though local hold-out AUC and public Kaggle LB remain different metrics.
 - The next research step should move from isolated-audio reproduction to soundscape adaptation.
+
+## 2026-03-20 Exp_002 Kaggle Submission Check
+
+### Confirmed Outcome
+
+- The dedicated Kaggle submission notebook for the pure `exp_002` checkpoint produced a public leaderboard score of `0.647`.
+
+### Interpretation
+
+- The result is much worse than the earlier `0.890` reference-blend baseline despite the much stronger isolated-recording hold-out AUC.
+- This confirms that isolated `train_audio` validation is not sufficient as a leaderboard proxy for BirdCLEF+ 2026.
+- The model learned useful species discrimination on clean clips, but it did not transfer to hidden Pantanal soundscapes without explicit soundscape adaptation, metadata priors, or texture-aware postprocessing.
+- The gap also fits the dataset facts established earlier:
+  - `28` target classes are absent from isolated `train_audio`
+  - many evaluation-relevant classes are soundscape-only or texture-like
+  - the hidden test domain is geographically and acoustically narrower than the global isolated-recording pool
+
+### Practical Conclusion
+
+- `exp_002` remains valuable as a repository-native pretraining checkpoint.
+- It should not be treated as a competitive standalone submission recipe.
+- The next experiments should prioritize:
+  - finetuning on labeled soundscape segments
+  - metadata priors
+  - texture-aware handling for `Amphibia` and `Insecta`
+  - second-stage stackers or probes on top of soundscape-aware features
+
+## 2026-03-20 Basic Tutorial Reference Check
+
+### Source Artifact Reviewed
+
+Source: `references/private-notebooks/basic-tutorial.ipynb`
+
+### Findings
+
+- The notebook is functionally the same method as `references/private-notebooks/perch-v2-starter-train-infer.ipynb`.
+- A cell-by-cell text comparison shows no meaningful algorithmic differences in the flattened notebook source.
+- It uses the same supporting assets:
+  - TensorFlow packaging notebook `bc26-tensorflow-2-20-0.ipynb`
+  - Google Perch V2 SavedModel
+  - cached `perch_meta` arrays
+- It follows the same modeling recipe:
+  - Perch logits plus embeddings
+  - exact scientific-name mapping into BirdCLEF labels
+  - site/hour/site-hour priors
+  - texture-specific smoothing and stronger prior fusion
+  - classwise embedding probes trained on fully labeled files only
+
+### Research Value
+
+- The notebook is still useful as a second copy of the same Perch stack, because it confirms that this approach is not a one-off implementation accident.
+- It does not currently add a new methodological direction beyond what was already extracted from the Perch starter notebook.
+- The working ideas worth reusing remain the same:
+  - soundscape-aware metadata priors
+  - explicit handling of texture classes
+  - frozen foundation embeddings as second-stage features
+  - strict use of fully labeled files for trusted adaptation
+
+## 2026-03-20 Exp_003 Perch Downstream Reproduction
+
+### Confirmed Outcome
+
+- A notebook-only local reproduction of the Perch downstream stack now exists at `notebooks/exp_003_perch_downstream_reproduction.ipynb`.
+- The experiment uses only local assets:
+  - `data/perch_meta/full_perch_meta.parquet`
+  - `data/perch_meta/full_perch_arrays.npz`
+  - `data/birdclef-2026/taxonomy.csv`
+  - `data/models/bird-vocalization-classifier-tensorflow2-perch_v2_cpu-v1.tar.gz`
+- The aligned trusted subset is:
+  - `59` fully labeled files
+  - `708` windows
+  - `71` active classes in the trusted windows
+  - `203 / 234` direct scientific-name mappings
+  - `42` active texture classes
+
+### Reproduced Metrics
+
+- Raw Perch-derived BirdCLEF scores: `0.7390` macro ROC-AUC
+- Honest OOF baseline after priors and texture smoothing: `0.8044`
+- Honest OOF embedding-probe stack: `0.8353`
+- Probe lift over the OOF baseline: `+0.0309`
+- Modeled probe classes: `52`
+
+### Baseline Ablation
+
+- `event + texture priors + smoothing`: `0.8044`
+- `event + texture priors`: `0.8031`
+- `texture priors only`: `0.8017`
+- `event priors only`: `0.7404`
+- `raw`: `0.7390`
+- `inactive unmapped suppression only`: `0.7390`
+
+### Interpretation
+
+- The reproduction confirms the earlier qualitative story very clearly:
+  - texture-aware priors explain almost all of the first-stage gain
+  - event priors alone barely move the metric
+  - smoothing helps, but only slightly after texture priors are already active
+- The classwise probe is useful but selective.
+- The largest probe recoveries in the local reproduction include:
+  - `nacnig1`
+  - `trsowl`
+  - `redjun`
+  - `24321`
+  - `517063`
+- Some classes still regress under the probe, so the stack should be treated as a strong comparison target, not as a universal monotonic improvement.
+
+### Practical Conclusion
+
+- `exp_003` is now the strongest soundscape-aware local reference in the repository.
+- `exp_004_soundscape_finetuning` should be compared against `exp_003`, not against the isolated `exp_002` hold-out alone.
+- The first native hybrid should likely import the following ideas from `exp_003`:
+  - site/hour/site-hour priors
+  - texture-aware handling for `Amphibia` and `Insecta`
+  - optional second-stage features using previous, next, mean, and max file-context scores
+
+## 2026-03-20 BirdCLEF Training Stack Reference Analysis
+
+### Source Artifacts Reviewed
+
+Source: `references/private-notebooks/birdclef-training/birdclef-2026-i-o-preprocessing.ipynb`
+
+- This notebook is an engineering-first preprocessing stage rather than a modeling notebook.
+- It converts filtered BirdCLEF audio into fixed-length 5-second waveform clips stored in memory-mapped `.npy` arrays.
+- It separates the corpus into:
+  - focal labeled clips
+  - background soundscape clips for later mixing
+- The main filters applied before decoding are:
+  - `rating >= 3.0`
+  - broad South America / Pantanal-style latitude-longitude bounds
+- Core constants:
+  - `sample_rate = 32_000`
+  - `clip_duration = 5`
+  - `SAMPLES_PER_CLIP = 160_000`
+- The most useful implementation ideas are:
+  - header-only clip counting with `soundfile.info()` before allocation
+  - explicit disk budgeting before building the mmap arrays
+  - precomputed `mmap_index` metadata and per-file offsets
+  - a capped background bank with `MAX_BG_CLIPS_TOTAL = 5_000`
+
+Source: `references/private-notebooks/birdclef-training/birdclef-2026-training.ipynb`
+
+- This notebook is a full dual-GPU DDP training system built on top of the preprocessed waveform arrays.
+- Core configuration extracted from the checked-in code:
+  - `sample_rate = 32_000`
+  - `clip_duration = 5`
+  - `n_fft = 1024`
+  - `hop_length = 512`
+  - `n_mels = 128`
+  - `fmin = 40`
+  - `fmax = 14_000`
+  - `backbone = tf_efficientnet_b1`
+  - `batch_size = 64`
+  - `epochs = 30`
+  - `lr = 3e-4`
+  - `weight_decay = 1e-4`
+  - `backbone_lr_mult = 0.1`
+  - `snapshot_epochs = [20, 22, 24, 26, 28, 30]`
+- The acoustic frontend is not a standard torchaudio mel stack.
+- It uses a custom GPU-native `AudioToMelPCEN` module:
+  - `torch.stft`
+  - mel filterbank projection
+  - causal smoother for the PCEN background estimate
+  - learnable PCEN parameters
+- The label handling is more careful than naive multi-hot BCE.
+- `MaskedBCEWithLogitsLoss` combines primary and secondary labels into one target tensor but masks loss on secondary-only positions, so uncertain secondary tags do not behave like fully trusted positives.
+- The training augmentation recipe is especially notable:
+  - background waveform mixing with probability `0.80`
+  - random SNR between `10` and `30` dB
+  - time shift with probability `0.50`
+  - gain perturbation with probability `0.40`
+  - SpecAugment with `2` frequency masks and `2` time masks
+  - additive MixUp with probability `0.50`
+- Pseudo-label integration is done at the waveform-mixing stage:
+  - pseudo targets are loaded for background clips
+  - background targets are blended into the focal target vector in proportion to the mixing scale
+- Validation appears to be `StratifiedKFold` on `label_id` from focal-clip metadata rather than a soundscape-aware split.
+- The notebook logs very high fold AUC values around `0.966`, but they should be treated carefully because this validation still looks isolated-recording-centric.
+
+Source: `references/private-notebooks/birdclef-training/birdclef-2026-target-domain-pseudo-labeling.ipynb`
+
+- This notebook is the stage that adapts the training pipeline to the target soundscape domain.
+- It runs a 5-fold ONNX ensemble over `train_soundscapes` and writes pseudo labels for stage-2 training.
+- The inference pipeline uses:
+  - 5-second windows
+  - 2.5-second hop
+  - temporal smoothing with `uniform_filter1d(size=3)`
+  - class-specific quantile thresholding
+- The checked-in code currently sets:
+  - `gamma = 1.0`
+  - `dynamic_threshold_percentile = 0.70`
+- This is important because the markdown text describes a more aggressive variant:
+  - Babych-style power transform with `gamma = 2.0`
+  - `95th` percentile filtering
+- So the notebook documentation and the executed code are not perfectly aligned; we should trust the code more than the prose when porting ideas.
+- Operationally the notebook is very optimized:
+  - one producer process for audio decoding
+  - two GPU consumer processes for ONNX inference
+  - shared-memory transport between them
+- Conceptually the key idea is simple and very relevant for us:
+  - pseudo-label the target-domain soundscapes rather than only the isolated recordings
+
+### What Likely Drives This Stack
+
+- These three notebooks together form a coherent recipe, not three disconnected tricks:
+  - preprocess fixed waveform clips for fast random access
+  - train a strong clip classifier with heavy augmentation and careful target handling
+  - adapt to the real test domain through pseudo labels on soundscapes
+- The main lesson is that this approach treats BirdCLEF+ 2026 as a domain-adaptation systems problem.
+- The likely biggest gains come from:
+  - soundscape-like background mixing
+  - masked use of secondary labels
+  - PCEN for noisy long-form audio
+  - target-domain pseudo-labeling with overlapping windows and smoothing
+
+### Most Transferable Ideas For Our Project
+
+- Add a soundscape-bank background mixing stage to native training instead of training only on clean focal clips.
+- Replace naive secondary-label supervision with a masked-BCE formulation.
+- Evaluate PCEN as a stronger frontend for noisy Pantanal soundscapes.
+- Keep target-domain pseudo-labeling as a later-stage branch once our soundscape validation loop is stable.
+- Reuse the overlap-and-smooth idea even if we do not copy the full shared-memory ONNX system.
+
+### Cautions
+
+- The preprocessing notebook is strong operationally, but it is a large infrastructure commitment; we should only port the full mmap pipeline if our current notebook training becomes I/O-bound.
+- The training notebook's validation protocol still appears too close to isolated-recording CV to be trusted as a leaderboard proxy.
+- The pseudo-labeling notebook uses `train_soundscapes`, so any local evaluation must remain fold-safe to avoid leakage.

@@ -1,0 +1,24 @@
+{
+  "experiment_id": "exp_003",
+  "experiment_name": "perch_downstream_reproduction",
+  "seed": 7,
+  "trusted_files": 59,
+  "trusted_windows": 708,
+  "raw_local_auc": 0.7390178442294307,
+  "baseline_oof_auc": 0.8044348179842165,
+  "probe_oof_auc": 0.8353024140080767,
+  "probe_delta": 0.030867596023860244,
+  "modeled_probe_classes": 52,
+  "best_fusion": {
+    "lambda_event": 0.4,
+    "lambda_texture": 1.0,
+    "lambda_proxy_texture": 0.8,
+    "smooth_texture": 0.35
+  },
+  "best_probe": {
+    "pca_dim": 64,
+    "min_pos": 8,
+    "C": 0.5,
+    "alpha": 0.4
+  }
+}

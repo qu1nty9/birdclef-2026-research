@@ -52,7 +52,7 @@ Validation Strategy:
 
 Results:
 - Final best validation score: `0.9135256778` macro ROC-AUC at epoch `8`
-- Leaderboard score: pending
+- Leaderboard score: `0.647`
 
 Training Time:
 - The initial run was interrupted after epoch `6 / 8`, then resumed successfully and completed through epoch `8 / 8`
@@ -73,6 +73,9 @@ Observations:
 - The best checkpoint and training history were written to `experiments/outputs/exp_002_train_audio_reproduction/`.
 - The resumed notebook now writes `last_model.pt` after every completed epoch and still preserves `best_model.pt`.
 - The final curve suggests the cosine schedule was still productive at the end rather than obviously overfitting.
+- A dedicated Kaggle submission notebook now exists at `notebooks/kaggle_submission_exp_002_native.ipynb` to measure the pure single-checkpoint public score of `exp_002`.
+- The pure native checkpoint does not transfer well enough to hidden soundscapes yet: the public score of `0.647` is far below the earlier `0.890` reference blend.
+- This makes the main research conclusion very clear: isolated-clip validation is useful for pretraining and architecture checks, but leaderboard-facing work now has to center soundscape adaptation.
 
 Failure Cases:
 - The first long run was interrupted manually before epochs 7 and 8 completed.
