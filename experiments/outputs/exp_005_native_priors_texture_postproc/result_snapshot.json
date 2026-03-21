@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp_005",
+  "experiment_name": "native_priors_texture_postproc",
+  "source_checkpoint": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_004_soundscape_finetuning/best_model.pt",
+  "fold": 0,
+  "raw_macro_auc": 0.7796052180251812,
+  "best_variant": "event_texture_priors_smooth",
+  "best_macro_auc": 0.8156599403232923,
+  "delta_vs_raw": 0.03605472229811102,
+  "lambda_event": 0.4,
+  "lambda_texture": 1.0,
+  "smooth_texture": 0.35,
+  "scored_classes_best_variant": 29
+}

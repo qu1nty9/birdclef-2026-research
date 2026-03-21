@@ -521,3 +521,37 @@ Source: `references/private-notebooks/birdclef-training/birdclef-2026-target-dom
   - `exp_004` predictions
   - plus `site/hour` priors
   - plus texture-aware postprocessing
+
+## 2026-03-21 Exp_005 Native Priors Transfer Check
+
+### Confirmed Result
+
+- `exp_005_native_priors_texture_postproc` was run on the same validation fold as `exp_004`.
+- Raw native `exp_004` score on that fold: `0.7796052180`
+- Best postprocessed native score: `0.8156599403`
+- Uplift over raw native predictions: `+0.0360547223`
+
+### Ablation Pattern
+
+- `event + texture priors + smoothing`: `0.8157`
+- `event + texture priors`: `0.8151`
+- `texture priors only`: `0.8059`
+- `event priors only`: `0.7888`
+- `raw`: `0.7796`
+
+### Interpretation
+
+- This is a strong validation of the current research direction.
+- The native branch is not missing only training signal; it was also missing a soundscape-aware inference layer.
+- The transfer pattern mirrors the Perch branch:
+  - texture priors matter much more than event priors alone
+  - smoothing is a small but positive final increment
+- The result substantially narrows the local gap between the first native soundscape branch and the soundscape-aware Perch reference.
+
+### Practical Conclusion
+
+- The best next public test should not be raw `exp_004`.
+- The best next public test should be a lightweight native submission built around:
+  - the `exp_004` checkpoint
+  - metadata priors
+  - texture-aware smoothing

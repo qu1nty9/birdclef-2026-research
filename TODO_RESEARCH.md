@@ -17,12 +17,15 @@
 - [x] Create a notebook-only reproduction of the Perch downstream stack using the cached `perch_meta` arrays
 - [ ] Submit the dedicated Perch `exp_003` Kaggle notebook and record the public LB
 - [ ] Test whether site/hour priors and texture smoothing transfer to our non-Perch baselines
-- [ ] Promote the best locally validated inference recipe into the default Kaggle submission notebook
+- [x] Promote the best locally validated inference recipe into the default Kaggle submission notebook
 - [x] Create `exp_004_soundscape_finetuning` starting from the `exp_002` checkpoint because the pure isolated-audio model scored only `0.647` on Kaggle
 - [x] Run `exp_004_soundscape_finetuning` and record the first local soundscape macro ROC-AUC
 - [ ] Improve `exp_004` validation coverage with additional folds or OOF aggregation because the first fold scored only `29` classes
-- [ ] Build `exp_005_native_priors_texture_postproc` on top of `exp_004`
+- [x] Build `exp_005_native_priors_texture_postproc` on top of `exp_004`
+- [x] Test whether site/hour priors and texture smoothing transfer to our non-Perch baselines
 - [ ] Compare `exp_004` and `exp_005` against `exp_003_perch_downstream_reproduction` on local soundscape metrics before another Kaggle submission
+- [x] Build a lightweight native submission notebook using the best `exp_005` postprocessing recipe
+- [ ] Submit the dedicated `exp_005` native hybrid Kaggle notebook and record the public LB
 
 ## Data And Validation
 
@@ -59,5 +62,6 @@
 - [ ] Try class-aware thresholds only for diagnostic analysis, not as the main AUC optimization target
 - [ ] Build a CPU-safe submission script that mirrors the best validated inference recipe
 - [ ] Add metadata priors based on `site`, `hour_utc`, and `site-hour` combinations
+- [x] Add metadata priors based on `site`, `hour_utc`, and `site-hour` combinations
 - [ ] Compare plain logits against logits plus file-context features (`prev`, `next`, `mean`, `max`) in a second-stage classifier
 - [ ] Reproduce target-domain pseudo-labeling with overlapping `5s` windows, `2.5s` hop, temporal smoothing, and classwise quantile filtering in a notebook-only experiment
