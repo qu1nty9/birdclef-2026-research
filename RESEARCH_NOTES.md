@@ -555,3 +555,38 @@ Source: `references/private-notebooks/birdclef-training/birdclef-2026-target-dom
   - the `exp_004` checkpoint
   - metadata priors
   - texture-aware smoothing
+
+## 2026-03-21 Exp_005 First Public Kaggle Score
+
+### Confirmed Result
+
+- The lightweight native hybrid submission notebook scored `0.737` on the public leaderboard.
+- This score comes from the `exp_004` checkpoint plus the best local `exp_005` postprocessing recipe:
+  - `site/hour/site-hour` priors
+  - texture-aware smoothing
+  - no Perch
+  - no external reference checkpoints
+
+### Interpretation
+
+- This is a meaningful leaderboard improvement over the pure native `exp_002` checkpoint:
+  - `exp_002`: `0.647`
+  - `exp_005` native hybrid: `0.737`
+- The direction from local validation transferred correctly:
+  - soundscape-aware priors are not just a local-CV artifact
+  - texture-aware logic helps public LB too
+- But the remaining gap is still large:
+  - `exp_005`: `0.737`
+  - reference blend baseline: `0.890`
+- The implication is important:
+  - better inference logic helps
+  - but postprocessing alone is not enough to make the native branch competitive with the strongest currently available reference path
+
+### Practical Conclusion
+
+- `exp_005` should be considered a successful proof that native hybrid inference works.
+- The next main gain should likely come from one of three heavier directions:
+  - stronger native soundscape training
+  - a second-stage native stacker with file-context features
+  - target-domain pseudo-labeling
+- Before choosing among them, the validation protocol for native soundscape runs still needs to be strengthened beyond the current sparse single fold.

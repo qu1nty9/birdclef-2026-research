@@ -25,7 +25,8 @@
 - [x] Test whether site/hour priors and texture smoothing transfer to our non-Perch baselines
 - [ ] Compare `exp_004` and `exp_005` against `exp_003_perch_downstream_reproduction` on local soundscape metrics before another Kaggle submission
 - [x] Build a lightweight native submission notebook using the best `exp_005` postprocessing recipe
-- [ ] Submit the dedicated `exp_005` native hybrid Kaggle notebook and record the public LB
+- [x] Submit the dedicated `exp_005` native hybrid Kaggle notebook and record the public LB
+- [ ] Decide whether the next native gain should come from stronger soundscape training, a native stacker, or target-domain pseudo-labeling after the `0.737` public LB result
 
 ## Data And Validation
 

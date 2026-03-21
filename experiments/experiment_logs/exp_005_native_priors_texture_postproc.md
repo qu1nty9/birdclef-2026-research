@@ -63,7 +63,7 @@ Results:
   - `event priors only`: `0.7888`
   - `raw`: `0.7796`
 - Validation scored `29` classes on this fold
-- Kaggle leaderboard score: `n/a`
+- Kaggle leaderboard score: `0.737`
 
 Training Time:
 - Fast notebook-only diagnostic run
@@ -76,6 +76,11 @@ Observations:
   - `texture priors only` beat `event priors only` by a wide margin
 - Smoothing adds a small but positive final increment on top of the prior fusion.
 - This result materially narrows the local gap between the native branch and `exp_003`.
+- The first public Kaggle test also moved in the same direction:
+  - pure `exp_002`: `0.647`
+  - native hybrid `exp_005`: `0.737`
+- This confirms that the postprocessing recipe is not only a local-CV artifact.
+- However, the remaining gap to the `0.890` reference blend is still large, so stronger native training or a richer second stage is still needed.
 
 Failure Cases:
 - The fold is still sparse and only scores `29` classes, so this is not yet a final native-vs-Perch verdict.
@@ -93,3 +98,4 @@ Submission Notebook:
   - `site/hour/site-hour` priors
   - texture-aware smoothing
   - no Perch, no external checkpoints, no probe fitting
+- First public LB from this notebook: `0.737`
