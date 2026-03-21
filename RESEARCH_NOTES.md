@@ -590,3 +590,84 @@ Source: `references/private-notebooks/birdclef-training/birdclef-2026-target-dom
   - a second-stage native stacker with file-context features
   - target-domain pseudo-labeling
 - Before choosing among them, the validation protocol for native soundscape runs still needs to be strengthened beyond the current sparse single fold.
+
+## 2026-03-21 Exp_006 Native Branch Plan
+
+### Why This Branch Exists
+
+- The first native hybrid public score of `0.737` answered one question clearly:
+  - soundscape-aware priors do help the leaderboard
+  - but inference-only adaptation is not enough
+- That pushes the next main bet toward stronger native soundscape training rather than another lightweight postprocessing-only experiment.
+
+### Planned Changes
+
+- Keep the same native `exp_002 -> exp_004` initialization path.
+- Keep background mixing from the first soundscape finetuning notebook.
+- Turn on a non-zero weight for replay `secondary_labels` so the masked loss is no longer a placeholder.
+- Expand the replay bank slightly to make the secondary-label signal show up more often.
+- Save fold-specific best validation predictions so future OOF analysis and native postprocessing do not depend on rerunning training.
+
+### Practical Objective
+
+- `exp_006` is meant to improve two things at once:
+  - the checkpoint quality
+  - the evaluation protocol
+- This is the first native notebook designed explicitly as an OOF-ready training branch rather than a single-fold proof of concept.
+
+## 2026-03-21 Exp_006 Fold 0 First Result
+
+### Confirmed Result
+
+- `exp_006_soundscape_finetuning_v2` completed fold `0`.
+- Best validation score: `0.7796052180` macro ROC-AUC.
+- Best epoch: `4`.
+- Scored classes: `29`.
+- Validation exports were written successfully alongside the checkpoint.
+
+### Interpretation
+
+- The scientific result is currently neutral:
+  - the score exactly matches the best `exp_004` fold-0 result
+  - the current `secondary_weight=0.2` and larger replay bank did not produce a measurable lift on this fold
+- The operational result is still valuable:
+  - fold-specific outputs work
+  - best-model checkpointing works
+  - best validation predictions are now exported for later OOF analysis
+
+### Practical Conclusion
+
+- `exp_006` cannot yet be claimed as a real modeling improvement.
+- `exp_006` can already be claimed as a successful protocol improvement.
+- The next decision should wait for additional folds:
+  - if more folds also show no lift, keep the export pipeline and move on to a stronger modeling change
+  - if later folds improve, then `exp_006` becomes the right base for the next native hybrid
+
+## 2026-03-21 Exp_006 Folds 1-2 Update
+
+### Confirmed Result
+
+- Fold `1` best macro ROC-AUC: `0.8312950828`
+- Fold `2` best macro ROC-AUC: `0.7724515414`
+- Fold `2` scored `35` classes, compared with `29` on folds `0` and `1`
+- The first three-fold summary for `exp_006` is now:
+  - fold `0`: `0.7796052180`
+  - fold `1`: `0.8312950828`
+  - fold `2`: `0.7724515414`
+  - mean over folds `0-2`: `0.7944506141`
+
+### Interpretation
+
+- The result is now clearly mixed rather than purely negative.
+- Fold `1` is strong enough to show that the branch still has upside.
+- Fold `2` falling below fold `0` while scoring more classes reinforces the main methodological warning:
+  - these soundscape folds are sparse
+  - coverage differences still change the apparent difficulty a lot
+- The current evidence does not justify claiming that `exp_006` is strictly better than `exp_004`.
+- The current evidence also does not justify discarding `exp_006` as a dead end.
+
+### Practical Conclusion
+
+- `exp_006` should now be treated as a usable native base, but not yet a proven stronger checkpoint.
+- The most informative next test is no longer another raw training ablation.
+- The most informative next test is to reuse the exported `exp_006` fold predictions and apply the proven `exp_005` priors/texture recipe on top of them.

@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp_006",
+  "experiment_name": "soundscape_finetuning_v2",
+  "fold": 0,
+  "best_epoch": 4,
+  "best_macro_auc": 0.7796052180251812,
+  "scored_classes": 29,
+  "skipped_no_positive": 205,
+  "skipped_no_negative": 0,
+  "best_valid_loss": 0.0526128086882332,
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_006_soundscape_finetuning_v2/fold_00",
+  "secondary_weight": 0.2,
+  "max_replay_samples_per_class": 12
+}

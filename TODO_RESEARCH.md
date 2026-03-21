@@ -26,7 +26,12 @@
 - [ ] Compare `exp_004` and `exp_005` against `exp_003_perch_downstream_reproduction` on local soundscape metrics before another Kaggle submission
 - [x] Build a lightweight native submission notebook using the best `exp_005` postprocessing recipe
 - [x] Submit the dedicated `exp_005` native hybrid Kaggle notebook and record the public LB
-- [ ] Decide whether the next native gain should come from stronger soundscape training, a native stacker, or target-domain pseudo-labeling after the `0.737` public LB result
+- [x] Choose stronger native soundscape training as the next main branch after the `0.737` public LB result
+- [x] Create `exp_006_soundscape_finetuning_v2` as a fold-aware notebook with exported validation predictions
+- [x] Run `exp_006_soundscape_finetuning_v2` on fold `0` and record best macro ROC-AUC
+- [x] Run at least `2-3` folds of `exp_006_soundscape_finetuning_v2` before trusting small native deltas
+- [ ] Decide whether `exp_006` is a real improvement or just a protocol upgrade after additional folds
+- [ ] Apply the `exp_005` priors/texture recipe on top of exported `exp_006` fold predictions and compare against raw `exp_006`
 
 ## Data And Validation
 
