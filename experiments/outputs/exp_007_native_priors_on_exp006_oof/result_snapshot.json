@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp_007",
+  "experiment_name": "native_priors_on_exp006_oof",
+  "fold_ids": [
+    0,
+    1,
+    2
+  ],
+  "raw_oof_macro_auc": 0.6646442720135262,
+  "best_variant": "event_texture_priors_smooth",
+  "best_oof_macro_auc": 0.7108902338496021,
+  "delta_vs_raw": 0.04624596183607599,
+  "lambda_event": 0.4,
+  "lambda_texture": 1.0,
+  "smooth_texture": 0.35,
+  "oof_scored_classes_best_variant": 54,
+  "fold_mean_raw_macro_auc": 0.7944506140781198,
+  "fold_mean_best_macro_auc": 0.838551334423706
+}

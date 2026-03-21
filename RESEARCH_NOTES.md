@@ -671,3 +671,125 @@ Source: `references/private-notebooks/birdclef-training/birdclef-2026-target-dom
 - `exp_006` should now be treated as a usable native base, but not yet a proven stronger checkpoint.
 - The most informative next test is no longer another raw training ablation.
 - The most informative next test is to reuse the exported `exp_006` fold predictions and apply the proven `exp_005` priors/texture recipe on top of them.
+
+## 2026-03-22 BirdCLEF 2025 1st Place Solution Analysis
+
+### Source Artifacts Reviewed
+
+Source: `references/private-solutions/birdclef2025_1st_place_solution/birdclef2025_1st_place_solution.docx`
+
+- The writeup is unusually strong because it explains not only the final ensemble, but also why the pseudo-labeling loop eventually worked.
+- The solution title is very descriptive: `Multi-Iterative Noisy Student Is All You Need`.
+
+Source: `references/private-solutions/birdclef2025_1st_place_solution/birdclef2025-1st-place-inference.ipynb`
+
+- The submission path confirms the writeup claims in code:
+  - long-context SED models
+  - overlap-aware frame aggregation
+  - delta-shift TTA
+  - smoothing
+  - a separate `Amphibia/Insecta` model
+  - CPU-optimized OpenVINO inference
+
+### What The 2025 Winner Actually Did
+
+- Trained SED CNNs on `20`-second chunks while still predicting competition outputs at `5`-second resolution.
+- Reused the SED head to keep framewise predictions, then aggregated overlapping neighboring chunks instead of treating each chunk independently.
+- Used multi-iterative pseudo-labeling on unlabeled soundscapes.
+- Made self-training work through a Noisy Student recipe:
+  - mixup between clean labeled samples and pseudo-labeled soundscapes
+  - stochastic depth during self-training
+  - confidence-aware pseudo-label sampling
+  - power-transform denoising of pseudo-label probabilities
+- Added a dedicated model for texture-heavy groups (`Amphibia`, `Insecta`) using extra Xeno-Canto species.
+- Finalized with a diverse ensemble across iterations and backbones.
+
+### High-Value Transfer Ideas For BirdCLEF 2026
+
+- Long-context SED is the single most important architectural idea from this solution.
+  - Our current branch still treats the task too much like independent `5`-second clip classification.
+  - A `20`-second context branch that still emits `5`-second outputs is highly aligned with the soundscape-heavy nature of BirdCLEF 2026.
+- Overlap-aware frame aggregation is a very strong inference idea for our setting.
+  - It is more principled than making each `5`-second row independent.
+  - It fits especially well if we keep or extend SED-style heads.
+- Noisy Student style pseudo-label training is the most important training idea.
+  - The key transferable lesson is not just “use pseudo-labels.”
+  - The real lesson is that pseudo-labels worked only after adding enough noise and denoising:
+    - mixup with labeled data
+    - stochastic depth
+    - confidence-weighted pseudo sampling
+    - probability power transform
+- Separate treatment of texture groups is strongly reinforced again.
+  - We already saw this story in `exp_003` and `exp_005`.
+  - The 2025 winning solution confirms that a dedicated `Amphibia/Insecta` branch can be worth real leaderboard points.
+- Extra external data should be targeted, not indiscriminate.
+  - The writeup explicitly says that extra target-species audio often hurt.
+  - The useful external data was much more specific: extra texture-heavy species for a dedicated texture model.
+- CPU inference engineering matters once the ensemble becomes non-trivial.
+  - OpenVINO/ONNX export, shared spectrogram computation, and multiprocess loading are all practical ideas for Kaggle runtime limits.
+
+### Ideas To Treat Carefully
+
+- We should not import the “validate on LB only” practice.
+  - The 2025 winner explicitly says CV did not correlate well and they trusted public LB.
+  - For our 2026 project, we already have a better path: labeled soundscapes plus fold-aware exports.
+- We should not blindly copy the exact `20`-second choice as dogma.
+  - It is a very strong ablation target, not yet a guaranteed optimum for 2026.
+- We should not jump directly into a huge 7-model ensemble.
+  - The ensemble only became powerful after the training stages themselves were already strong.
+
+### Practical Conclusion
+
+- The most actionable ideas for us, in order, are:
+  - build a long-context native SED branch with overlap-aware `5`-second outputs
+  - add a real noisy-student pseudo-label branch with denoising and weighted pseudo sampling
+  - consider a dedicated `Amphibia/Insecta` model with targeted extra data
+  - only after that, invest in heavier ensemble and inference optimization work
+
+## 2026-03-22 Exp_007 Native Priors On Exp006 OOF
+
+### Confirmed Result
+
+- The `exp_005` postprocessing recipe transfers positively to the fold-aware `exp_006` exports.
+- Pooled OOF raw macro ROC-AUC: `0.6646442720`
+- Pooled OOF best macro ROC-AUC: `0.7108902338`
+- Absolute uplift: `+0.0462459618`
+- Best variant: `event_texture_priors_smooth`
+- Pooled OOF scored classes: `54`
+
+### Fold-Level Readout
+
+- Fold `0`:
+  - raw: `0.7796052180`
+  - best: `0.8229967977`
+- Fold `1`:
+  - raw: `0.8312950828`
+  - best: `0.8640179581`
+- Fold `2`:
+  - raw: `0.7724515414`
+  - best: `0.8286392475`
+- Mean fold-wise raw macro ROC-AUC: `0.7944506141`
+- Mean fold-wise best macro ROC-AUC: `0.8385513344`
+
+### Interpretation
+
+- The positive result is real, but the methodological warning is just as important as the gain.
+- Simple fold means are too optimistic here:
+  - pooled OOF raw is only `0.6646`, far below the fold mean `0.7945`
+  - pooled OOF best is `0.7109`, far below the fold mean `0.8386`
+- The main reason is broader pooled class coverage:
+  - per-fold evaluation scored only `29`, `29`, and `35` classes
+  - pooled OOF scored `54` classes
+- This makes pooled OOF a much better comparison tool for future native branches than single sparse splits.
+- The pattern from earlier experiments survives:
+  - event priors alone help only slightly (`0.6646 -> 0.6672`)
+  - texture priors deliver most of the gain (`0.6646 -> 0.7013`)
+  - smoothing adds a smaller final improvement (`0.7086 -> 0.7109`)
+
+### Practical Conclusion
+
+- `exp_007` is a successful consolidation step for the native branch.
+- The next native Kaggle submission should use `exp_006 + priors + texture smoothing`.
+- At the same time, `exp_007` does not remove the need for a larger modeling jump:
+  - even improved native OOF is still clearly below the stronger soundscape-aware external branch
+  - the roadmap toward long-context native SED and noisy-student pseudo-labeling remains justified

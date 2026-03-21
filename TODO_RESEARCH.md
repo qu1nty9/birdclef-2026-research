@@ -31,7 +31,12 @@
 - [x] Run `exp_006_soundscape_finetuning_v2` on fold `0` and record best macro ROC-AUC
 - [x] Run at least `2-3` folds of `exp_006_soundscape_finetuning_v2` before trusting small native deltas
 - [ ] Decide whether `exp_006` is a real improvement or just a protocol upgrade after additional folds
-- [ ] Apply the `exp_005` priors/texture recipe on top of exported `exp_006` fold predictions and compare against raw `exp_006`
+- [x] Apply the `exp_005` priors/texture recipe on top of exported `exp_006` fold predictions and compare against raw `exp_006`
+- [x] Build the next native Kaggle submission from `exp_006 + priors`
+- [ ] Submit the `exp_006 + priors` native notebook to Kaggle and record the public LB
+- [ ] If `exp_007` is not sufficient, start the long-context native SED branch (`exp_008`)
+- [ ] After the long-context branch, start a noisy-student pseudo-label branch (`exp_009`)
+- [ ] Prepare a dedicated `Amphibia/Insecta` specialist branch (`exp_010`) if the generic native branch still underperforms on texture-heavy classes
 
 ## Data And Validation
 
@@ -45,12 +50,16 @@
 
 - [ ] Train a clean baseline on `train_audio` only with the same mel frontend and backbone as the reference checkpoints
 - [ ] Train a soundscape-aware finetuning stage on labeled `train_soundscapes`
+- [ ] Prototype a long-context native SED branch (`20s` chunks -> `5s` outputs) instead of treating each row as an independent `5s` clip
 - [ ] Compare BCE vs focal-style loss for long-tail classes
 - [ ] Test adding `secondary_labels` as weak multi-label supervision
 - [ ] Port masked BCE for primary-plus-secondary labels from the training references and compare it against the current loss
 - [ ] Test class-balanced sampling for species with `<= 20` isolated recordings
 - [ ] Add a background-bank mixing augmentation stage using soundscape clips or trusted background windows
 - [ ] Test whether a PCEN frontend improves soundscape transfer over the current mel frontend
+- [ ] Implement a real noisy-student pseudo-label branch with mixup between labeled data and pseudo-labeled soundscape chunks
+- [ ] Test probability power-transform denoising and confidence-weighted sampling for pseudo-labeled soundscapes
+- [ ] Try a dedicated `Amphibia/Insecta` model with targeted extra Xeno-Canto species instead of mixing those labels into the generic branch
 
 ## Feature And Architecture Ideas
 
@@ -67,7 +76,9 @@
 - [ ] Compare probability blending vs logit blending
 - [ ] Try class-aware thresholds only for diagnostic analysis, not as the main AUC optimization target
 - [ ] Build a CPU-safe submission script that mirrors the best validated inference recipe
+- [ ] Test overlap-average-max-delta aggregation on framewise SED predictions instead of independent `5s` clipwise inference
 - [ ] Add metadata priors based on `site`, `hour_utc`, and `site-hour` combinations
 - [x] Add metadata priors based on `site`, `hour_utc`, and `site-hour` combinations
 - [ ] Compare plain logits against logits plus file-context features (`prev`, `next`, `mean`, `max`) in a second-stage classifier
+- [ ] Evaluate OpenVINO or ONNX export once the native ensemble is strong enough to make CPU runtime a bottleneck
 - [ ] Reproduce target-domain pseudo-labeling with overlapping `5s` windows, `2.5s` hop, temporal smoothing, and classwise quantile filtering in a notebook-only experiment

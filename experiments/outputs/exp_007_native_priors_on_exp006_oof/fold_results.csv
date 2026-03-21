@@ -1,0 +1,16 @@
+fold,variant,macro_auc,scored_classes,skipped_no_positive,skipped_no_negative
+0,event_texture_priors_smooth,0.8229973122569042,29,205,0
+0,event_texture_priors,0.8145318839301003,29,205,0
+0,texture_priors_only,0.8053331759854656,29,205,0
+0,raw,0.7796052180251812,29,205,0
+0,event_priors_only,0.777047472546696,29,205,0
+1,event_texture_priors_smooth,0.864017909029339,29,205,0
+1,event_texture_priors,0.8602327916070113,29,205,0
+1,event_priors_only,0.84711362758402,29,205,0
+1,texture_priors_only,0.8444142468251157,29,205,0
+1,raw,0.8312950828021243,29,205,0
+2,event_texture_priors_smooth,0.8286387819848747,35,199,0
+2,event_texture_priors,0.8256715384040058,35,199,0
+2,texture_priors_only,0.8210019283312205,35,199,0
+2,raw,0.7724515414070539,35,199,0
+2,event_priors_only,0.7715374667355261,35,199,0
