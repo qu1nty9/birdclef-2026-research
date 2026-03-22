@@ -36,8 +36,12 @@
 - [x] Submit the `exp_006 + priors` native notebook to Kaggle and record the public LB
 - [x] Start the long-context native SED branch (`exp_008`) because `exp_007` public LB `0.758` is still too far from `0.890`
 - [x] Run fold `0` of `exp_008_long_context_native_sed` and record best macro ROC-AUC
-- [ ] Apply the `exp_007` priors/texture layer on top of `exp_008` fold `0` exports
-- [ ] If the postprocessed `exp_008` result is stronger, build the first Kaggle submission from the long-context branch
+- [x] Apply the `exp_007` priors/texture layer on top of `exp_008` fold `0` exports
+- [x] Build the first Kaggle submission from the long-context branch using the `exp_008b` winning recipe
+- [x] Record the first Kaggle LB for the long-context branch and compare it against the current native public best `0.758`
+- [x] Run at least one more `exp_008` fold before trusting the long-context branch again on Kaggle
+- [x] Build a fold-safe long-context OOF postprocess comparison on top of `exp_008` folds `0-2`
+- [x] Decide whether long-context is a real branch or a single-fold mirage using pooled OOF before spending more leaderboard attempts on it
 - [ ] After the long-context branch, start a noisy-student pseudo-label branch (`exp_009`)
 - [ ] Prepare a dedicated `Amphibia/Insecta` specialist branch (`exp_010`) if the generic native branch still underperforms on texture-heavy classes
 

@@ -51,34 +51,50 @@ Validation Strategy:
 
 Status:
 - notebook created
-- first fold run completed
+- first three folds completed
 
 Results:
 - Fold `0` best validation macro ROC-AUC: `0.8377433031`
-- Best epoch: `6 / 6`
-- Scored classes: `29`
-- Skipped no-positive classes: `205`
+- Fold `1` best validation macro ROC-AUC: `0.8222946825`
+- Fold `2` best validation macro ROC-AUC: `0.8094790079`
+- Mean across folds `0-2`: `0.8231724344`
+- Best epochs:
+  - fold `0`: `6 / 6`
+  - fold `1`: `6 / 6`
+  - fold `2`: `5 / 6`
+- Scored classes:
+  - fold `0`: `29`
+  - fold `1`: `29`
+  - fold `2`: `35`
+- Skipped no-positive classes:
+  - fold `0`: `205`
+  - fold `1`: `205`
+  - fold `2`: `199`
 - Coverage statistics after overlap aggregation:
   - mean: `3.0`
   - min: `1`
   - max: `4`
-- Best validation loss: `0.0511462778`
+- Best validation loss:
+  - fold `0`: `0.0511462778`
+  - fold `1`: `0.0408654824`
+  - fold `2`: `0.0429244949`
 - Kaggle leaderboard score: `n/a`
 
 Observations:
 - This is the first clear native modeling gain that does not come only from postprocessing.
-- On the same sparse fold, raw `exp_008` improved over:
-  - raw `exp_004`: `0.7796 -> 0.8377`
-  - fold `0` raw `exp_006`: `0.7796 -> 0.8377`
-  - fold-local best `exp_005`: `0.8157 -> 0.8377`
-  - fold-local best `exp_007`: `0.8230 -> 0.8377`
-- The longer-context branch therefore looks genuinely promising before any metadata-prior layer is applied.
+- Across folds `0-2`, raw `exp_008` is stronger and more stable locally than the short-context `exp_006` branch:
+  - `exp_006` mean over folds `0-2`: `0.7945`
+  - `exp_008` mean over folds `0-2`: `0.8232`
+  - absolute gain: `+0.0287`
+- The gain is not limited to the easiest sparse fold:
+  - fold `2` still reached `0.8095` while scoring `35` classes instead of `29`
+- The longer-context branch therefore still looks genuinely promising before any metadata-prior layer is applied.
 - The overlap-aware aggregation is active in practice because most validation rows were seen in multiple contexts.
 
 Failure Cases:
-- This is still only one sparse fold with `29` scored classes.
-- The result is strong enough to continue, but not yet strong enough to declare the branch solved.
-- No Kaggle submission has been run yet for this branch.
+- Even after three local folds, the first single-fold Kaggle test through `exp_008b` scored only `0.707`.
+- This means the local gain is real, but the local protocol is still not strong enough to guarantee leaderboard transfer.
+- The branch should continue, but only with a stricter multi-fold local readout before another leaderboard attempt.
 
 Planned Outputs:
 - `experiments/outputs/exp_008_long_context_native_sed/fold_XX/history.csv`

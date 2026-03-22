@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp_008c",
+  "experiment_name": "long_context_priors_on_oof",
+  "fold_ids": [
+    0,
+    1,
+    2
+  ],
+  "raw_oof_macro_auc": 0.6682152899014667,
+  "best_variant": "event_texture_priors_smooth",
+  "best_oof_macro_auc": 0.7004623407079607,
+  "delta_vs_raw": 0.032247050806493927,
+  "lambda_event": 0.4,
+  "lambda_texture": 1.0,
+  "smooth_texture": 0.35,
+  "oof_scored_classes_best_variant": 54,
+  "fold_mean_raw_macro_auc": 0.8231723311660057,
+  "fold_mean_best_macro_auc": 0.8380978440107613
+}

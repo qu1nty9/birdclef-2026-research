@@ -1,0 +1,6 @@
+variant,macro_auc,scored_classes,skipped_no_positive,skipped_no_negative
+event_texture_priors_smooth,0.7004623407079607,54,180,0
+event_texture_priors,0.6990991017291299,54,180,0
+texture_priors_only,0.6897597910950319,54,180,0
+raw,0.6682152899014667,54,180,0
+event_priors_only,0.6664665021622874,54,180,0

@@ -67,15 +67,34 @@
   - move beyond independent `5s` clip classification and model broader soundscape context
 - Main experiment:
   - `exp_008`: native SED branch on `20s` chunks with `5s` outputs
+- Follow-up experiment:
+  - `exp_008b`: apply metadata priors and texture-aware smoothing on top of exported `exp_008` predictions
 - Status:
-  - notebook ready
   - first fold completed with a promising raw gain
+  - postprocessing follow-up also completed and improved the fold again
+  - first Kaggle submission was negative and scored below the current native public best
 - Core ideas:
   - long-context mel frontend
   - SED head with framewise predictions
   - overlap-aware aggregation for `5s` rows
 - Success criterion:
   - better soundscape-aware validation than the short-context native branch
+- Current readout:
+  - raw `exp_008` fold `0`: `0.8377`
+  - best `exp_008b` variant: `0.8435`
+  - best variant remains `event + texture priors + smoothing`
+  - first long-context public LB: `0.707`
+- Updated local readout after more folds:
+  - `exp_008` fold `1`: `0.8223`
+  - `exp_008` fold `2`: `0.8095`
+  - `exp_008` mean across folds `0-2`: `0.8232`
+- Honest pooled OOF check:
+  - `exp_008c` raw pooled OOF: `0.6682`
+  - `exp_008c` best pooled OOF: `0.7005`
+  - this is below `exp_007` best pooled OOF: `0.7109`
+- Updated operational step:
+  - do not promote long-context to the default native submit path yet
+  - the fold-safe OOF check is now complete and still not strong enough
 
 ### Phase C. Noisy-Student Pseudo-Label Branch
 
@@ -117,8 +136,7 @@
 
 ### Execution Order
 
-1. Native Kaggle submission from `exp_006 + priors`
-2. `exp_008`: long-context native SED
-3. `exp_009`: noisy-student pseudo-label branch
-4. `exp_010`: texture specialist branch
-5. native stacker and final ensemble
+1. Keep `exp_007` as the default native public baseline
+2. `exp_009`: noisy-student pseudo-label branch
+3. `exp_010`: texture specialist branch
+4. native stacker and final ensemble

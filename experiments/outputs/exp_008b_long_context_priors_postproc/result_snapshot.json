@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp_008b",
+  "experiment_name": "long_context_priors_postproc",
+  "fold": 0,
+  "source_experiment": "exp_008",
+  "source_best_epoch": 6,
+  "raw_macro_auc": 0.8377433031098451,
+  "best_variant": "event_texture_priors_smooth",
+  "best_macro_auc": 0.8434672643698109,
+  "delta_vs_raw": 0.005723961259965771,
+  "lambda_event": 0.4,
+  "lambda_texture": 1.0,
+  "smooth_texture": 0.35,
+  "scored_classes_best_variant": 29,
+  "valid_rows": 144,
+  "coverage_mean": 3.0,
+  "coverage_min": 1,
+  "coverage_max": 4
+}

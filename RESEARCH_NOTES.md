@@ -259,6 +259,147 @@ Source: `data/models/bird-vocalization-classifier-tensorflow2-perch_v2_cpu-v1.ta
 
 Source: `references/private-notebooks/basic-tutorial.ipynb`
 
+## 2026-03-22 Exp_008b Kaggle Submission Check
+
+### Confirmed Outcome
+
+- The first Kaggle submission built from the long-context native branch (`exp_008 + exp_008b` postprocessing) scored `0.707`.
+
+### Interpretation
+
+- This is a clearly negative leaderboard result.
+- The branch underperformed:
+  - `exp_007` 3-fold native hybrid: `0.758`
+  - `exp_005` single-fold native hybrid: `0.737`
+  - current long-context submission: `0.707`
+- So the strong local fold `0` result did not transfer to the public leaderboard.
+
+### Most Likely Explanation
+
+- The local long-context evidence was built on a single sparse fold with only `29` scored classes.
+- That fold now looks too optimistic to guide leaderboard choices by itself.
+- The architectural idea may still be valid, but the current evidence says:
+  - single-fold long-context validation is not reliable enough
+  - the branch should not replace the current native public baseline yet
+
+### Practical Conclusion
+
+- `exp_007` remains the strongest repository-native public recipe for now.
+- The long-context branch should only continue in one of two ways:
+  - validate it on more folds first
+  - or pause it and move to a stronger modeling jump such as target-domain pseudo-labeling
+- The key lesson is methodological:
+  - local fold gains from soundscape data are useful
+  - but sparse single-fold wins are still too fragile to trust for leaderboard promotion
+
+## 2026-03-22 Exp_008 Additional Folds
+
+### Confirmed Outcome
+
+- `exp_008` now has three completed local folds:
+  - fold `0`: `0.8377433031`
+  - fold `1`: `0.8222946825`
+  - fold `2`: `0.8094790079`
+- Mean across folds `0-2`: `0.8231724344`
+
+### Interpretation
+
+- This materially changes the local interpretation of the long-context branch.
+- Compared with `exp_006` over the same folds:
+  - `exp_006` mean: `0.7945`
+  - `exp_008` mean: `0.8232`
+  - absolute gain: `+0.0287`
+- So the architecture jump was not a one-fold fluke locally.
+- Fold `2` is especially useful evidence because it covered `35` scored classes and still stayed above `0.809`.
+
+### Practical Conclusion
+
+- The negative `0.707` Kaggle result should not be read as “long context is dead”.
+- The better reading is:
+  - single-fold promotion to Kaggle was premature
+  - local gains are real
+  - the next correct step is a fold-safe OOF postprocess comparison on top of `exp_008` folds `0-2`
+- In other words, the branch has earned one more local validation stage before we either discard it or try another submission.
+
+## 2026-03-22 Exp_008c Honest Pooled OOF Check
+
+### Confirmed Outcome
+
+- `exp_008c_long_context_priors_on_oof` completed locally on `exp_008` folds `0-2`.
+- Raw pooled OOF macro ROC-AUC: `0.6682152899`
+- Best pooled OOF variant: `event_texture_priors_smooth`
+- Best pooled OOF macro ROC-AUC: `0.7004623407`
+- Absolute pooled OOF gain vs raw: `+0.0322470508`
+- Scored classes in pooled OOF: `54`
+
+### Why This Matters
+
+- This is the honest comparison the branch needed after the misleading single-fold story.
+- The result explains the weak leaderboard outcome much better than the fold means did.
+
+### Comparison To The Current Native Baseline
+
+- `exp_007` pooled OOF raw: `0.6646`
+- `exp_008c` pooled OOF raw: `0.6682`
+- `exp_007` pooled OOF best: `0.7109`
+- `exp_008c` pooled OOF best: `0.7005`
+
+### Interpretation
+
+- Long context is not useless; it slightly improves the raw pooled OOF baseline.
+- But once both branches receive the same metadata-prior and texture-aware inference layer, the long-context branch still loses to `exp_007`.
+- So the main lesson is:
+  - long-context modeling alone was not the missing competition-level ingredient
+  - the branch is interesting architecturally
+  - but it is not the next promoted submission route
+
+### Practical Conclusion
+
+- The current best validated native recipe remains `exp_007`.
+- The long-context branch should be parked for now rather than pushed further on Kaggle.
+- The roadmap should move on to the stronger next modeling jump: noisy-student pseudo-labeling.
+
+## 2026-03-22 Exp_008b Long-Context Postprocessing Check
+
+### Confirmed Outcome
+
+- `exp_008b_long_context_priors_postproc` completed locally on top of the exported `exp_008` fold `0` predictions.
+- Raw long-context `exp_008` fold `0` macro ROC-AUC: `0.8377433031`
+- Best postprocessed variant: `event_texture_priors_smooth`
+- Best macro ROC-AUC after priors: `0.8434672644`
+- Absolute gain versus raw: `+0.0057239613`
+
+### Variant Ablation
+
+- `event + texture priors + smoothing`: `0.8435`
+- `event + texture priors`: `0.8402`
+- `raw`: `0.8377`
+- `texture priors only`: `0.8357`
+- `event priors only`: `0.8188`
+
+### Interpretation
+
+- The long-context branch still benefits from the existing soundscape-aware inference layer, so priors are not obsolete.
+- At the same time, the gain is much smaller than what we saw in the short-context branch:
+  - `exp_005`: `0.7796 -> 0.8157` (`+0.0361`)
+  - `exp_008b`: `0.8377 -> 0.8435` (`+0.0057`)
+- This is a strong sign that the move to `20s` context is already absorbing part of the structure that priors previously had to repair:
+  - neighboring windows are now modeled jointly
+  - overlap-aware aggregation already injects local file context
+  - the backbone and temporal head are carrying more of the soundscape adaptation load directly
+
+### Classwise Pattern
+
+- Texture-heavy and sonotype-like classes still produced the largest gains.
+- Some already-strong bird/event classes regressed, which means postprocessing should still be validated on Kaggle rather than assumed universally beneficial.
+- The best recipe remained stable:
+  - `event + texture priors + smoothing`
+
+### Practical Conclusion
+
+- `exp_008 + priors` is now the strongest repository-native long-context candidate for the next public leaderboard test.
+- The next high-signal action should be a Kaggle submission from this branch, not another small local postprocessing ablation on the old short-context models.
+
 ### Findings
 
 - The notebook is functionally the same method as `references/private-notebooks/perch-v2-starter-train-infer.ipynb`.
