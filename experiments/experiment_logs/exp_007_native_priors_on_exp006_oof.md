@@ -64,13 +64,17 @@ Results:
   - fold `2`: `0.8286392475`
 - Mean fold-wise raw macro ROC-AUC: `0.7944506141`
 - Mean fold-wise best macro ROC-AUC: `0.8385513344`
-- Kaggle leaderboard score: `n/a`
+- Kaggle leaderboard score: `0.758`
 
 Training Time:
 - under one minute locally
 
 Observations:
 - The `exp_005` recipe transfers cleanly to the `exp_006` branch.
+- The same direction also transferred to the public leaderboard:
+  - previous native public score: `0.737`
+  - `exp_007` 3-fold public score: `0.758`
+  - absolute public uplift: `+0.021`
 - Texture-aware priors remain the dominant gain source:
   - raw: `0.6646`
   - event priors only: `0.6672`
@@ -79,11 +83,13 @@ Observations:
   - event + texture priors + smoothing: `0.7109`
 - Filename-level smoothing is a small but real extra improvement after priors are already active.
 - The pooled OOF score is much lower than the fold-wise mean because pooled evaluation scores more classes (`54`) than the sparse per-fold readouts.
+- The public gain is real but smaller than the local OOF delta, which suggests that the current bottleneck is no longer just inference calibration.
 
 Failure Cases:
 - Even with the positive `+0.0462` uplift, the best native pooled OOF remains below the stronger external Perch-based soundscape reference.
 - The experiment improves inference quality, but it does not prove that the underlying `exp_006` training recipe is a stronger model than `exp_004`.
-- No Kaggle submission has been run yet for this exact branch.
+- Even after the successful public LB improvement to `0.758`, the native branch still remains far below the current `0.890` reference blend.
+- This means more lightweight priors alone are unlikely to close the gap; the next jump should come from stronger soundscape modeling.
 
 Notebook:
 - `notebooks/exp_007_native_priors_on_exp006_oof.ipynb`

@@ -53,6 +53,7 @@
   - positive
   - best pooled OOF variant: `event + texture priors + smoothing`
   - pooled OOF improvement: `0.6646 -> 0.7109`
+  - public LB after the dedicated 3-fold submission: `0.758`
 - Success criterion:
   - stronger and more stable local soundscape metric than the older `exp_004 + exp_005` branch
 - If successful:
@@ -66,6 +67,9 @@
   - move beyond independent `5s` clip classification and model broader soundscape context
 - Main experiment:
   - `exp_008`: native SED branch on `20s` chunks with `5s` outputs
+- Status:
+  - notebook ready
+  - first fold completed with a promising raw gain
 - Core ideas:
   - long-context mel frontend
   - SED head with framewise predictions

@@ -793,3 +793,94 @@ Source: `references/private-solutions/birdclef2025_1st_place_solution/birdclef20
 - At the same time, `exp_007` does not remove the need for a larger modeling jump:
   - even improved native OOF is still clearly below the stronger soundscape-aware external branch
   - the roadmap toward long-context native SED and noisy-student pseudo-labeling remains justified
+
+## 2026-03-22 Exp_007 Kaggle Submission Readout
+
+### Confirmed Result
+
+- Public leaderboard score: `0.758`
+- Previous best native public score: `0.737`
+- Absolute native public gain: `+0.021`
+
+### Interpretation
+
+- The gain is real, so `exp_006 + priors + texture smoothing` is not just a local-OOF artifact.
+- The public leaderboard confirms that fold-aware ensembling and metadata priors do transfer to hidden test.
+- At the same time, the gain is modest relative to the remaining benchmark gap:
+  - current native public best: `0.758`
+  - current strong reference blend: `0.890`
+- This strongly suggests that the current main bottleneck is no longer “missing priors.”
+- The bottleneck is more likely the native model's soundscape representation itself:
+  - short context
+  - limited target-domain adaptation
+  - no pseudo-label branch yet
+
+### Practical Conclusion
+
+- Native progress is now clear and monotonic:
+  - `0.647` from pure `exp_002`
+  - `0.737` from `exp_005`
+  - `0.758` from `exp_007`
+- That is encouraging, but still not competitive enough.
+- The next likely meaningful gain should come from `exp_008` long-context native SED rather than from another small postprocessing tweak.
+
+## 2026-03-22 Exp_008 Notebook Design
+
+### Planned Experiment
+
+- `exp_008` is now prepared as a notebook-first long-context native SED branch:
+  - `20s` waveform input
+  - `4` aligned `5s` outputs
+  - overlap-aware aggregation back to row-level validation predictions
+
+### Why This Design
+
+- It directly targets the main limitation of the current native branch:
+  - short local context
+  - heavy dependence on inference-only postprocessing for leaderboard gains
+- It is also the cleanest next transfer from the 2025 first-place solution without jumping too early into noisy-student pseudo-labeling.
+
+### First-Version Scope
+
+- Keep the first version simple enough to debug:
+  - labeled soundscapes only
+  - background mixing retained
+  - partial warm-start from `exp_002`
+  - no pseudo-labels yet
+  - no extra stacker yet
+
+### Practical Goal
+
+- First confirm that longer context alone improves the native local soundscape metric.
+- If that happens, reuse the proven `exp_007` priors and texture-aware smoothing on top of `exp_008` exports before going back to Kaggle.
+
+## 2026-03-22 Exp_008 Fold 0 Result
+
+### Confirmed Result
+
+- Fold `0` best macro ROC-AUC: `0.8377433031`
+- Best epoch: `6 / 6`
+- Scored classes: `29`
+- Coverage after overlap aggregation:
+  - mean: `3.0`
+  - min: `1`
+  - max: `4`
+
+### Interpretation
+
+- This is the first strong native gain that comes from changing the model context itself rather than only from inference-time priors.
+- On the same sparse fold, raw `exp_008` is stronger than:
+  - raw `exp_004`: `0.7796`
+  - raw `exp_006` fold `0`: `0.7796`
+  - best local `exp_005` fold result: `0.8157`
+  - best local `exp_007` fold result: `0.8230`
+- That comparison is important because it means long context is already competitive before adding the priors layer back in.
+- The coverage statistics also confirm that overlap-aware aggregation is active and meaningful:
+  - many rows are being seen in multiple `20s` contexts
+  - the branch is not degenerating back to one independent view per row
+
+### Practical Conclusion
+
+- `exp_008` is the strongest native modeling direction we have seen so far.
+- The immediate next test should not be a second raw architecture change.
+- The immediate next test should be to reuse the validated `exp_007` priors/texture layer on top of the `exp_008` exported validation outputs.

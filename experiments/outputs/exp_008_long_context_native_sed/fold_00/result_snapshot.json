@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp_008",
+  "experiment_name": "long_context_native_sed",
+  "fold": 0,
+  "best_epoch": 6,
+  "best_macro_auc": 0.8377433031098451,
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_008_long_context_native_sed/fold_00",
+  "context_duration": 20.0,
+  "target_duration": 5.0,
+  "num_output_steps": 4,
+  "train_contexts": 423,
+  "valid_contexts": 108
+}

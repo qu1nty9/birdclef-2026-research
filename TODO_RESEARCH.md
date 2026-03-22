@@ -33,8 +33,11 @@
 - [ ] Decide whether `exp_006` is a real improvement or just a protocol upgrade after additional folds
 - [x] Apply the `exp_005` priors/texture recipe on top of exported `exp_006` fold predictions and compare against raw `exp_006`
 - [x] Build the next native Kaggle submission from `exp_006 + priors`
-- [ ] Submit the `exp_006 + priors` native notebook to Kaggle and record the public LB
-- [ ] If `exp_007` is not sufficient, start the long-context native SED branch (`exp_008`)
+- [x] Submit the `exp_006 + priors` native notebook to Kaggle and record the public LB
+- [x] Start the long-context native SED branch (`exp_008`) because `exp_007` public LB `0.758` is still too far from `0.890`
+- [x] Run fold `0` of `exp_008_long_context_native_sed` and record best macro ROC-AUC
+- [ ] Apply the `exp_007` priors/texture layer on top of `exp_008` fold `0` exports
+- [ ] If the postprocessed `exp_008` result is stronger, build the first Kaggle submission from the long-context branch
 - [ ] After the long-context branch, start a noisy-student pseudo-label branch (`exp_009`)
 - [ ] Prepare a dedicated `Amphibia/Insecta` specialist branch (`exp_010`) if the generic native branch still underperforms on texture-heavy classes
 
@@ -50,7 +53,7 @@
 
 - [ ] Train a clean baseline on `train_audio` only with the same mel frontend and backbone as the reference checkpoints
 - [ ] Train a soundscape-aware finetuning stage on labeled `train_soundscapes`
-- [ ] Prototype a long-context native SED branch (`20s` chunks -> `5s` outputs) instead of treating each row as an independent `5s` clip
+- [x] Prototype a long-context native SED branch (`20s` chunks -> `5s` outputs) instead of treating each row as an independent `5s` clip
 - [ ] Compare BCE vs focal-style loss for long-tail classes
 - [ ] Test adding `secondary_labels` as weak multi-label supervision
 - [ ] Port masked BCE for primary-plus-secondary labels from the training references and compare it against the current loss
