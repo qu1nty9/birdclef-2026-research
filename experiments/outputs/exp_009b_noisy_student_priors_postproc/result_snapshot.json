@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp_009b",
+  "experiment_name": "noisy_student_priors_postproc",
+  "fold": 0,
+  "source_experiment": "exp_009",
+  "source_best_epoch": 2,
+  "raw_macro_auc": 0.8494899255856971,
+  "best_variant": "raw",
+  "best_macro_auc": 0.8494899255856971,
+  "delta_vs_raw": 0.0,
+  "lambda_event": 0.4,
+  "lambda_texture": 1.0,
+  "smooth_texture": 0.35,
+  "scored_classes_best_variant": 29,
+  "valid_rows": 144,
+  "pseudo_rows": 69593,
+  "pseudo_files": 9552,
+  "pseudo_confidence_mean": 0.655200209205719
+}

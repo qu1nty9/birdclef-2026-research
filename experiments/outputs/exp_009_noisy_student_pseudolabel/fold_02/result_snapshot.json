@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp_009",
+  "experiment_name": "noisy_student_pseudolabel",
+  "fold": 2,
+  "best_epoch": 3,
+  "best_macro_auc": 0.8848806193416292,
+  "scored_classes": 35,
+  "skipped_no_positive": 199,
+  "skipped_no_negative": 0,
+  "best_valid_loss": 0.0452111292009552,
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_009_noisy_student_pseudolabel/fold_02",
+  "resume_mode": "init_from_exp006_fold",
+  "pseudo_rows": 70142,
+  "pseudo_files": 9669,
+  "teacher_folds": [
+    0,
+    1
+  ],
+  "pseudo_confidence_mean": 0.6458408895074083
+}

@@ -1025,3 +1025,332 @@ Source: `references/private-solutions/birdclef2025_1st_place_solution/birdclef20
 - `exp_008` is the strongest native modeling direction we have seen so far.
 - The immediate next test should not be a second raw architecture change.
 - The immediate next test should be to reuse the validated `exp_007` priors/texture layer on top of the `exp_008` exported validation outputs.
+
+## 2026-03-22 Exp_009 Notebook Setup
+
+### What Was Created
+
+- The first repository-native noisy-student notebook now exists:
+  - `notebooks/exp_009_noisy_student_pseudolabel.ipynb`
+- The branch intentionally uses the stronger short-context native path as its base:
+  - student init from `exp_006` fold checkpoints when available
+  - fallback init from `exp_002`
+  - teacher ensemble from `exp_006` folds that exclude the active validation fold
+
+### Setup Validation Result
+
+- The notebook passed a safe setup run in the project `.venv` with both heavy stages disabled.
+- Fold `0` resolved:
+  - teacher folds: `[1, 2]`
+  - pseudo-candidate windows: `127157`
+  - student init: `exp_006` fold `0`
+- No pseudo rows were cached yet and no training has run yet, so this is an operational checkpoint, not a quality result.
+
+### Why This Branch Is The Right Next Step
+
+- `exp_008c` showed that long context is still weaker than `exp_007` under honest pooled OOF.
+- That means the next likely gain source is not another promotion of the long-context branch.
+- The next likely gain source is to improve the training data itself:
+  - fold-safe pseudo labels on target-domain soundscapes
+  - confidence-aware sampling
+  - denoising by probability power transform
+  - continued use of background mixing and replay
+
+### Practical First-Run Sequence
+
+- Generate pseudo labels once and write:
+  - `pseudo_label_meta.parquet`
+  - `pseudo_label_probs.npz`
+  - `teacher_summary.json`
+- Inspect pseudo count and confidence distribution before training.
+- Run a short smoke-train after pseudo caching succeeds.
+- Only then commit to the full `exp_009` student run.
+
+## 2026-03-23 Exp_009 Pseudo-Generation Readout
+
+### Confirmed Result
+
+- Fold `0` pseudo-label generation completed successfully.
+- Manifest rows: `127896`
+- Pseudo candidates before filtering: `127157`
+- Kept pseudo rows: `69593`
+- Pseudo files covered: `9552`
+- Keep rate vs pseudo candidates: `54.73%`
+- Teacher folds used: `[1, 2]`
+- Probability tensor shape: `(69593, 234)`
+
+### Confidence Distribution
+
+- Mean confidence: `0.6552`
+- Median confidence: `0.6797`
+- `p75` confidence: `0.9063`
+- `p90` confidence: `0.9789`
+- Max confidence: `0.99995`
+
+### Interpretation
+
+- This is a strong first pseudo-label cache:
+  - it is selective enough to remove a large fraction of low-confidence candidates
+  - it still keeps a large training pool rather than collapsing to a tiny trusted subset
+- The confidence profile is especially encouraging:
+  - median confidence is far above the `0.20` threshold
+  - the upper tail is very strong, which should work well with confidence-weighted pseudo sampling
+- The per-file cap is behaving as intended:
+  - top files keep exactly `8` pseudo windows
+  - the notebook is not letting a few high-activity files dominate the pseudo pool
+
+### Practical Conclusion
+
+- `exp_009` has cleared the pseudo-generation checkpoint.
+- The next correct step is not another pseudo-generation rerun.
+- The next correct step is a short smoke-train on fold `0` using these cached pseudo labels.
+
+## 2026-03-23 Exp_009 Fold 0 Training Result
+
+### Confirmed Result
+
+- Best epoch: `2 / 6`
+- Best macro ROC-AUC: `0.8494899256`
+- Best valid loss: `0.0684762717`
+- Scored classes: `29`
+- Pseudo rows used: `69593`
+- Teacher folds: `[1, 2]`
+
+### Epoch Curve
+
+- epoch `1`: `0.8306`
+- epoch `2`: `0.8495`
+- epoch `3`: `0.8343`
+- epoch `4`: `0.7950`
+- epoch `5`: `0.8253`
+- epoch `6`: `0.8028`
+
+### Interpretation
+
+- This is the strongest raw fold-0 native training result in the project so far.
+- On the same sparse fold, `exp_009` beats:
+  - `exp_006` fold `0` by about `+0.0699`
+  - raw `exp_008` fold `0` by about `+0.0117`
+  - postprocessed `exp_008b` by about `+0.0060`
+- That is exactly the kind of signal we wanted from the noisy-student branch:
+  - pseudo labels did not destabilize training
+  - the student improved materially over the short-context supervised baseline
+  - the branch is competitive even against the stronger long-context local fold result
+- The curve also suggests early saturation:
+  - the best score came at epoch `2`
+  - later epochs regressed
+  - so future runs may need stronger early stopping or slightly lighter late-epoch learning
+
+### Important Caution
+
+- The result is still only one sparse fold with `29` scored classes.
+- So this is a strong positive direction, but not yet enough evidence for immediate Kaggle promotion.
+- We already learned from `exp_008` that single-fold enthusiasm can be misleading.
+
+### Practical Conclusion
+
+- `exp_009` is now the most promising native training branch.
+- The next high-signal steps are:
+  - apply the proven priors/texture postprocess on top of `exp_009` exports
+  - run at least one more fold
+  - only then decide whether it should replace `exp_007` as the default native submit path
+
+## 2026-03-23 Exp_009b Priors Postprocess Result
+
+### Confirmed Result
+
+- Raw `exp_009` fold `0`: `0.8494899256`
+- Best postprocess variant: `raw`
+- Delta vs raw: `+0.0000`
+- All prior variants regressed:
+  - `event_texture_priors`: `0.8112`
+  - `event_texture_priors_smooth`: `0.8108`
+  - `texture_priors_only`: `0.8075`
+  - `event_priors_only`: `0.7964`
+
+### Interpretation
+
+- This is one of the most informative negative results in the project so far.
+- Earlier native branches depended heavily on inference-time priors.
+- `exp_009` does not.
+- More than that, the old priors are now miscalibrated enough to hurt strongly.
+- The most plausible explanation is that noisy-student training has already internalized a meaningful part of:
+  - site/hour structure
+  - texture-heavy background patterns
+  - target-domain calibration that earlier supervised branches lacked
+
+### Practical Conclusion
+
+- `exp_009` should currently be treated as a raw model branch first.
+- We should not automatically inherit the old `exp_007` postprocess into the noisy-student branch.
+- The next correct test is not another postprocess tweak.
+- The next correct test is another `exp_009` fold, and then a raw Kaggle submission if the gain survives.
+
+## 2026-03-23 Exp_009 Fold 1 Result
+
+### Confirmed Result
+
+- Fold `1` best macro ROC-AUC: `0.8768579395`
+- Best epoch: `3 / 6`
+- Scored classes: `29`
+- Best valid loss: `0.0457730132`
+- Pseudo rows / files: `69640 / 9569`
+- Teacher folds: `[0, 2]`
+- Pseudo confidence mean: `0.6845`
+
+### Interpretation
+
+- This is the strongest native fold result in the project so far.
+- Fold `1` improves over fold `0` by about `+0.0274`.
+- Across folds `0-1`, the branch now averages `0.8632`, which is materially above the earlier supervised native branches.
+- The result also weakens the idea that fold `0` was a lucky spike:
+  - the second fold stayed in the same sparse validation regime
+  - and still improved again
+- This makes the raw noisy-student path the first native branch that looks genuinely promotion-worthy rather than merely interesting.
+
+### Practical Conclusion
+
+- `exp_009` should remain raw by default.
+- The next high-signal step is now fold `2`, not more postprocess work.
+- If fold `2` stays in the same quality band, the branch deserves its first raw Kaggle submission.
+
+## 2026-03-24 Exp_009 Fold 2 Result
+
+### Confirmed Result
+
+- Fold `2` best macro ROC-AUC: `0.8848806193`
+- Best epoch: `3 / 6`
+- Scored classes: `35`
+- Best valid loss: `0.0452111292`
+- Pseudo rows / files: `70142 / 9669`
+- Teacher folds: `[0, 1]`
+- Pseudo confidence mean: `0.6458`
+
+### Interpretation
+
+- This is the strongest `exp_009` fold so far.
+- More importantly, it is also the broadest fold so far, with `35` scored classes instead of `29`.
+- That sharply reduces the risk that the branch is only exploiting an easy sparse split.
+- The three-fold picture is now:
+  - fold `0`: `0.8495`
+  - fold `1`: `0.8769`
+  - fold `2`: `0.8849`
+  - mean: `0.8704`
+- This is the first native branch in the project that looks both strong and stable enough to justify direct leaderboard validation in raw form.
+
+### Practical Conclusion
+
+- The main local validation question is answered.
+- `exp_009` should be promoted to the next Kaggle candidate.
+- The correct next step is the first raw `exp_009` submission, not more local postprocess ablations.
+
+## 2026-03-23 BirdCLEF 2026 HGNetV2-B0 Baseline (`0.856`) Analysis
+
+Source:
+- `references/private-solutions/birdclef2026-score=0.856/hgnetv2_b0_baseline.docx`
+- `references/private-solutions/birdclef2026-score=0.856/birdclef-2026-hgnetv2-b0-baseline-training.ipynb`
+- `references/private-solutions/birdclef2026-score=0.856/birdclef-2026-hgnetv2-b0-baseline-inference.ipynb`
+- `references/private-solutions/birdclef2026-score=0.856/birdclef-2026-download-wheels.ipynb`
+
+### What The Method Actually Is
+
+- This is a strong supervised baseline rather than a foundation-model stack.
+- Backbone:
+  - `hgnetv2_b0.ssld_stage2_ft_in1k` from `timm`
+- Input:
+  - `32 kHz`
+  - `5s` audio crops
+  - single-channel log-mel image resized to `(256, 256)`
+- Loss:
+  - plain `nn.BCEWithLogitsLoss`
+- Training data:
+  - `train_audio`
+  - segmented `train_soundscapes`
+  - `secondary_labels` from `train_audio` merged into the target vector
+- CV:
+  - custom `MultiLabelStratifiedGroupKFold`
+  - groups are `audio_id`
+  - `4` folds
+- Augmentation:
+  - spectrogram-space MixUp with `alpha=1.0`, `theta=0.8`
+- Scheduler:
+  - `OneCycleLR`
+- Inference:
+  - convert trained PyTorch fold models to ONNX and then OpenVINO
+  - CPU inference with async request queue
+  - optional rank averaging across folds
+
+### Why The Score Is Good
+
+- The score does not come from one exotic trick.
+- It comes from combining a few pragmatic choices that fit the competition well:
+  - stronger image-style backbone than our current B0 baseline
+  - direct use of labeled soundscape segments inside supervised training
+  - multi-label targets through `secondary_labels`
+  - very fast audio IO, which makes full 4-fold training cheap enough to run often
+  - efficient CPU-safe inference through OpenVINO
+- The writeup reports:
+  - OOF: `0.9574`
+  - public LB: `0.856`
+- The OOF is probably not directly comparable to our pooled soundscape OOF because it mixes isolated recordings and segmented soundscapes in one broad CV protocol.
+- Still, the public `0.856` confirms that the supervised recipe is genuinely strong.
+
+### High-Value Transfer Ideas
+
+- Preconvert `train_audio` from `.ogg` to `.wav` and use partial reads through `soundfile.SoundFile`.
+  - This is the single most practical engineering idea in the solution.
+  - It cuts training time enough to make 4-fold supervised training realistic.
+- Build a unified supervised dataframe from:
+  - `train_audio` with `primary + secondary`
+  - labeled `train_soundscapes` cut into explicit supervised clips
+- Use grouped multi-label CV by `audio_id`.
+  - This is a cleaner supervised protocol than naive random clip splitting.
+- Try `HGNetV2-B0` as a backbone candidate.
+  - The solution suggests that a stronger efficient image backbone can beat our current EfficientNet-B0 baseline even without complicated downstream machinery.
+- Keep the head simple at first.
+  - A plain classification head already reaches a good public score here.
+- Export the best native models to OpenVINO for Kaggle inference.
+  - This is highly relevant for our future CPU-limited submission notebooks.
+
+### Important Details About Their Data Handling
+
+- `train_soundscapes_labels.csv` is deduplicated first.
+- The notebook then writes explicit soundscape clip files:
+  - contiguous rows with the same `filename` and `primary_label` are merged into longer segments
+  - these are saved as `.wav`
+- Those soundscape-derived clips are treated as labeled training examples.
+- `train_audio` rows keep multi-label targets using `primary_label + secondary_labels`.
+- This means the method does target-domain adaptation already at the supervised dataset level, not only through postprocessing.
+
+### Inference Engineering Ideas
+
+- They do not run a heavy neural postprocess stack.
+- Instead they optimize the submission path:
+  - precompute log-mels in batches with `joblib`
+  - compile fold models with OpenVINO
+  - run async CPU inference
+  - average folds in probability space by default
+  - optionally test rank averaging
+- This is very useful for us later even if we keep a different training recipe.
+
+### What To Treat Carefully
+
+- The very high OOF should not be treated as a reliable leaderboard proxy for our project.
+- The baseline still uses only `5s` independent clips and a plain linear head.
+  - So it is strong, but probably not the final ceiling.
+- The inference notebook reads only the first `60s` of each file and slices fixed `5s` windows.
+  - That matches the competition format, but it is not a general soundscape detector.
+- There is no metadata-prior layer here.
+  - So the method is complementary to `exp_007`, not a replacement for our soundscape-aware inference ideas.
+
+### Practical Conclusion
+
+- This is one of the most useful references in the repository because it is strong, simple, and reproducible.
+- The most transferable ideas for our project are:
+  - wav-cache plus partial-read audio loading
+  - unified supervised training on `train_audio + labeled soundscape clips`
+  - `HGNetV2-B0` backbone test
+  - OpenVINO export for native submission notebooks
+- This reference suggests a valuable future branch:
+  - a fast supervised native branch that is simpler than Perch and cheaper than noisy-student training
+  - especially as a comparison branch once `exp_009` is finished

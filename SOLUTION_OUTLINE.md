@@ -102,6 +102,16 @@
   - use unlabeled soundscapes as a real training asset rather than only at inference time
 - Main experiment:
   - `exp_009`: pseudo-label training with noisy-student style mixup
+- Current status:
+  - notebook created: `notebooks/exp_009_noisy_student_pseudolabel.ipynb`
+  - safe setup validated on fold `0`
+  - pseudo labels generated on fold `0`
+  - first full run completed on fold `0` with best macro ROC-AUC `0.8495`
+  - postprocess check completed through `exp_009b`, and raw remains best
+  - fold `1` completed with best macro ROC-AUC `0.8769`
+  - fold `2` completed with best macro ROC-AUC `0.8849`
+  - folds `0-2` now average `0.8704`
+  - branch is now ready for its first raw Kaggle submission
 - Core ideas:
   - pseudo-labeled soundscape chunks
   - mixup with labeled data
@@ -137,6 +147,6 @@
 ### Execution Order
 
 1. Keep `exp_007` as the default native public baseline
-2. `exp_009`: noisy-student pseudo-label branch
+2. `exp_009`: validate the branch on Kaggle in raw form
 3. `exp_010`: texture specialist branch
 4. native stacker and final ensemble

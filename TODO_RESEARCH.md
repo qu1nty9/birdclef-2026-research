@@ -42,7 +42,14 @@
 - [x] Run at least one more `exp_008` fold before trusting the long-context branch again on Kaggle
 - [x] Build a fold-safe long-context OOF postprocess comparison on top of `exp_008` folds `0-2`
 - [x] Decide whether long-context is a real branch or a single-fold mirage using pooled OOF before spending more leaderboard attempts on it
-- [ ] After the long-context branch, start a noisy-student pseudo-label branch (`exp_009`)
+- [x] After the long-context branch, start a noisy-student pseudo-label branch (`exp_009`)
+- [x] Run pseudo-label generation in `exp_009` and inspect pseudo confidence / coverage before any long training run
+- [x] Launch a short smoke-train for `exp_009` after pseudo-label caching succeeds
+- [x] Run the first full `exp_009` fold and record best macro ROC-AUC
+- [x] Apply the `exp_007` priors/texture recipe on top of exported `exp_009` fold predictions
+- [x] Run at least one more `exp_009` fold before treating the branch as Kaggle-ready
+- [x] Run `exp_009` fold `2` to get a three-fold view before the first raw Kaggle promotion
+- [ ] Prepare a Kaggle submission notebook for raw `exp_009` without the old priors layer
 - [ ] Prepare a dedicated `Amphibia/Insecta` specialist branch (`exp_010`) if the generic native branch still underperforms on texture-heavy classes
 
 ## Data And Validation
@@ -64,15 +71,19 @@
 - [ ] Test class-balanced sampling for species with `<= 20` isolated recordings
 - [ ] Add a background-bank mixing augmentation stage using soundscape clips or trusted background windows
 - [ ] Test whether a PCEN frontend improves soundscape transfer over the current mel frontend
-- [ ] Implement a real noisy-student pseudo-label branch with mixup between labeled data and pseudo-labeled soundscape chunks
+- [x] Implement a real noisy-student pseudo-label branch with mixup between labeled data and pseudo-labeled soundscape chunks
 - [ ] Test probability power-transform denoising and confidence-weighted sampling for pseudo-labeled soundscapes
 - [ ] Try a dedicated `Amphibia/Insecta` model with targeted extra Xeno-Canto species instead of mixing those labels into the generic branch
+- [ ] Prototype a fast supervised HGNetV2-B0 branch using `train_audio + labeled soundscape clips` as a simpler alternative to heavier pseudo-label pipelines
+- [ ] Test whether explicit soundscape clip extraction by contiguous `(filename, primary_label)` segments is stronger than our current raw soundscape-window supervision
+- [ ] Build a wav-cache + partial-read audio loader path so full 4-fold supervised training is cheap enough to rerun often
 
 ## Feature And Architecture Ideas
 
 - [ ] Compare `n_mels=128` vs `n_mels=224`
 - [ ] Test lower `fmin` for amphibians and insects
 - [ ] Compare EfficientNet-B0 against a stronger timm backbone once the baseline is stable
+- [ ] Compare EfficientNet-B0 against `hgnetv2_b0.ssld_stage2_ft_in1k`
 - [ ] Evaluate whether segmentwise logits from the attention head can improve sound event localization
 - [ ] Test frozen embedding stackers on top of model outputs instead of only end-to-end finetuning
 - [ ] Separate texture-style classes (`Amphibia`, `Insecta`) from bird/event classes in postprocessing or auxiliary heads
@@ -88,4 +99,5 @@
 - [x] Add metadata priors based on `site`, `hour_utc`, and `site-hour` combinations
 - [ ] Compare plain logits against logits plus file-context features (`prev`, `next`, `mean`, `max`) in a second-stage classifier
 - [ ] Evaluate OpenVINO or ONNX export once the native ensemble is strong enough to make CPU runtime a bottleneck
+- [ ] Reproduce the HGNetV2/OpenVINO CPU-safe submit path as a native inference engineering branch
 - [ ] Reproduce target-domain pseudo-labeling with overlapping `5s` windows, `2.5s` hop, temporal smoothing, and classwise quantile filtering in a notebook-only experiment

@@ -1,0 +1,13 @@
+{
+  "teacher_folds": [
+    1,
+    2
+  ],
+  "pseudo_rows": 69593,
+  "pseudo_files": 9552,
+  "confidence_mean": 0.655200209205719,
+  "confidence_p75": 0.9062780141830444,
+  "confidence_max": 0.9999481439590454,
+  "pseudo_power": 1.5,
+  "pseudo_min_confidence": 0.2
+}
