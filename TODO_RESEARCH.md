@@ -49,7 +49,11 @@
 - [x] Apply the `exp_007` priors/texture recipe on top of exported `exp_009` fold predictions
 - [x] Run at least one more `exp_009` fold before treating the branch as Kaggle-ready
 - [x] Run `exp_009` fold `2` to get a three-fold view before the first raw Kaggle promotion
-- [ ] Prepare a Kaggle submission notebook for raw `exp_009` without the old priors layer
+- [x] Prepare a Kaggle submission notebook for raw `exp_009` without the old priors layer
+- [x] Run the first Kaggle submission for raw `exp_009` and record the public LB
+- [x] Build a pooled OOF / calibration analysis for `exp_009` before another leaderboard attempt
+- [x] Prototype the `HGNetV2-B0 + wav-cache + soundscape-clip` supervised branch from the `0.856` reference
+- [ ] Run `exp_011_hgnetv2_soundscape_supervised` on fold `0` and record both overall and soundscape-only validation ROC-AUC
 - [ ] Prepare a dedicated `Amphibia/Insecta` specialist branch (`exp_010`) if the generic native branch still underperforms on texture-heavy classes
 
 ## Data And Validation
@@ -74,7 +78,7 @@
 - [x] Implement a real noisy-student pseudo-label branch with mixup between labeled data and pseudo-labeled soundscape chunks
 - [ ] Test probability power-transform denoising and confidence-weighted sampling for pseudo-labeled soundscapes
 - [ ] Try a dedicated `Amphibia/Insecta` model with targeted extra Xeno-Canto species instead of mixing those labels into the generic branch
-- [ ] Prototype a fast supervised HGNetV2-B0 branch using `train_audio + labeled soundscape clips` as a simpler alternative to heavier pseudo-label pipelines
+- [x] Prototype a fast supervised HGNetV2-B0 branch using `train_audio + labeled soundscape clips` as a simpler alternative to heavier pseudo-label pipelines
 - [ ] Test whether explicit soundscape clip extraction by contiguous `(filename, primary_label)` segments is stronger than our current raw soundscape-window supervision
 - [ ] Build a wav-cache + partial-read audio loader path so full 4-fold supervised training is cheap enough to rerun often
 

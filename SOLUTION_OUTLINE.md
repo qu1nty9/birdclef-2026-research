@@ -111,7 +111,14 @@
   - fold `1` completed with best macro ROC-AUC `0.8769`
   - fold `2` completed with best macro ROC-AUC `0.8849`
   - folds `0-2` now average `0.8704`
-  - branch is now ready for its first raw Kaggle submission
+  - first raw Kaggle submission scored `0.735`
+  - that is below the current native public best `0.758`
+  - pooled OOF follow-up completed through `exp_009c`
+  - raw pooled OOF is only `0.7934`, with an optimism gap of `0.0770` vs fold mean
+  - raw remains the best fixed `exp_009` OOF variant
+  - no lightweight calibration rescue justified another leaderboard attempt
+  - raw submission notebook prepared: `notebooks/kaggle_submission_exp_009_raw_3fold.ipynb`
+  - raw model dataset prepared: `submissions/kaggle_datasets/birdclef-exp009-raw-3fold`
 - Core ideas:
   - pseudo-labeled soundscape chunks
   - mixup with labeled data
@@ -121,7 +128,29 @@
 - Success criterion:
   - reproducible gain over the best purely supervised native branch
 
-### Phase D. Texture Specialist Branch
+### Phase D. HGNetV2 Supervised Branch
+
+- Goal:
+  - test whether a simpler but stronger supervised branch can outperform the older native path without Perch or noisy-student machinery
+- Main experiment:
+  - `exp_011`: `HGNetV2-B0 + train_audio + labeled soundscape clips + grouped multi-label CV`
+- Current status:
+  - notebook created: `notebooks/exp_011_hgnetv2_soundscape_supervised.ipynb`
+  - setup validated end-to-end in the local `.venv`
+  - local soundscape labels were correctly reinterpreted as multi-label segment strings
+  - those expand to `3122` per-label rows and `529` merged soundscape clips across `75` target classes
+  - fold `0` is ready with `26996` train rows and `9082` valid rows
+- Core ideas:
+  - `hgnetv2_b0.ssld_stage2_ft_in1k`
+  - optional wav-cache for `train_audio`
+  - soundscape-clip supervision through merged contiguous intervals
+  - grouped multi-label validation by `audio_id`
+  - export of validation metadata and predictions for later OOF analysis
+- Success criterion:
+  - a stronger supervised local branch than the current EfficientNet-based native path
+  - especially on soundscape-only validation readouts
+
+### Phase E. Texture Specialist Branch
 
 - Goal:
   - improve texture-heavy taxa that repeatedly behave differently from bird/event classes
@@ -130,7 +159,7 @@
 - Success criterion:
   - measurable uplift on texture-heavy validation classes and positive ensemble contribution
 
-### Phase E. Native Stacker And Ensemble
+### Phase F. Native Stacker And Ensemble
 
 - Goal:
   - combine the strongest native branches into a solution that can realistically challenge the current reference baseline
@@ -147,6 +176,7 @@
 ### Execution Order
 
 1. Keep `exp_007` as the default native public baseline
-2. `exp_009`: validate the branch on Kaggle in raw form
-3. `exp_010`: texture specialist branch
-4. native stacker and final ensemble
+2. Run `exp_011_hgnetv2_soundscape_supervised` on fold `0`
+3. If the first fold is strong, expand `exp_011` to a full multi-fold supervised comparison branch
+4. `exp_010`: texture specialist branch
+5. native stacker and final ensemble

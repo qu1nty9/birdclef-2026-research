@@ -174,3 +174,24 @@ Interpretation:
 Practical Conclusion:
 - `exp_009` is ready for its first raw Kaggle submission.
 - The next step should be a submit notebook, not another local postprocess pass.
+
+Submission Assets:
+- Notebook: `notebooks/kaggle_submission_exp_009_raw_3fold.ipynb`
+- Model dataset package: `submissions/kaggle_datasets/birdclef-exp009-raw-3fold`
+
+## First Raw Kaggle Submission
+
+Confirmed Result:
+- Public LB: `0.735`
+- Notebook: `notebooks/kaggle_submission_exp_009_raw_3fold.ipynb`
+
+Interpretation:
+- This is a negative transfer result relative to the local three-fold picture.
+- It underperforms:
+  - `exp_007` public LB `0.758`
+  - `exp_005` public LB `0.737`
+- So raw `exp_009` is not yet ready to replace the current native public baseline.
+
+Practical Conclusion:
+- Do not promote raw `exp_009` as the default submit recipe yet.
+- The next correct step is a pooled OOF / calibration analysis for the branch before another Kaggle attempt.

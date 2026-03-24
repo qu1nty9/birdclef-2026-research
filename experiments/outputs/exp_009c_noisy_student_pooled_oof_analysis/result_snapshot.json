@@ -1,0 +1,33 @@
+{
+  "experiment_id": "exp_009c",
+  "experiment_name": "noisy_student_pooled_oof_analysis",
+  "fold_ids": [
+    0,
+    1,
+    2
+  ],
+  "raw_pooled_oof_macro_auc": 0.7933963540973474,
+  "raw_pooled_oof_brier": 0.009112088941037655,
+  "raw_pooled_oof_ece": 0.007075753758523384,
+  "raw_fold_mean_macro_auc": 0.8704094948159128,
+  "optimism_gap_fold_mean_minus_pooled": 0.07701314071856535,
+  "best_fixed_variant": "raw",
+  "best_fixed_variant_macro_auc": 0.7933963540973474,
+  "fold_safe_selected_macro_auc": 0.785292509480159,
+  "fold_safe_selected_brier": 0.009044108912348747,
+  "fold_safe_selected_ece": 0.006583856123137581,
+  "temperature_scaled_macro_auc": 0.7674671922948699,
+  "temperature_scaled_brier": 0.00903234351426363,
+  "temperature_scaled_ece": 0.0036940367025474563,
+  "chosen_variants_by_fold": {
+    "0": "raw",
+    "1": "event_smooth_texture_filemax_strong",
+    "2": "raw"
+  },
+  "chosen_temperatures_by_fold": {
+    "0": 1.5,
+    "1": 1.5,
+    "2": 1.5
+  },
+  "raw_vs_exp007_gap": 0.08249635409734746
+}

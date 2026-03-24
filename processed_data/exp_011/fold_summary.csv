@@ -1,0 +1,9 @@
+fold,source,rows,unique_audio
+0,soundscape_clip,136,17
+0,train_audio,8946,8946
+1,soundscape_clip,124,15
+1,train_audio,8911,8911
+2,soundscape_clip,132,16
+2,train_audio,8875,8875
+3,soundscape_clip,137,18
+3,train_audio,8817,8817

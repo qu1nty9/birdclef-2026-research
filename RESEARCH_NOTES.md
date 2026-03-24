@@ -1244,6 +1244,76 @@ Source: `references/private-solutions/birdclef2025_1st_place_solution/birdclef20
 - `exp_009` should be promoted to the next Kaggle candidate.
 - The correct next step is the first raw `exp_009` submission, not more local postprocess ablations.
 
+## 2026-03-24 Exp_009 First Raw Kaggle Result
+
+### Confirmed Result
+
+- Raw `exp_009` 3-fold Kaggle LB: `0.735`
+- Previous best native public result: `exp_007 = 0.758`
+- Earlier single-fold native hybrid: `exp_005 = 0.737`
+
+### Interpretation
+
+- This is a strong negative transfer result.
+- The branch looked excellent locally:
+  - fold `0`: `0.8495`
+  - fold `1`: `0.8769`
+  - fold `2`: `0.8849`
+  - mean: `0.8704`
+- But that local picture did not survive leaderboard validation.
+- So the issue is not that `exp_009` lacks local signal.
+- The issue is that our current summary for it is still not honest enough as a leaderboard proxy.
+- In other words:
+  - raw noisy-student training improved local folds
+  - but the branch is still miscalibrated or otherwise mismatched to the hidden test domain
+
+### Practical Conclusion
+
+- `exp_009` should not replace `exp_007` as the default native public baseline yet.
+- The next correct step is not another blind Kaggle submission.
+- The next correct step is a pooled OOF / calibration analysis for `exp_009`.
+
+## 2026-03-24 Exp_009c Pooled OOF / Calibration Analysis
+
+Source:
+- `notebooks/exp_009c_noisy_student_pooled_oof_analysis.ipynb`
+
+### Confirmed Result
+
+- Raw pooled OOF macro ROC-AUC: `0.7933963541`
+- Raw fold-mean macro ROC-AUC: `0.8704094948`
+- Optimism gap: `0.0770131407`
+- Best fixed variant: `raw`
+- Fold-safe selected macro ROC-AUC: `0.7852925095`
+- Temperature-scaled raw macro ROC-AUC: `0.7674671923`
+- Raw pooled Brier: `0.0091121`
+- Raw pooled ECE: `0.00708`
+- Temperature scaling improved calibration:
+  - Brier: `0.0090323`
+  - ECE: `0.00369`
+  - but not ranking quality
+
+### Interpretation
+
+- This analysis explains the main local-vs-Kaggle disconnect much better than the fold means did.
+- `exp_009` is still a real branch:
+  - pooled OOF is not weak in absolute terms
+  - and it remains clearly above the old `exp_007` pooled OOF reference (`0.7109`)
+- But its fold summary was substantially too optimistic.
+- More importantly, the calibration story is now much clearer:
+  - raw remains the best fixed OOF variant
+  - fold-safe context repair does not beat raw
+  - both weak and old priors hurt
+  - temperature scaling improves probability calibration but not AUC
+- So the current problem is not “we forgot one small inference trick”.
+- The current problem is that this branch still does not transfer cleanly to the hidden leaderboard domain.
+
+### Practical Conclusion
+
+- No lightweight postprocess rescue has justified another `exp_009` leaderboard attempt.
+- `exp_009` remains useful research signal, but not the next promoted submit path.
+- The next high-signal move should be a new modeling branch, with the `HGNetV2-B0` supervised reference now looking especially attractive.
+
 ## 2026-03-23 BirdCLEF 2026 HGNetV2-B0 Baseline (`0.856`) Analysis
 
 Source:
@@ -1354,3 +1424,51 @@ Source:
 - This reference suggests a valuable future branch:
   - a fast supervised native branch that is simpler than Perch and cheaper than noisy-student training
   - especially as a comparison branch once `exp_009` is finished
+
+## 2026-03-24 Exp_011 HGNetV2 Supervised Branch Scaffold
+
+### What Was Turned Into A Notebook
+
+- New experiment notebook:
+  - `notebooks/exp_011_hgnetv2_soundscape_supervised.ipynb`
+- Core recipe kept from the `0.856` reference:
+  - `hgnetv2_b0.ssld_stage2_ft_in1k`
+  - unified supervised dataframe
+  - grouped multi-label folds by `audio_id`
+  - `soundfile.SoundFile` partial reads
+  - log-mel frontend with `(256, 256)` resizing
+  - spectrogram MixUp
+  - optional wav-cache for `train_audio`
+
+### Important Local Data Nuance Confirmed
+
+- The local `train_soundscapes_labels.csv` does **not** behave like one-label-per-row data.
+- It stores multi-label segment strings separated by `;`.
+- After deduplication and token expansion:
+  - unique labeled soundscape segments: `739`
+  - expanded per-label rows: `3122`
+  - target classes covered: `75`
+- After contiguous same-label merging inside each file:
+  - supervised soundscape clips: `529`
+  - files covered: `66`
+
+### Why This Matters
+
+- The first naive notebookization attempt almost treated the raw `primary_label` field as a single class string.
+- That would have collapsed most of the soundscape supervision incorrectly.
+- Fixing this inside the notebook makes `exp_011` the cleanest supervised soundscape-clip branch we have built so far.
+
+### Setup Validation
+
+- The notebook now passes full setup execution in the local `.venv` with `RUN_TRAINING = False`.
+- Fold `0` ready state:
+  - train rows: `26996`
+  - valid rows: `9082`
+  - train soundscape rows: `393`
+  - valid soundscape rows: `136`
+- No wav cache exists yet, so the first run will use direct `ogg` offset reads unless cache building is enabled manually.
+
+### Practical Conclusion
+
+- `exp_011` is ready for the first real fold run.
+- This branch is attractive because it tests a stronger supervised backbone and cleaner target-domain supervision without the complexity of Perch or noisy-student inference stacks.
