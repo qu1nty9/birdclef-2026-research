@@ -53,7 +53,14 @@
 - [x] Run the first Kaggle submission for raw `exp_009` and record the public LB
 - [x] Build a pooled OOF / calibration analysis for `exp_009` before another leaderboard attempt
 - [x] Prototype the `HGNetV2-B0 + wav-cache + soundscape-clip` supervised branch from the `0.856` reference
-- [ ] Run `exp_011_hgnetv2_soundscape_supervised` on fold `0` and record both overall and soundscape-only validation ROC-AUC
+- [x] Run `exp_011_hgnetv2_soundscape_supervised` on fold `0` and record both overall and soundscape-only validation ROC-AUC
+- [x] Run `exp_011_hgnetv2_soundscape_supervised` on folds `1-2` before any Kaggle promotion
+- [x] Build a dedicated Kaggle submission notebook for `exp_011` if folds `1-2` confirm the fold `0` strength
+- [x] Run the first Kaggle submission for `exp_011` and compare it against `exp_007 = 0.758`
+- [ ] Decide whether to prioritize `exp_011` fold `3` / stronger inference or jump directly to the simplified `0.924` ProtoSSM branch
+- [x] Analyze `pantanal-distill-birdclef2026-improvement-0.924.ipynb` and extract the genuinely new ideas beyond the older Perch notebooks
+- [ ] Prototype a simplified `Perch embeddings + file-level temporal model` branch inspired by the `0.924` ProtoSSM stack
+- [ ] Test whether in-model `site/hour` metadata embeddings outperform our older post-hoc priors on the same trusted full-file subset
 - [ ] Prepare a dedicated `Amphibia/Insecta` specialist branch (`exp_010`) if the generic native branch still underperforms on texture-heavy classes
 
 ## Data And Validation

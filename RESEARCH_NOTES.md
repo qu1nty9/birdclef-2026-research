@@ -1472,3 +1472,144 @@ Source:
 
 - `exp_011` is ready for the first real fold run.
 - This branch is attractive because it tests a stronger supervised backbone and cleaner target-domain supervision without the complexity of Perch or noisy-student inference stacks.
+
+## 2026-03-24 Exp_011 Fold 0 Result
+
+### Confirmed Result
+
+- `exp_011` fold `0` completed successfully on `mps`.
+- Best epoch:
+  - `8 / 12`
+- Best checkpoint selection metric:
+  - soundscape-only macro ROC-AUC `0.8508523324`
+- Overall validation macro ROC-AUC at the selected epoch:
+  - `0.9555301905`
+- Overall scored classes:
+  - `220`
+- Soundscape-only scored classes:
+  - `42`
+- Best validation loss at the selected epoch:
+  - `0.0123390177`
+
+### Why This Is Important
+
+- This is the strongest native supervised fold we have produced so far.
+- It is also a much healthier validation signal than the older soundscape-only branches because the soundscape subset now scores `42` classes instead of the older `29-35` range.
+- The result sits very close to the external supervised reference OOF scale while still being fully repository-native.
+
+### Learning Curve Interpretation
+
+- Overall macro ROC-AUC keeps increasing through the later epochs:
+  - epoch `8`: `0.9555`
+  - epoch `12`: `0.9585`
+- But soundscape-only macro ROC-AUC peaks at epoch `8`:
+  - epoch `8`: `0.8509`
+  - epoch `9`: `0.8277`
+  - epoch `10`: `0.8323`
+  - epoch `11`: `0.8353`
+  - epoch `12`: `0.8354`
+- This is exactly the type of domain-gap signal we wanted to capture:
+  - the model can still improve on the mixed validation fold
+  - while already drifting away from the target-domain soundscape objective
+
+### Practical Conclusion
+
+- The HGNetV2 branch has now earned immediate expansion to folds `1-2`.
+- The best checkpoint criterion should remain soundscape-aware, not generic full-fold AUC or raw validation loss.
+- If folds `1-2` stay strong, this branch becomes the next most justified native Kaggle submission candidate.
+
+## 2026-03-25 Exp_011 Folds 1-2 Result
+
+### Confirmed Result
+
+- Fold `1`:
+  - best epoch: `4 / 12`
+  - overall macro ROC-AUC: `0.9406223787`
+  - soundscape-only macro ROC-AUC: `0.8042338925`
+  - soundscape-only scored classes: `37`
+- Fold `2`:
+  - best epoch: `9 / 12`
+  - overall macro ROC-AUC: `0.9622501589`
+  - soundscape-only macro ROC-AUC: `0.8543629181`
+  - soundscape-only scored classes: `52`
+- Mean across folds `0-2`:
+  - overall macro ROC-AUC: `0.9528009094`
+  - soundscape-only macro ROC-AUC: `0.8364830477`
+
+### Interpretation
+
+- Fold `1` is visibly weaker than folds `0` and `2`, but it is still a strong result rather than a collapse.
+- Fold `2` is especially important because it covers the broadest soundscape subset so far (`52` scored classes) and still remains extremely strong.
+- The branch therefore looks stable enough for a first Kaggle check.
+
+### Repeated Pattern Worth Keeping
+
+- Fold `1` repeats the same lesson as fold `0` even more strongly:
+  - full-fold macro ROC-AUC keeps rising all the way to epoch `12`
+  - soundscape-only macro ROC-AUC peaks much earlier at epoch `4`
+- Fold `2` is slightly gentler, but still peaks on soundscape metric before the final epoch.
+- So `exp_011` has now clearly validated soundscape-aware checkpointing across multiple folds, not just once.
+
+### Practical Conclusion
+
+- `exp_011` has passed the “multi-fold stability” bar.
+- The next justified step is no longer another local fold.
+- The next justified step is the first Kaggle submission for the `exp_011` branch.
+- That submission package is now prepared as:
+  - `notebooks/kaggle_submission_exp_011_hgnetv2_3fold.ipynb`
+  - `submissions/kaggle_datasets/birdclef-exp011-hgnetv2-3fold`
+
+## 2026-03-25 Exp_011 First Kaggle Result
+
+- Public leaderboard score: `0.844`
+- Previous best native public result: `exp_007 = 0.758`
+- Strong reference blend: `0.890`
+
+Interpretation:
+- This is a strong positive transfer result.
+- `exp_011` improves the repository-native public baseline by `+0.086` over `exp_007`.
+- The branch is now the strongest repository-native public path in the project.
+- The gap to the stronger reference blend shrinks from `0.132` (`0.758 -> 0.890`) to only `0.046` (`0.844 -> 0.890`).
+
+Research implication:
+- The `HGNetV2 + unified train_audio + labeled soundscape clips` branch is not just locally strong; it transfers meaningfully to the hidden leaderboard.
+- This makes `exp_011` the first native branch that is good enough to serve as a serious launchpad for the final solution.
+- The next strategic choice is now between:
+  - scaling `exp_011` further with more folds / stronger inference engineering
+  - or jumping to the simplified `0.924` Perch ProtoSSM branch as the next major modeling leap
+
+## 2026-03-25 Pantanal Distill ProtoSSM (`0.924`) Analysis
+
+Source:
+- `references/private-notebooks/pantanal-distill-birdclef2026-improvement-0.924.ipynb`
+
+What this notebook really is:
+- Not a plain `Perch + priors` submission.
+- It builds a full downstream stack on top of `Perch v2` embeddings and logits over all `12` windows of each `60s` file.
+- The trusted training subset is still the `59` fully labeled soundscape files, cached through `perch_meta`-style arrays.
+
+Core pipeline:
+- `Perch -> ProtoSSM(pass1) + MLP probe -> weighted fusion -> ResidualSSM(pass2) -> TTA -> temperature -> file-level scaling -> rank-aware scaling -> delta smoothing -> threshold sharpening`
+
+What appears genuinely new relative to the earlier Perch notebooks:
+- File-level temporal modeling of the full `12 x 5s` sequence, instead of windowwise stacking only.
+- Bidirectional selective SSM layers plus cross-attention over windows.
+- Metadata embeddings (`site`, `hour`) injected inside the temporal model, not only as post-hoc priors.
+- Prototypical head with learnable class prototypes and cosine-similarity logits.
+- Gated fusion between the learned temporal model and raw Perch logits on a per-class basis.
+- Multi-task training: focal BCE, label smoothing, distillation toward Perch logits, taxonomic auxiliary loss, mixup, and SWA.
+- A second-pass residual SSM that learns additive corrections after the first ensemble.
+
+What is probably doing most of the work:
+- The biggest conceptual jump is the file-level temporal model on top of `Perch` embeddings/logits.
+- The second biggest is moving metadata from pure postprocess priors into the model through `site/hour` embeddings.
+- The `MLP probe + sequential features` branch is still important, but it now acts as one leg of a larger ensemble rather than the whole downstream story.
+
+What looks more leaderboard-specific or lower-priority for first reproduction:
+- Per-class threshold sharpening.
+- The long postprocess chain after the main fusion.
+- The residual SSM second pass before we have reproduced the simpler first-pass ProtoSSM branch.
+
+Research implication:
+- The strongest current external ceiling in this repo is no longer the older `0.899` Perch stack, but this `0.924` temporal downstream branch.
+- This suggests that, for the Perch direction, the next serious experiment should be a simplified `Perch embeddings + file-level temporal model` reproduction rather than another minor priors/probe tweak.

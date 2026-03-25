@@ -139,7 +139,13 @@
   - setup validated end-to-end in the local `.venv`
   - local soundscape labels were correctly reinterpreted as multi-label segment strings
   - those expand to `3122` per-label rows and `529` merged soundscape clips across `75` target classes
-  - fold `0` is ready with `26996` train rows and `9082` valid rows
+  - folds `0-2` completed with:
+    - fold `0` soundscape-only macro ROC-AUC `0.8509`
+    - fold `1` soundscape-only macro ROC-AUC `0.8042`
+    - fold `2` soundscape-only macro ROC-AUC `0.8544`
+    - soundscape-only mean across folds `0-2`: `0.8365`
+    - overall macro ROC-AUC mean across folds `0-2`: `0.9528`
+  - later epochs often improved mixed-fold AUC while degrading the soundscape-only objective, so soundscape-aware checkpointing is clearly necessary
 - Core ideas:
   - `hgnetv2_b0.ssld_stage2_ft_in1k`
   - optional wav-cache for `train_audio`
@@ -175,8 +181,8 @@
 
 ### Execution Order
 
-1. Keep `exp_007` as the default native public baseline
-2. Run `exp_011_hgnetv2_soundscape_supervised` on fold `0`
-3. If the first fold is strong, expand `exp_011` to a full multi-fold supervised comparison branch
+1. Treat `exp_011 = 0.844` as the default native public baseline
+2. If we stay on the native branch, expand `exp_011` with fold `3` and/or a stronger inference recipe
+3. If we want the next major leap, prioritize a simplified reproduction of the `0.924` Perch ProtoSSM temporal branch
 4. `exp_010`: texture specialist branch
 5. native stacker and final ensemble

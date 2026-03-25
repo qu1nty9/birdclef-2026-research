@@ -39,7 +39,7 @@
   - `529` supervised soundscape clips
   - `66` source files
 
-## Fold 0 Ready State
+## Fold 0 Result
 
 - Train rows:
   - `26996`
@@ -51,16 +51,74 @@
   - `136`
 - Wav-cache rows:
   - `0`
+- Best epoch:
+  - `8 / 12`
+- Best checkpoint selection metric:
+  - soundscape-only macro ROC-AUC `0.8508523324`
+- Overall macro ROC-AUC at the selected epoch:
+  - `0.9555301905`
+- Overall scored classes:
+  - `220`
+- Soundscape-only scored classes:
+  - `42`
+- Best validation loss at the selected epoch:
+  - `0.0123390177`
 
 ## Practical Notes
 
-- The notebook passes a full setup execution in the project `.venv` with `RUN_TRAINING = False`.
-- The first run can proceed directly from `ogg` offset reads.
+- The notebook passed full setup validation in the project `.venv` before training.
+- Fold `0` completed directly from `ogg` offset reads on `mps`.
 - `train_audio` wav caching and soundscape clip wav export remain optional accelerators, not hard requirements.
+- The best checkpoint is not the last epoch.
+- Overall macro ROC-AUC keeps improving after epoch `8`, but soundscape-only ROC-AUC peaks at epoch `8` and then declines.
+- That confirms the branch needs soundscape-aware checkpoint selection.
+
+## Fold 1 Result
+
+- Best epoch:
+  - `4 / 12`
+- Best checkpoint selection metric:
+  - soundscape-only macro ROC-AUC `0.8042338925`
+- Overall macro ROC-AUC at the selected epoch:
+  - `0.9406223787`
+- Overall scored classes:
+  - `217`
+- Soundscape-only scored classes:
+  - `37`
+- Best validation loss at the selected epoch:
+  - `0.0152798412`
+
+## Fold 2 Result
+
+- Best epoch:
+  - `9 / 12`
+- Best checkpoint selection metric:
+  - soundscape-only macro ROC-AUC `0.8543629181`
+- Overall macro ROC-AUC at the selected epoch:
+  - `0.9622501589`
+- Overall scored classes:
+  - `224`
+- Soundscape-only scored classes:
+  - `52`
+- Best validation loss at the selected epoch:
+  - `0.0118059591`
+
+## Three-Fold Readout
+
+- Mean overall macro ROC-AUC across folds `0-2`:
+  - `0.9528009094`
+- Mean soundscape-only macro ROC-AUC across folds `0-2`:
+  - `0.8364830477`
+- Interpretation:
+  - fold `1` is lower, but the branch remains clearly strong
+  - fold `2` is broad and nearly matches fold `0`
+  - the branch is now stable enough for a first Kaggle test
 
 ## Next Step
 
-- Run fold `0` and record:
-  - best overall validation macro ROC-AUC
-  - best soundscape-only validation macro ROC-AUC
-  - runtime characteristics with and without wav-cache
+- First Kaggle submission completed.
+- Public leaderboard score: `0.844`
+- This beats the old native public best `exp_007 = 0.758` by `+0.086`.
+- Notebook: `notebooks/kaggle_submission_exp_011_hgnetv2_3fold.ipynb`
+- Dataset package: `submissions/kaggle_datasets/birdclef-exp011-hgnetv2-3fold`
+- Next decision: either scale `exp_011` further or move to the simplified `0.924` ProtoSSM branch.
