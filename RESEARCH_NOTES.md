@@ -1613,3 +1613,150 @@ What looks more leaderboard-specific or lower-priority for first reproduction:
 Research implication:
 - The strongest current external ceiling in this repo is no longer the older `0.899` Perch stack, but this `0.924` temporal downstream branch.
 - This suggests that, for the Perch direction, the next serious experiment should be a simplified `Perch embeddings + file-level temporal model` reproduction rather than another minor priors/probe tweak.
+
+## 2026-03-25 Exp_012 Perch Temporal Light Branch
+
+- Notebook created:
+  - `notebooks/exp_012_perch_temporal_light.ipynb`
+- Status:
+  - scaffolded and AST-clean
+  - first grouped OOF run still pending
+
+### Why This Branch Matters
+
+- `exp_011 = 0.844` has now proved that a strong native supervised branch can transfer to Kaggle.
+- But the new external ceiling is much higher:
+  - `0.924` from the Pantanal Distill / ProtoSSM Perch stack
+- That makes `exp_012` a very useful control experiment:
+  - not just "can we score higher?"
+  - but "how much extra structure do strong foundation embeddings expose once we model the whole file sequence?"
+
+### What Exp_012 Intentionally Keeps
+
+- cached `Perch v2` logits and embeddings from `data/perch_meta`
+- file-level `12 x 5s` sequence modeling instead of independent window stacking
+- in-model `site` and `hour` embeddings
+- a prototype head
+- per-class gated fusion between learned temporal logits and raw Perch logits
+
+### What Exp_012 Intentionally Drops For Now
+
+- residual second-pass SSM correction
+- long leaderboard-oriented postprocess chain
+- threshold sharpening
+- heavier ensemble logic
+
+### Research Value
+
+- If `exp_012` is strong locally, we get evidence that the next major gains are not just from better labels or stronger native supervision.
+- They are from better temporal modeling of a richer embedding space.
+- If `exp_012` underperforms `exp_011`, that is also a valuable result:
+  - it would suggest our supervised HGNet reformulation is already capturing much of the competition signal without the full external stack.
+
+### Immediate Next Step
+
+- Run `exp_011` fold `3` to create the first `4-fold` native submission candidate.
+- In parallel, run grouped OOF for `exp_012` and compare it first against:
+  - `exp_003` Perch downstream reproduction
+  - `exp_011` soundscape-only folds
+
+## 2026-03-25 Exp_012 First Grouped OOF Result
+
+- Raw Perch AUC on the cached fully labeled files:
+  - `0.7390`
+- `exp_012` grouped pooled OOF AUC:
+  - `0.6248`
+- Delta vs raw:
+  - `-0.1142`
+- Fold AUCs:
+  - fold `1`: `0.8337`
+  - fold `2`: `0.6862`
+  - fold `3`: `0.8705`
+- Fold mean:
+  - `0.7968`
+
+### Interpretation
+
+- This is a strong warning against trusting fold means in this branch.
+- The fold-level scores look decent, but the honest pooled OOF score is much worse and even drops below raw Perch.
+- So the current `ProtoTemporalLight` stack is not yet learning a useful file-level correction.
+
+### Most Likely Takeaway
+
+- The failure is probably not "Perch is bad".
+- It is more likely one of these:
+  - the current SSM/prototype/fusion stack is too ambitious for only `59` trusted files
+  - the grouped split by `site` is highly imbalanced, so the model overfits fold-specific structure
+  - the gated fusion is already hurting before the temporal branch has learned a stable representation
+
+### Research Implication
+
+- This is still a valuable result.
+- It tells us the simplified ProtoSSM direction should not be promoted as-is.
+- The next useful move is not Kaggle submission, but a cleaner ablation ladder:
+  - raw Perch
+  - simple MLP / probe on file sequences
+  - temporal model without prototype head
+  - temporal model without gated fusion
+
+## 2026-03-25 Exp_011 Fold 3 And 4-Fold Promotion
+
+- Fold `3` best epoch:
+  - `9 / 12`
+- Fold `3` overall macro ROC-AUC:
+  - `0.9662`
+- Fold `3` soundscape-only macro ROC-AUC:
+  - `0.7992`
+- Fold `3` soundscape-only scored classes:
+  - `39`
+
+### Interpretation
+
+- Fold `3` is weaker than folds `0` and `2`, but still fully consistent with the branch being strong.
+- More importantly, it reduces the risk that we are over-trusting an optimistic three-fold picture.
+- The four-fold summary is now:
+  - overall macro ROC-AUC mean: `0.9562`
+  - soundscape-only macro ROC-AUC mean: `0.8272`
+
+### Practical Outcome
+
+- `exp_011` is now promotion-ready for a second Kaggle test as a `4-fold` ensemble.
+- Submission assets prepared:
+  - `notebooks/kaggle_submission_exp_011_hgnetv2_4fold.ipynb`
+  - `submissions/kaggle_datasets/birdclef-exp011-hgnetv2-4fold`
+
+### Why This Matters Research-Wise
+
+- We now have a fuller answer to the native supervised hypothesis:
+  - strong transfer was real at `0.844`
+  - but the branch also has non-trivial fold variance on the soundscape-only metric
+- That makes the next Kaggle submission more scientifically meaningful than another local ablation:
+  - if `4-fold` improves, the gain is likely coming from a more stable ensemble estimate
+  - if it does not, that is a strong sign that the remaining gap is architectural, not just fold count
+
+## 2026-03-25 Exp_011 Second Kaggle Result (`4-fold`)
+
+- Public leaderboard score:
+  - `0.850`
+- Previous `3-fold` score:
+  - `0.844`
+- Delta from adding fold `3`:
+  - `+0.006`
+
+### Interpretation
+
+- This is a real and useful gain, so the fold-expansion idea was worth trying.
+- But the gain is small enough that it changes the strategic interpretation of the branch:
+  - `exp_011` is now a strong stabilized native baseline
+  - it is probably not hiding another big jump from "just one more fold" or another tiny inference tweak
+
+### Research Implication
+
+- We now have a much firmer native anchor for the whole project:
+  - repository-native public score `0.850`
+  - gap to reference blend `0.890`: `0.040`
+  - gap to external ProtoSSM ceiling `0.924`: `0.074`
+- This is exactly the point where the next experiment should become more explanatory, not just more incremental.
+- So the highest-value next step is no longer more HGNet bookkeeping.
+- It is the first grouped OOF run of `exp_012`, because that branch can answer a deeper question:
+  - does file-level temporal modeling over strong Perch embeddings unlock a qualitatively different source of gains than our native supervised path?

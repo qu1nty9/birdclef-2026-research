@@ -57,9 +57,15 @@
 - [x] Run `exp_011_hgnetv2_soundscape_supervised` on folds `1-2` before any Kaggle promotion
 - [x] Build a dedicated Kaggle submission notebook for `exp_011` if folds `1-2` confirm the fold `0` strength
 - [x] Run the first Kaggle submission for `exp_011` and compare it against `exp_007 = 0.758`
-- [ ] Decide whether to prioritize `exp_011` fold `3` / stronger inference or jump directly to the simplified `0.924` ProtoSSM branch
+- [x] Decide whether to prioritize `exp_011` fold `3` / stronger inference or jump directly to the simplified `0.924` ProtoSSM branch
 - [x] Analyze `pantanal-distill-birdclef2026-improvement-0.924.ipynb` and extract the genuinely new ideas beyond the older Perch notebooks
-- [ ] Prototype a simplified `Perch embeddings + file-level temporal model` branch inspired by the `0.924` ProtoSSM stack
+- [x] Prototype a simplified `Perch embeddings + file-level temporal model` branch inspired by the `0.924` ProtoSSM stack
+- [x] Run `exp_011_hgnetv2_soundscape_supervised` on fold `3` and select the checkpoint by soundscape-only ROC-AUC
+- [x] Build a `4-fold` Kaggle submission package for `exp_011`
+- [x] Run the second Kaggle submission for `exp_011` as a `4-fold` ensemble and compare it against the current `0.844` public baseline
+- [x] Run the first grouped OOF experiment for `exp_012_perch_temporal_light` on cached `perch_meta`
+- [ ] Compare `exp_011` 4-fold vs `exp_012` on Kaggle readiness, research value, and ensemble potential
+- [ ] Add a simpler `exp_012` ablation without the temporal/prototype stack to isolate whether the failure comes from grouping, gated fusion, or the SSM block itself
 - [ ] Test whether in-model `site/hour` metadata embeddings outperform our older post-hoc priors on the same trusted full-file subset
 - [ ] Prepare a dedicated `Amphibia/Insecta` specialist branch (`exp_010`) if the generic native branch still underperforms on texture-heavy classes
 

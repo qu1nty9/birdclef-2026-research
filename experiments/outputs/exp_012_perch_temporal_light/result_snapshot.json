@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp_012",
+  "experiment_name": "perch_temporal_light",
+  "n_splits": 3,
+  "raw_perch_auc": 0.7390178442294307,
+  "legacy_exp003_best_auc": null,
+  "oof_auc": 0.6247943480319937,
+  "delta_vs_raw": -0.11422349619743699,
+  "delta_vs_exp003": null,
+  "n_files": 59,
+  "n_sites": 8,
+  "model": {
+    "d_model": 192,
+    "d_state": 16,
+    "n_ssm_layers": 2,
+    "dropout": 0.15
+  },
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_012_perch_temporal_light"
+}

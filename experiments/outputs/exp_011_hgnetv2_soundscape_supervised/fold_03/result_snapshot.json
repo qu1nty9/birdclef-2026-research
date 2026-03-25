@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp_011",
+  "experiment_name": "hgnetv2_soundscape_supervised",
+  "fold": 3,
+  "best_epoch": 9,
+  "best_selection_metric": 0.799206367013475,
+  "best_macro_auc": 0.9662019378652492,
+  "best_soundscape_macro_auc": 0.799206367013475,
+  "scored_classes": 208,
+  "soundscape_scored_classes": 39,
+  "skipped_no_positive": 26,
+  "skipped_no_negative": 0,
+  "best_valid_loss": 0.011513754402357029,
+  "train_rows": 27124,
+  "valid_rows": 8954,
+  "train_soundscape_rows": 392,
+  "valid_soundscape_rows": 137,
+  "resume_mode": "fresh",
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_011_hgnetv2_soundscape_supervised/fold_03",
+  "model_name": "hgnetv2_b0.ssld_stage2_ft_in1k",
+  "device": "mps"
+}

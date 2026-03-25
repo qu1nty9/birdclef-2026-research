@@ -181,8 +181,12 @@
 
 ### Execution Order
 
-1. Treat `exp_011 = 0.844` as the default native public baseline
-2. If we stay on the native branch, expand `exp_011` with fold `3` and/or a stronger inference recipe
-3. If we want the next major leap, prioritize a simplified reproduction of the `0.924` Perch ProtoSSM temporal branch
-4. `exp_010`: texture specialist branch
-5. native stacker and final ensemble
+1. Treat `exp_011 = 0.850` as the default native public baseline
+2. Use the modest `4-fold` gain (`0.844 -> 0.850`) as evidence that `exp_011` is now stabilized rather than massively under-ensembled
+3. In parallel, run `exp_012` as a simplified `Perch + file-level temporal model` branch to test the strongest external research hypothesis directly
+4. Compare `exp_011` and `exp_012` on three axes:
+   - Kaggle score
+   - research value / explanatory power
+   - ensemble complementarity
+5. `exp_010`: texture specialist branch
+6. native stacker and final ensemble

@@ -114,6 +114,32 @@
   - fold `2` is broad and nearly matches fold `0`
   - the branch is now stable enough for a first Kaggle test
 
+## Fold 3 Result
+
+- Best epoch:
+  - `9 / 12`
+- Best checkpoint selection metric:
+  - soundscape-only macro ROC-AUC `0.7992063670`
+- Overall macro ROC-AUC at the selected epoch:
+  - `0.9662019379`
+- Overall scored classes:
+  - `208`
+- Soundscape-only scored classes:
+  - `39`
+- Best validation loss at the selected epoch:
+  - `0.0115137544`
+
+## Four-Fold Readout
+
+- Mean overall macro ROC-AUC across folds `0-3`:
+  - `0.9561511665`
+- Mean soundscape-only macro ROC-AUC across folds `0-3`:
+  - `0.8271638775`
+- Interpretation:
+  - fold `3` is weaker than folds `0` and `2`, but still strong enough to keep the branch credible
+  - the mean drops compared with the first three-fold summary, which is useful because it makes the branch estimate less optimistic before the second Kaggle test
+  - we now have the full four-fold checkpoint set, so the next submission can test stability rather than just additional modeling
+
 ## Next Step
 
 - First Kaggle submission completed.
@@ -121,4 +147,15 @@
 - This beats the old native public best `exp_007 = 0.758` by `+0.086`.
 - Notebook: `notebooks/kaggle_submission_exp_011_hgnetv2_3fold.ipynb`
 - Dataset package: `submissions/kaggle_datasets/birdclef-exp011-hgnetv2-3fold`
-- Next decision: either scale `exp_011` further or move to the simplified `0.924` ProtoSSM branch.
+- Second submission assets are now also prepared:
+  - notebook: `notebooks/kaggle_submission_exp_011_hgnetv2_4fold.ipynb`
+  - dataset package: `submissions/kaggle_datasets/birdclef-exp011-hgnetv2-4fold`
+- Second Kaggle submission completed.
+- Public leaderboard score (`4-fold`): `0.850`
+- Gain over the first `3-fold` Kaggle submission:
+  - `0.844 -> 0.850`
+  - delta `+0.006`
+- Interpretation:
+  - fold expansion was worthwhile
+  - but the gain is modest, so the branch now looks stabilized rather than massively under-ensembled
+- Next decision: compare the stabilized `exp_011` result against the simplified `exp_012` Perch temporal branch and decide whether an ensemble is justified.
