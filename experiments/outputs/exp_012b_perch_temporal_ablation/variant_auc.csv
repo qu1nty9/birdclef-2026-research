@@ -1,0 +1,5 @@
+variant,pooled_oof_auc
+raw_perch,0.7390178442294307
+pooled_mlp_rawfeat,0.6175990662654064
+ssm_linear_rawfeat,0.42856959104795816
+ssm_linear,0.3355242629477103

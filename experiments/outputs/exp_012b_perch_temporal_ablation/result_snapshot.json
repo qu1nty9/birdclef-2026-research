@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp_012b",
+  "experiment_name": "perch_temporal_ablation",
+  "n_splits": 3,
+  "raw_perch_auc": 0.7390178442294307,
+  "legacy_exp003_probe_auc": 0.8353024140080767,
+  "variant_auc": {
+    "raw_perch": 0.7390178442294307,
+    "pooled_mlp_rawfeat": 0.6175990662654064,
+    "ssm_linear": 0.3355242629477103,
+    "ssm_linear_rawfeat": 0.42856959104795816
+  },
+  "best_variant": "raw_perch",
+  "best_variant_auc": 0.7390178442294307,
+  "delta_best_vs_raw": 0.0,
+  "delta_best_vs_exp003": -0.09628456977864597,
+  "n_files": 59,
+  "n_sites": 8,
+  "model": {
+    "d_model": 192,
+    "raw_dim": 64,
+    "meta_dim": 16,
+    "d_state": 16,
+    "n_ssm_layers": 2,
+    "dropout": 0.15
+  },
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_012b_perch_temporal_ablation"
+}

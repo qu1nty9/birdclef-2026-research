@@ -1,0 +1,17 @@
+{
+  "teacher_folds": [
+    1,
+    2,
+    3
+  ],
+  "manifest_rows": 127104,
+  "manifest_files": 10592,
+  "pseudo_rows": 8724,
+  "pseudo_files": 3237,
+  "retain_rate": 0.06863670694864048,
+  "confidence_mean": 0.6357798278195111,
+  "confidence_p75": 0.737839937210083,
+  "pseudo_min_confidence": 0.45,
+  "max_pseudo_segments_per_file": 4,
+  "max_pseudo_segments_total": 12000
+}

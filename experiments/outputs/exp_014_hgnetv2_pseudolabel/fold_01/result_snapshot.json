@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp_014",
+  "experiment_name": "hgnetv2_pseudolabel",
+  "fold": 1,
+  "best_epoch": 1,
+  "best_selection_metric": 0.815386930462755,
+  "best_macro_auc": 0.961726974505694,
+  "best_soundscape_macro_auc": 0.815386930462755,
+  "train_rows_labeled": 27032,
+  "valid_rows": 9046,
+  "pseudo_rows": 22188,
+  "pseudo_files": 5646,
+  "teacher_folds": [
+    0,
+    2,
+    3
+  ],
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_014_hgnetv2_pseudolabel/fold_01",
+  "resume_mode": "init_from_exp011_fold"
+}

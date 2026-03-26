@@ -156,6 +156,47 @@
   - a stronger supervised local branch than the current EfficientNet-based native path
   - especially on soundscape-only validation readouts
 
+#### Follow-Up: Exp_014 HGNetV2 Pseudo-Label Continuation
+
+- Goal:
+  - test whether the stabilized `exp_011` branch can move beyond pure supervised training by adding target-domain pseudo labels from unlabeled `train_soundscapes`
+- Main experiment:
+  - `exp_014`: `HGNetV2-B0` student trained on:
+    - labeled `train_audio`
+    - labeled soundscape clips
+    - soft pseudo-labeled soundscape windows
+- Current status:
+  - notebook created: `notebooks/exp_014_hgnetv2_pseudolabel.ipynb`
+  - safe setup validated on fold `0`
+  - fold `0` teacher folds resolved to `[1, 2, 3]`
+  - fold `0` pseudo manifest already built with `127104` windows across `10592` files
+  - fold `0` pseudo generation retained `20688` windows across `5471` files
+  - fold `0` best soundscape-only macro ROC-AUC reached `0.8684`
+  - this beats `exp_011` fold `0` (`0.8509`) by `+0.0176`
+  - fold `1` pseudo generation retained `22188` windows across `5646` files
+  - fold `1` best soundscape-only macro ROC-AUC reached `0.8154`
+  - this beats `exp_011` fold `1` (`0.8042`) by `+0.0112`
+  - fold `2` pseudo generation retained `20211` windows across `5333` files
+  - fold `2` best soundscape-only macro ROC-AUC reached `0.8301`
+  - this loses to `exp_011` fold `2` (`0.8544`) by `-0.0243`
+  - fold `3` pseudo generation retained `20595` windows across `5293` files
+  - fold `3` best soundscape-only macro ROC-AUC reached `0.7702`
+  - this loses to `exp_011` fold `3` (`0.7992`) by `-0.0290`
+  - four-fold mean is now `0.8210`, below `exp_011` at `0.8272`
+- Follow-up rescue branch:
+  - `exp_014b`: stricter pseudo-label continuation with:
+    - higher confidence threshold
+    - smaller pseudo cache
+    - lower pseudo loss weight
+    - delayed pseudo start
+  - first fold result:
+    - soundscape-only macro ROC-AUC `0.8683`
+    - almost identical to `exp_014` fold `0`
+    - but with a much smaller pseudo cache (`8724` vs `20688`)
+- Success criterion:
+  - beat the local soundscape-aware validation picture of `exp_011`
+  - and justify a new Kaggle submission path beyond the current `0.850` native baseline
+
 ### Phase E. Texture Specialist Branch
 
 - Goal:
@@ -183,10 +224,13 @@
 
 1. Treat `exp_011 = 0.850` as the default native public baseline
 2. Use the modest `4-fold` gain (`0.844 -> 0.850`) as evidence that `exp_011` is now stabilized rather than massively under-ensembled
-3. In parallel, run `exp_012` as a simplified `Perch + file-level temporal model` branch to test the strongest external research hypothesis directly
-4. Compare `exp_011` and `exp_012` on three axes:
+3. Treat the current local Perch line as unresolved after `exp_012` and `exp_012b` both failed to beat raw Perch on pooled OOF
+4. Compare any future repaired Perch line against `exp_011` only after it first beats raw Perch locally
+5. Run `exp_014` as the next native modeling test on top of the stabilized `exp_011` branch
+6. In parallel, operationalize one faithful `0.924` external notebook as a separate high-ceiling submit path
+   - now prepared as `exp_015`
    - Kaggle score
    - research value / explanatory power
    - ensemble complementarity
-5. `exp_010`: texture specialist branch
-6. native stacker and final ensemble
+7. `exp_010`: texture specialist branch
+8. native stacker and final ensemble

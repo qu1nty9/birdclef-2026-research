@@ -66,6 +66,23 @@
 - [x] Run the first grouped OOF experiment for `exp_012_perch_temporal_light` on cached `perch_meta`
 - [ ] Compare `exp_011` 4-fold vs `exp_012` on Kaggle readiness, research value, and ensemble potential
 - [ ] Add a simpler `exp_012` ablation without the temporal/prototype stack to isolate whether the failure comes from grouping, gated fusion, or the SSM block itself
+- [x] Add a simpler `exp_012` ablation without the temporal/prototype stack to isolate whether the failure comes from grouping, gated fusion, or the SSM block itself
+- [x] Run the first grouped OOF comparison for `exp_012b_perch_temporal_ablation`
+- [ ] Decide whether the Perch local branch should be paused after `exp_012` and `exp_012b` both failed to beat raw Perch on pooled OOF
+- [x] Scaffold `exp_014_hgnetv2_pseudolabel` as the next native modeling branch on top of `exp_011`
+- [x] Run pseudo generation for `exp_014` fold `0` and inspect the retained confidence distribution before training
+- [x] Run the first full `exp_014` fold and compare it against `exp_011` on soundscape-aware validation
+- [x] Run `exp_014` fold `1` to test whether the first positive signal survives beyond one fold
+- [x] Run `exp_014` fold `2` to decide whether the branch is stable enough for a first Kaggle submission
+- [x] Run `exp_014` fold `3` to settle whether the branch is a real upgrade over `exp_011` or just a mixed continuation
+- [ ] Decide whether to revise `exp_014` with stricter early stopping / pseudo filtering or leave it as a negative control and move the main effort to the `0.924` external branch
+- [x] Scaffold `exp_014b_hgnetv2_pseudolabel_strict` as the conservative pseudo-label follow-up to `exp_014`
+- [x] Run pseudo generation for `exp_014b` fold `0` and inspect whether the stricter recipe produces a meaningfully cleaner cache
+- [x] Run the first full `exp_014b` fold and compare it against both `exp_014` and `exp_011`
+- [ ] Decide whether to run more `exp_014b` folds later or freeze it as a successful diagnostic branch and move on
+- [x] Choose one `0.924` reference notebook and operationalize it as a faithful submission path instead of another simplified local Perch rewrite
+- [ ] Run the first Kaggle submission for `exp_015_pantanal_proto_ssm_v17_submit_path`
+- [ ] Record runtime behavior and public LB for `exp_015`
 - [ ] Test whether in-model `site/hour` metadata embeddings outperform our older post-hoc priors on the same trusted full-file subset
 - [ ] Prepare a dedicated `Amphibia/Insecta` specialist branch (`exp_010`) if the generic native branch still underperforms on texture-heavy classes
 
@@ -117,4 +134,5 @@
 - [ ] Compare plain logits against logits plus file-context features (`prev`, `next`, `mean`, `max`) in a second-stage classifier
 - [ ] Evaluate OpenVINO or ONNX export once the native ensemble is strong enough to make CPU runtime a bottleneck
 - [ ] Reproduce the HGNetV2/OpenVINO CPU-safe submit path as a native inference engineering branch
+- [x] Verify whether the newly added `birdclef-2026-hgnetv2-b0-baseline-inference-0.859.ipynb` introduces any new inference logic beyond the already studied `0.856` HGNetV2 reference
 - [ ] Reproduce target-domain pseudo-labeling with overlapping `5s` windows, `2.5s` hop, temporal smoothing, and classwise quantile filtering in a notebook-only experiment

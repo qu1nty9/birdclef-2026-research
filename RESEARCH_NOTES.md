@@ -1699,6 +1699,61 @@ Research implication:
   - temporal model without prototype head
   - temporal model without gated fusion
 
+## 2026-03-25 Exp_012b Ablation Notebook
+
+- Notebook created:
+  - `notebooks/exp_012b_perch_temporal_ablation.ipynb`
+
+### Purpose
+
+- Turn the negative `exp_012` result into a precise diagnosis rather than abandoning the Perch direction entirely.
+- Compare four variants under the same grouped pooled OOF protocol:
+  - `raw_perch`
+  - `pooled_mlp_rawfeat`
+  - `ssm_linear`
+  - `ssm_linear_rawfeat`
+
+### Why This Is The Right Next Step
+
+- It removes the two highest-risk pieces from `exp_012`:
+  - prototype head
+  - gated fusion
+- That makes the next result much easier to interpret:
+  - if even `pooled_mlp_rawfeat` loses to raw Perch, the issue is probably the training protocol or grouped split
+  - if `pooled_mlp_rawfeat` helps but `ssm_*` hurts, the issue is the temporal block
+  - if `ssm_linear_rawfeat` wins, the Perch temporal path is still alive but needed a much simpler downstream head
+
+## 2026-03-25 Exp_012b First Grouped OOF Result
+
+- `raw_perch`: `0.7390`
+- `pooled_mlp_rawfeat`: `0.6176`
+- `ssm_linear`: `0.3355`
+- `ssm_linear_rawfeat`: `0.4286`
+- Best variant:
+  - still `raw_perch`
+
+### Interpretation
+
+- This is a very strong negative control.
+- The problem is not only the heavy prototype / gated-fusion stack from `exp_012`.
+- Even much simpler learned downstream variants still regress materially below raw Perch on honest pooled OOF.
+
+### What This Tells Us
+
+- On the current trusted `59` files and site-grouped split, the local Perch direction is not yet a stable upgrade path.
+- That could mean:
+  - the available trusted subset is too small for these learned downstream models
+  - the grouped split is so harsh that simple local training does not recover robust cross-site behavior
+  - the strong external `0.924` notebook owes a lot more to its full recipe than to any one simplified component we can peel off easily
+
+### Research Implication
+
+- This is actually a high-value result for the project.
+- We now have a clearer contrast:
+  - `exp_011` gives a stable, real Kaggle-positive native path (`0.850`)
+  - the current simplified Perch local branches (`exp_012`, `exp_012b`) are not yet competitive even with raw Perch on grouped pooled OOF
+- So the Perch line should be treated as a high-ceiling but currently unresolved research path, not as the immediate main optimization branch.
+
 ## 2026-03-25 Exp_011 Fold 3 And 4-Fold Promotion
 
 - Fold `3` best epoch:
@@ -1760,3 +1815,281 @@ Research implication:
 - So the highest-value next step is no longer more HGNet bookkeeping.
 - It is the first grouped OOF run of `exp_012`, because that branch can answer a deeper question:
   - does file-level temporal modeling over strong Perch embeddings unlock a qualitatively different source of gains than our native supervised path?
+
+## 2026-03-25 Exp_014 Setup Validation
+
+- New branch:
+  - `exp_014_hgnetv2_pseudolabel`
+- Notebook:
+  - `notebooks/exp_014_hgnetv2_pseudolabel.ipynb`
+- Parent branch:
+  - `exp_011`
+
+### Why This Branch Matters
+
+- `exp_009` already told us that pseudo-labeling can create strong local signals.
+- But it used the older EfficientNet-based native stack and transferred poorly to Kaggle.
+- `exp_014` is a cleaner scientific test:
+  - keep the strongest successful native supervised recipe
+  - change only the training signal by adding pseudo-labeled soundscape windows
+
+### Setup Readout
+
+- Fold validated:
+  - `0`
+- Teacher folds:
+  - `[1, 2, 3]`
+- Labeled rows:
+  - `36078`
+- Fold `0` train / valid rows:
+  - `26991 / 9087`
+- Fold `0` valid soundscape rows:
+  - `144`
+- Pseudo manifest rows / files:
+  - `127104 / 10592`
+
+### Research Implication
+
+- This is now the most informative next native modeling branch in the repository.
+- If `exp_014` improves over `exp_011`, we learn that the missing gain is in target-domain supervision rather than only architecture choice.
+- If it fails, that is equally useful:
+  - `exp_011` may already be close to saturating what this training family can extract from the available labels
+  - and the next large jump likely requires either a faithful `0.924` external stack or a genuinely different native architecture
+
+## 2026-03-26 Exp_014 Fold 0 First Readout
+
+- Pseudo generation summary:
+  - retained pseudo rows / files: `20688 / 5471`
+  - mean confidence: `0.5025`
+  - `p75` confidence: `0.6014`
+  - retain rate vs manifest: about `16.28%`
+
+### Training Result
+
+- Fold `0` best epoch:
+  - `5 / 8`
+- Best soundscape-only macro ROC-AUC:
+  - `0.8684479825`
+- Best overall macro ROC-AUC seen during the run:
+  - `0.9660572606`
+- Soundscape-scored classes:
+  - `46`
+
+### Interpretation
+
+- This is the strongest first-fold result we have seen from a native pseudo-label continuation.
+- It is also a cleaner comparison than `exp_009` because the parent branch is already leaderboard-positive and the validation protocol is aligned with `exp_011`.
+- Direct fold `0` comparison:
+  - `exp_011`: `0.8509`
+  - `exp_014`: `0.8684`
+  - delta: `+0.0176`
+
+### Research Implication
+
+- This is the first concrete sign that pseudo labels may help more when layered on top of a strong supervised soundscape-aware branch than when attached to the older EfficientNet recipe.
+- That makes `exp_014` one of the highest-value current experiments in the project.
+- But it is still only one fold, so the next scientific question is stability, not Kaggle score yet.
+
+## 2026-03-26 Exp_014 Fold 1 Update
+
+- Fold `1` best epoch:
+  - `1 / 8`
+- Best soundscape-only macro ROC-AUC:
+  - `0.8153869305`
+- `exp_011` fold `1` comparison:
+  - `0.8042338925`
+- Delta:
+  - `+0.0112`
+
+### Interpretation
+
+- This is a second positive fold for the HGNetV2 pseudo-label continuation.
+- The gain is smaller than on fold `0`, but it still survives the split change.
+- That matters more than the absolute number, because it means `exp_014` is no longer behaving like a one-fold anomaly.
+
+### Important Nuance
+
+- Fold `1` peaked immediately at epoch `1`.
+- Later epochs hovered just below the best value instead of collapsing, which suggests:
+  - the pseudo labels are still useful
+  - but this split may saturate much earlier than fold `0`
+- So if the same pattern repeats on fold `2`, early stopping may matter more than a longer cosine tail.
+
+## 2026-03-26 Exp_014 Fold 2 Update
+
+- Fold `2` best epoch:
+  - `6 / 8`
+- Best soundscape-only macro ROC-AUC:
+  - `0.8300901176`
+- `exp_011` fold `2` comparison:
+  - `0.8543629181`
+- Delta:
+  - `-0.0243`
+
+### Interpretation
+
+- This is the first fold where the pseudo-label continuation loses clearly to the supervised baseline.
+- That matters a lot because fold `2` was one of the strongest `exp_011` folds, so this is not just harmless noise around a weak split.
+
+### Research Implication
+
+- `exp_014` is now a genuinely mixed branch.
+- That is still useful:
+  - it suggests pseudo labels may help some grouped splits while hurting others
+  - which is exactly the kind of instability we would want to diagnose before any Kaggle promotion
+- The current three-fold summary is:
+  - `exp_014`: `0.8380`
+  - `exp_011`: `0.8365`
+  - mean delta: only `+0.0015`
+- So the next question is no longer “is pseudo-labeling promising at all?”
+- It is:
+  - “is this branch truly better after the last fold, or are we looking at a near-tie with higher variance?”
+
+## 2026-03-26 Exp_014 Fold 3 And Final Four-Fold Verdict
+
+- Fold `3` best soundscape-only macro ROC-AUC:
+  - `0.7702235931`
+- `exp_011` fold `3` comparison:
+  - `0.7992063670`
+- Delta:
+  - `-0.0290`
+
+### Four-Fold Summary
+
+- `exp_014` mean soundscape-only macro ROC-AUC:
+  - `0.8210`
+- `exp_011` mean soundscape-only macro ROC-AUC:
+  - `0.8272`
+- Mean delta:
+  - `-0.0061`
+
+### Final Interpretation
+
+- `exp_014` is not a real upgrade over the supervised HGNetV2 branch.
+- The branch is still valuable scientifically:
+  - it shows that pseudo-label continuation can improve some folds
+  - but it also shows that the same recipe can degrade the broader fold picture enough to lose on the full four-fold view
+- This is exactly the kind of result that saves wasted Kaggle attempts:
+  - without the four-fold readout, the first two folds could easily have led to an overconfident promotion
+
+## 2026-03-26 Exp_014b Setup
+
+- New branch:
+  - `exp_014b_hgnetv2_pseudolabel_strict`
+- Notebook:
+  - `notebooks/exp_014b_hgnetv2_pseudolabel_strict.ipynb`
+
+### Motivation
+
+- `exp_014` failed overall, but not in a way that kills the whole idea.
+- The most plausible failure mode is:
+  - too many medium-confidence pseudo rows
+  - too much pseudo influence
+  - pseudo supervision arriving too early
+
+### What Changes In `exp_014b`
+
+- `pseudo_min_confidence: 0.45`
+- `pseudo_loss_weight: 0.25`
+- `max_pseudo_segments_per_file: 4`
+- `max_pseudo_segments_total: 12000`
+- `pseudo_start_epoch: 2`
+- `epochs: 6`
+- `learning_rate: 2e-4`
+
+### Setup Readout
+
+- Safe setup validated on fold `0`
+- Same grouped supervised frame as `exp_014`
+- Same fold `0` pseudo manifest size:
+  - `127104` rows across `10592` files
+- Teacher folds:
+  - `[1, 2, 3]`
+
+### Research Implication
+
+- `exp_014b` is worth exactly because it is a narrow diagnostic branch.
+- If it helps, we learn that pseudo labels themselves were not the problem; the problem was how aggressively we used them.
+- If it still fails, that makes the case much stronger that this HGNetV2 pseudo-label direction should be paused in favor of the stronger external `0.924` line.
+
+## 2026-03-26 Exp_014b Fold 0
+
+- Best soundscape-only macro ROC-AUC:
+  - `0.8682576606`
+- `exp_014` fold `0` comparison:
+  - `0.8684479825`
+- Delta:
+  - `-0.00019`
+
+### Pseudo Cache Comparison
+
+- `exp_014` pseudo rows / files:
+  - `20688 / 5471`
+- `exp_014b` pseudo rows / files:
+  - `8724 / 3237`
+- `exp_014b` mean confidence / `p75`:
+  - `0.6358 / 0.7378`
+
+### Interpretation
+
+- This is a very strong diagnostic result.
+- The stricter recipe keeps essentially the same validation quality while using far fewer pseudo rows.
+- That strongly supports the idea that the instability of `exp_014` was caused by an overly aggressive pseudo recipe, not by the pseudo-label concept itself.
+
+## 2026-03-27 Exp_015 Submit-Path Operationalization
+
+- New notebook:
+  - `notebooks/kaggle_submission_exp_015_pantanal_proto_ssm_v17.ipynb`
+- Source reference:
+  - `references/private-notebooks/pantanal-distill-birdclef2026-improvement-0.924.ipynb`
+
+### What Was Done
+
+- The notebook was not reinterpreted as a local ablation.
+- Instead, it was ported as a faithful Kaggle submit path with only the following changes:
+  - dynamic TensorFlow 2.20 wheel discovery
+  - dynamic competition directory discovery
+  - dynamic `perch_v2_cpu` model discovery
+  - dynamic cached full-file Perch output discovery
+  - explicit failure in submit mode if the full-file cache is missing
+
+### Why This Matters
+
+- This is the first time the project has a real operational path for the strongest known external branch.
+- That is important because `exp_012` and `exp_012b` strongly suggested that simplified local Perch reproductions were not the right way to capture this ceiling.
+- `exp_015` therefore becomes the correct next Kaggle-facing test of the external high-ceiling hypothesis.
+
+## 2026-03-26 HGNetV2 Inference Notebook `0.859`
+
+- New file reviewed:
+  - `references/private-notebooks/birdclef-2026-hgnetv2-b0-baseline-inference-0.859.ipynb`
+- Compared against:
+  - `references/private-solutions/birdclef2026-score=0.856/birdclef-2026-hgnetv2-b0-baseline-inference.ipynb`
+
+### Main Finding
+
+- The two notebooks are operationally the same at the source-code level.
+- All cell sources match.
+- The difference is not in the inference algorithm itself.
+- So the reported `0.859` should not be interpreted as a new modeling or inference trick relative to the earlier `0.856` HGNetV2 solution.
+
+### What The Notebook Actually Does
+
+- Uses the same `HGNetV2-B0` model family and the same `4-fold` inference setup.
+- Builds `256 x 256` log-mel spectrograms from `5s` windows at `32 kHz`.
+- Converts trained fold checkpoints to OpenVINO IR and runs CPU async inference.
+- Supports either:
+  - plain probability averaging across folds
+  - optional rank averaging (`RANK_AVG = False` by default)
+- Reads one `60s` soundscape at a time, slices it into `12` non-overlapping `5s` windows, and predicts rows directly.
+
+### Why This Matters
+
+- This notebook does not introduce a new scientific direction.
+- Its value is engineering confirmation:
+  - the OpenVINO CPU-safe submit path is stable
+  - the simple non-overlapping `5s` inference recipe is competitive enough to reach around the same public-LB range as the original HGNetV2 baseline
+- For our roadmap, that means:
+  - no new experiment should be created just from this notebook
+  - the useful ideas were already extracted into the `exp_011` branch
+  - if we want to improve the HGNet line further, we should focus on training changes (`exp_014`) or later ensembling, not on re-copying this inference notebook
