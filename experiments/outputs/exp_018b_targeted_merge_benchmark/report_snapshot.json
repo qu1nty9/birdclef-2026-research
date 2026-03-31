@@ -1,0 +1,21 @@
+{
+  "experiment_id": "exp_018b",
+  "experiment_name": "targeted_merge_benchmark",
+  "target_taxa": [
+    "Amphibia",
+    "Insecta"
+  ],
+  "aligned_rows": 1017,
+  "aligned_soundscape_rows": 367,
+  "generic_target_macro_auc": 0.8486395858952078,
+  "generic_target_soundscape_macro_auc": 0.7217788066845731,
+  "specialist_target_macro_auc": 0.8903669960267262,
+  "specialist_target_soundscape_macro_auc": 0.7450348032837641,
+  "best_weight_target_only": 0.75,
+  "best_target_macro_auc": 0.8912630030597741,
+  "best_target_soundscape_macro_auc": 0.7464605658529007,
+  "overall_aligned_subset_baseline": 0.8382584690440658,
+  "best_overall_merge_weight_in_grid": 0.75,
+  "best_overall_aligned_subset_macro_auc": 0.8766195444921753,
+  "proxy_note": "Generic baseline is pooled exp_011 OOF; use this as a direction finder before any Kaggle overlay on exp_015d."
+}

@@ -64,11 +64,11 @@
 - [x] Build a `4-fold` Kaggle submission package for `exp_011`
 - [x] Run the second Kaggle submission for `exp_011` as a `4-fold` ensemble and compare it against the current `0.844` public baseline
 - [x] Run the first grouped OOF experiment for `exp_012_perch_temporal_light` on cached `perch_meta`
-- [ ] Compare `exp_011` 4-fold vs `exp_012` on Kaggle readiness, research value, and ensemble potential
+- [x] Compare `exp_011` 4-fold vs `exp_012` on Kaggle readiness, research value, and ensemble potential
 - [ ] Add a simpler `exp_012` ablation without the temporal/prototype stack to isolate whether the failure comes from grouping, gated fusion, or the SSM block itself
 - [x] Add a simpler `exp_012` ablation without the temporal/prototype stack to isolate whether the failure comes from grouping, gated fusion, or the SSM block itself
 - [x] Run the first grouped OOF comparison for `exp_012b_perch_temporal_ablation`
-- [ ] Decide whether the Perch local branch should be paused after `exp_012` and `exp_012b` both failed to beat raw Perch on pooled OOF
+- [x] Decide whether the Perch local branch should be paused after `exp_012` and `exp_012b` both failed to beat raw Perch on pooled OOF
 - [x] Scaffold `exp_014_hgnetv2_pseudolabel` as the next native modeling branch on top of `exp_011`
 - [x] Run pseudo generation for `exp_014` fold `0` and inspect the retained confidence distribution before training
 - [x] Run the first full `exp_014` fold and compare it against `exp_011` on soundscape-aware validation
@@ -81,8 +81,13 @@
 - [x] Run the first full `exp_014b` fold and compare it against both `exp_014` and `exp_011`
 - [ ] Decide whether to run more `exp_014b` folds later or freeze it as a successful diagnostic branch and move on
 - [x] Choose one `0.924` reference notebook and operationalize it as a faithful submission path instead of another simplified local Perch rewrite
-- [ ] Run the first Kaggle submission for `exp_015_pantanal_proto_ssm_v17_submit_path`
-- [ ] Record runtime behavior and public LB for `exp_015`
+- [x] Run the first Kaggle submission for `exp_015_pantanal_proto_ssm_v17_submit_path`
+- [x] Record runtime behavior and public LB for `exp_015`
+- [x] Compare `exp_015d = 0.929` against `exp_011 = 0.850` at the design level and choose runtime blending as the safest first ensemble path
+- [ ] Decide whether `exp_015` should fully replace `exp_001 = 0.890` as the external anchor in future blend experiments
+- [x] Scaffold a lightweight Kaggle blend notebook for `exp_015 + exp_011` that works from attached `submission.csv` outputs instead of rerunning both heavy model stacks
+- [x] Run the first Kaggle submission for `exp_016b_runtime_blend_exp015d_exp011`
+- [ ] Compare `0.95 / 0.05` against nearby blend weights like `0.97 / 0.03` and `0.92 / 0.08` only if we explicitly want one more low-priority complementarity check
 - [ ] Test whether in-model `site/hour` metadata embeddings outperform our older post-hoc priors on the same trusted full-file subset
 - [ ] Prepare a dedicated `Amphibia/Insecta` specialist branch (`exp_010`) if the generic native branch still underperforms on texture-heavy classes
 
@@ -135,4 +140,45 @@
 - [ ] Evaluate OpenVINO or ONNX export once the native ensemble is strong enough to make CPU runtime a bottleneck
 - [ ] Reproduce the HGNetV2/OpenVINO CPU-safe submit path as a native inference engineering branch
 - [x] Verify whether the newly added `birdclef-2026-hgnetv2-b0-baseline-inference-0.859.ipynb` introduces any new inference logic beyond the already studied `0.856` HGNetV2 reference
+- [ ] Port the active V18 changes from `pantanal-distill-birdclef2026-improvement-0.927.ipynb` on top of `exp_015`, starting with the larger ProtoSSM / residual configs, revised probe settings, adaptive delta smoothing, and updated fusion lambdas
+- [x] Create a separate high-risk V18 submit notebook on top of `exp_015` instead of mutating the stable `0.925` baseline
+- [x] Attempt the first Kaggle submission for `exp_015c_full_v18_submit_path`
+- [x] Run `exp_015c_v18_artifact_export` to save V18 downstream artifacts (`ProtoSSM`, probes, residual, priors, thresholds)
+- [x] Package the exported artifacts as a Kaggle dataset
+- [x] Run the first Kaggle submission for `kaggle_submission_exp_015d_v18_artifact_submit`
+- [x] Scaffold `exp_015e` as a calibration-first refinement with isotonic calibration artifacts and a thin calibrated submit path
+- [ ] Run `exp_015e_v18_calibrated_artifact_export`
+- [ ] Package the calibrated artifact dataset for Kaggle
+- [ ] Run the first Kaggle submission for `kaggle_submission_exp_015e_v18_calibrated_submit`
+- [x] Scaffold `exp_015f` as a thin calibration-refresh export on top of fixed `exp_015d` artifacts
+- [ ] Run `exp_015f_v18_calibration_refresh_export`
+- [x] Scaffold `kaggle_submission_exp_015f_v18_calibration_refresh_submit`
+- [ ] Package the refreshed artifact dataset for the `exp_015f` thin submit notebook
+- [ ] Run the first Kaggle submission for `kaggle_submission_exp_015f_v18_calibration_refresh_submit`
+- [ ] Decide whether to pause `exp_015f` after repeated timeout behavior despite a passing `exp_015g` smoke-submit
+- [x] Scaffold `exp_015g_smoke_submit` as a minimal Kaggle timeout diagnostic notebook
+- [x] Run `exp_015g_smoke_submit` in the exact same Kaggle settings that previously timed out
+- [x] Scaffold `exp_017_v18_error_report` as a pooled native error-analysis notebook
+- [x] Run `exp_017_v18_error_report` locally on pooled `exp_011` outputs
+- [ ] Attach a V18 artifact dataset to `exp_017_v18_error_report` and generate the optional external-path threshold/calibration crosswalk
+- [x] Scaffold `exp_018a_texture_specialist_oof` as the first `Amphibia + Insecta` specialist notebook on top of the `exp_011` training recipe
+- [x] Validate `exp_018a_texture_specialist_oof` locally in safe setup mode with `RUN_TRAINING=False`
+- [x] Run fold `0` training for `exp_018a_texture_specialist_oof`
+- [x] Compare `exp_018a` target soundscape macro AUC against the weak-taxa diagnostics from `exp_017`
+- [x] Run fold `1` training for `exp_018a_texture_specialist_oof`
+- [x] Run fold `2` training for `exp_018a_texture_specialist_oof`
+- [x] Run fold `3` training for `exp_018a_texture_specialist_oof`
+- [x] Decide whether to promote `exp_018a` into `exp_018b` as a packaged multi-fold specialist correction branch
+- [x] Design and run a local targeted merge benchmark that overwrites or blends only `Amphibia/Insecta` columns using pooled aligned OOF
+- [x] Decide whether to promote `exp_018b` into a Kaggle-facing targeted overlay on top of `exp_015d`
+- [x] If promoted, build a submit notebook that runs specialist inference only for `Amphibia/Insecta` columns and blends them into `exp_015d`
+- [ ] Run the first Kaggle submission for `kaggle_submission_exp_018c_exp015d_texture_overlay`
+- [ ] Sweep conservative overlay weights around the first `exp_018c` run, starting with `0.25 / 0.35 / 0.45`, only if the first submit is runtime-safe
+- [x] Review whether the newly added `luck-factor-0.928.ipynb` introduces a new top-priority path beyond the current `exp_015d` / V18 family
+- [x] Review whether `pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb` adds source-code novelty beyond `luck-factor-0.928.ipynb`
+- [x] Review `0-928-luck-factor-just-edit-run-instantly.ipynb`
+- [x] Review `bird26-reprod-perch-proto-residualssm-train-s7177.ipynb`
+- [x] Review `bird26-reproduce-perch-protossm-resssm-inf-train.ipynb`
+- [ ] Decide whether batched `temporal_shift_tta` from the second `bird26` notebook is worth porting into a controlled local benchmark
+- [x] Freeze the original `exp_016` as a historical scaffold and move the active blend plan to `exp_016b = exp_015d + exp_011`
 - [ ] Reproduce target-domain pseudo-labeling with overlapping `5s` windows, `2.5s` hop, temporal smoothing, and classwise quantile filtering in a notebook-only experiment

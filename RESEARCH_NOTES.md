@@ -2059,6 +2059,71 @@ Research implication:
 - That is important because `exp_012` and `exp_012b` strongly suggested that simplified local Perch reproductions were not the right way to capture this ceiling.
 - `exp_015` therefore becomes the correct next Kaggle-facing test of the external high-ceiling hypothesis.
 
+### First Kaggle Result
+
+- The first Kaggle submission for `exp_015` scored `0.925` on the public leaderboard.
+- This slightly exceeds the reported `0.924` reference score.
+- It also becomes the new best public result in the repository:
+  - vs `exp_001` reference blend: `+0.035`
+  - vs `exp_011` native four-fold HGNetV2: `+0.075`
+
+### Interpretation
+
+- This is a major positive result for the project.
+- It validates the decision to stop over-simplifying the external Perch / ProtoSSM family and instead operationalize one strong notebook faithfully.
+- In hindsight, `exp_012` and `exp_012b` were still very useful:
+  - they showed that light local reproductions were not enough
+  - but they did not mean the external ceiling itself was weak
+- So the current strategic split becomes much clearer:
+  - `exp_015` is now the main Kaggle-facing path
+  - `exp_011` remains the strongest repository-native branch
+  - the next high-value question is whether `exp_015` and `exp_011` are complementary enough to justify a blend or ensemble
+
+## 2026-03-27 Exp_016 Submission-Level Blend Scaffold
+
+- New notebook:
+  - `notebooks/kaggle_submission_exp_016_blend_exp015_exp011.ipynb`
+
+### What It Does
+
+- Takes one attached `submission.csv` from `exp_015`
+- Takes one attached `submission.csv` from `exp_011`
+- Aligns them against `sample_submission.csv`
+- Produces a weighted blend
+
+## 2026-03-29 Exp_016b Runtime Blend Refresh
+
+- New notebook:
+  - `notebooks/kaggle_submission_exp_016b_runtime_blend_exp015d_exp011.ipynb`
+
+### Why A New Blend Branch Was Needed
+
+- The original `exp_016` question remains valid, but its execution path became outdated after `exp_015d = 0.929`.
+- The old CSV-based approach was also too brittle because Kaggle-downloaded artifacts were not reliable for direct row-aligned blending.
+- `exp_016b` keeps the useful runtime `exp_011` inference block from the old work, but anchors it on the stronger artifactized V18 submit path.
+
+### Default Hypothesis
+
+- Start with a small native weight:
+  - `0.95 * exp_015d + 0.05 * exp_011`
+- If this helps, then the native branch still contributes diversity even after the external path reached `0.929`.
+
+### First Outcome
+
+- The first public run of `exp_016b` matched `exp_015d` exactly:
+  - `0.929`
+- So the simple runtime blend did not show useful public complementarity.
+- This is still a valuable result because it tells us the current strongest native branch is not adding obvious generic ensemble gain on top of the V18 external path.
+- Default first test:
+  - `0.90 * exp_015 + 0.10 * exp_011`
+
+### Why This Is The Right First Ensemble Test
+
+- It is much cheaper and safer than building a first dual-model runtime notebook.
+- It directly answers the complementarity question.
+- It keeps the first ensemble experiment focused on signal, not engineering complexity.
+- If this already helps, we can justify heavier ensemble work later.
+
 ## 2026-03-26 HGNetV2 Inference Notebook `0.859`
 
 - New file reviewed:
@@ -2093,3 +2158,353 @@ Research implication:
   - no new experiment should be created just from this notebook
   - the useful ideas were already extracted into the `exp_011` branch
   - if we want to improve the HGNet line further, we should focus on training changes (`exp_014`) or later ensembling, not on re-copying this inference notebook
+
+## 2026-03-28 Pantanal Distill ProtoSSM (`0.927`) Analysis
+
+- New file reviewed:
+  - `references/private-notebooks/pantanal-distill-birdclef2026-improvement-0.927.ipynb`
+- Compared against:
+  - `references/private-notebooks/pantanal-distill-birdclef2026-improvement-0.924.ipynb`
+  - operational project port:
+    - `notebooks/kaggle_submission_exp_015_pantanal_proto_ssm_v17.ipynb`
+
+### Main Finding
+
+- The `0.927` notebook is not a new modeling family.
+- It is a V18-style continuation of the same Pantanal / ProtoSSM submit path that we already ported as `exp_015`.
+- So the right interpretation is:
+  - `0.927` is an incremental upgrade opportunity over `exp_015`
+  - not a reason to abandon the current external line and start from scratch again
+
+### Changes That Look Real And Active
+
+- Larger first-pass ProtoSSM config:
+  - `d_model: 320`
+  - `n_ssm_layers: 4`
+  - `n_prototypes: 2`
+  - `meta_dim: 24`
+  - `cross_attn_heads: 8`
+- Updated train config:
+  - `n_epochs: 80`
+  - `lr: 8e-4`
+  - `patience: 20`
+  - stronger regularization / label smoothing / focal settings
+- Stronger residual SSM config:
+  - `d_model: 128`
+  - `correction_weight: 0.35`
+- Changed fusion coefficients:
+  - `lambda_event = 0.45`
+  - `lambda_texture = 1.1`
+  - `lambda_proxy_texture = 0.9`
+- Stronger probe defaults:
+  - larger `MLPClassifier`
+  - `pca_dim = 128`
+  - looser `min_pos`
+  - `alpha = 0.45`
+- Inference/postprocess changes that really appear in the final path:
+  - finer `threshold_grid`
+  - `tta_shifts = [0]` (so effectively TTA is removed)
+  - `rank_aware_power = 0.4`
+  - `delta_shift_alpha = 0.20`
+  - adaptive confidence-aware delta smoothing replaces the fixed delta smoother
+
+### Changes That Appear Defined But Not Actually Wired In
+
+- The notebook defines several new helpers, but they do not appear to be called later in the provided source:
+  - cosine restart scheduler
+  - `mixup_cutmix(...)`
+  - `species_focal_loss(...)`
+  - class-frequency weights via `CLASS_WEIGHTS`
+  - isotonic calibration + threshold optimizer helper
+  - ensemble-weight sweep helper
+- So these should not be over-interpreted as proven causal contributors to the `0.927` score unless we later verify they are used in a different companion training notebook or asset pipeline.
+
+### Practical Interpretation For The Project
+
+- `exp_015 = 0.925` remains the strongest operational path right now.
+- The `0.927` reference suggests that the next external improvement should be an incremental V18 upgrade on top of `exp_015`, not a wholesale rewrite.
+- The highest-signal next port would therefore be:
+  - keep the faithful `exp_015` engineering scaffold
+  - port only the active V18 changes first
+  - especially:
+    - larger ProtoSSM / residual configs
+    - updated probe config
+    - adaptive delta smoothing
+    - revised fusion lambdas
+    - lighter/no-TTA setting (`[0]`)
+- This is attractive because it has a realistic chance of improving score while avoiding unnecessary engineering risk from copying unused or unverified helper blocks.
+
+### exp_015c Timeout Interpretation And Artifactized Response
+
+- The first direct V18 submit attempt (`exp_015c_full_v18_submit_path`) hit Kaggle `Notebook Timeout` even after moving to `P100`.
+- This does not point to hidden-test inference alone as the main issue.
+- Inspection of the notebook shows that in submit mode it still performs heavy train-time work:
+  - builds OOF meta-features when not already cached in working dir
+  - trains the final `ProtoSSM`
+  - trains all classwise `MLP probes`
+  - may also train `ResidualSSM`
+- Therefore the correct next step is not more micro-optimizing of the same monolithic submit notebook, but splitting the path into:
+  - `exp_015c_v18_artifact_export.ipynb`
+  - `kaggle_submission_exp_015d_v18_artifact_submit.ipynb`
+- The export notebook saves the downstream artifacts once.
+- The thin submit notebook then loads those artifacts and performs only hidden-test inference plus postprocess.
+- This should preserve the V18 recipe much more faithfully while directly targeting the real timeout source.
+- This artifactized path is now confirmed:
+  - `kaggle_submission_exp_015d_v18_artifact_submit.ipynb`
+  - public LB: `0.929`
+  - relative gain over `exp_015`: `+0.004`
+- This is an important result because it shows the V18 stack itself was strong enough all along; the blocking issue was the monolithic submit engineering, not the modeling direction.
+- Practically, `exp_015d` now becomes the strongest overall Kaggle path in the repository.
+
+### exp_015e Calibration-First Follow-Up
+
+- The next low-risk refinement is now scaffolded as:
+  - `notebooks/exp_015e_v18_calibrated_artifact_export.ipynb`
+  - `notebooks/kaggle_submission_exp_015e_v18_calibrated_submit.ipynb`
+- This branch does not rewrite the working V18 recipe again.
+- Instead, it isolates one plausible remaining gain source from the `0.927` family:
+  per-class isotonic calibration plus calibrated threshold export.
+- The export notebook fits isotonic calibrators from OOF blended probabilities, then re-optimizes per-class thresholds on calibrated probabilities.
+- The submit notebook stays thin and only loads those calibrators as extra artifacts, applying them before the existing file-level scaling and threshold sharpening.
+- Research value:
+  this should tell us whether there is still residual quality left in calibration, as opposed to architecture or training changes.
+- Score value:
+  it is one of the cheapest remaining ways to test for a `0.930+` move without destabilizing the proven `0.929` artifactized path.
+
+### exp_015f Thin Calibration Refresh
+
+- After the timeout on the heavier `exp_015e` export path, a thinner refresh branch is now prepared:
+  - `notebooks/exp_015f_v18_calibration_refresh_export.ipynb`
+- This branch no longer retrains `ProtoSSM`, probes, or `ResidualSSM`.
+- Instead it loads the fixed `exp_015d` artifacts, replays that exact downstream stack on cached labeled soundscape rows, and updates only:
+  - isotonic calibrators
+  - calibrated per-class thresholds
+  - artifact manifests
+- This is less honest than full OOF calibration because it is an in-sample refresh.
+- But it is much cheaper, much less timeout-prone, and is still a useful causal test of whether calibration alone can move the already strong `0.929` path.
+
+### `luck-factor-0.928.ipynb` Analysis
+
+- The newly added reference [luck-factor-0.928.ipynb](/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/references/private-notebooks/luck-factor-0.928.ipynb) is not a new modeling family.
+- It is another monolithic `Perch -> ProtoSSM -> MLP probe -> ResidualSSM -> postprocess` notebook in the same V17/V18 lineage as the already studied `0.927` Pantanal notebook and our artifactized `exp_015d`.
+- Its active config is very close to the V18 recipe we already operationalized:
+  - larger `ProtoSSM` (`d_model=320`, `4` SSM layers, `2` prototypes, `meta_dim=24`, `8` attention heads)
+  - larger `ResidualSSM`
+  - updated fusion lambdas
+  - stronger probe config (`pca_dim=128`, `hidden_layer_sizes=(256, 128)`)
+  - `rank_aware_power=0.4`
+  - `delta_shift_alpha=0.20`
+  - V18 hardcoded per-class thresholds
+- It still keeps the old monolithic engineering style:
+  - explicit `DEVICE = torch.device("cpu")`
+  - no artifact split
+  - submit path still depends on in-notebook downstream training and wall-time guards
+- This makes it less attractive than `exp_015d` as an operational path even though the public score is strong (`0.928`).
+- Research interpretation:
+  - the notebook reinforces that the V18 ProtoSSM family is real and reproducible across multiple variants
+  - but it does not currently expose a clearly new causal ingredient beyond the already captured `exp_015d` stack
+  - so it should be treated as confirmatory evidence, not as a new top-priority port
+
+### `pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb` Analysis
+
+- The newly added [pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb](/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/references/private-notebooks/pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb) does **not** appear to introduce a new code path.
+- A direct notebook-source comparison shows:
+  - code-cell content is identical to [luck-factor-0.928.ipynb](/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/references/private-notebooks/luck-factor-0.928.ipynb)
+  - similarity versus `0.928`: `1.0000`
+  - similarity versus the older `0.927` Pantanal notebook: `0.9894`
+- So the `0.930` result should currently be interpreted as:
+  - the same V18-family monolithic notebook
+  - with a slightly better leaderboard outcome
+  - not as evidence for a genuinely new architectural or inference idea
+- Practical interpretation:
+  - this strengthens confidence that the V18 ProtoSSM family can live in the `0.928-0.930` range
+  - but it does **not** create a new porting priority beyond the already operationalized `exp_015d` / calibration-refresh line
+- Research interpretation:
+  - the score delta from `0.928` to `0.930` is more plausibly due to leaderboard variance, run context, or ancillary notebook state than to source-code novelty
+  - therefore it should be treated as additional confirmatory evidence for the same family, not as a separate breakthrough
+
+### `birdclef-2026-protossm-v5-time-optimised.ipynb` Runtime Interpretation
+
+- The saved notebook source does **not** support the claim that it is a `7s` end-to-end replacement for our current path.
+- The attached execution metadata shows:
+  - papermill duration: `610.918562s` (about `10.2` minutes)
+  - internal logged wall time near the end: `361.9s`
+- Those two numbers are already much closer to our current operational runtime than to `7s`.
+- The run saved inside the notebook is also not a true hidden-test submission replay:
+  - it explicitly prints `Hidden test not mounted. Dry-run on first 20 train soundscapes.`
+  - so the observed inference timing is not directly comparable to a scored hidden-test submit run
+- There are also structural reasons the notebook can look faster:
+  - smaller, older model family than `exp_015d` (`ProtoSSM` around `723,610` params in the saved run)
+  - default submit-time thresholds (`0.5`) instead of artifactized V18 thresholds
+  - monolithic path with simpler/older postprocess
+- Practical interpretation:
+  - it is not evidence of a magic engineering trick that makes our current `0.929` recipe obsolete
+  - it is better understood as a lighter, older, dry-run-observed monolithic notebook whose apparent speed is easy to over-read
+
+### `0-928-luck-factor-just-edit-run-instantly.ipynb`
+
+- This notebook is not a new branch.
+- Its code is an exact duplicate of:
+  - `/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/references/private-notebooks/luck-factor-0.928.ipynb`
+  - `/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/references/private-notebooks/pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb`
+- Exact code hash match:
+  - all three share the same code-cell MD5: `be9b3784195bcb6eee7e5519bc6ff432`
+- Interpretation:
+  - no new causal idea
+  - no new engineering scaffold
+  - just another renamed copy of the already studied monolithic V18 ProtoSSM family
+
+### `bird26-reprod-perch-proto-residualssm-train-s7177.ipynb`
+
+- This notebook is not a new modeling family.
+- It stays in the same `Perch -> MLP probe -> ProtoSSM -> ResidualSSM -> postprocess` family as the existing Pantanal / V18 notebooks.
+- Line-overlap comparison shows it is closer to the older `0.927` path than to our artifactized `exp_015d`:
+  - Jaccard vs `pantanal-distill-birdclef2026-improvement-0.927.ipynb`: about `0.915`
+  - Jaccard vs `luck-factor-0.928.ipynb`: about `0.902`
+  - Jaccard vs `kaggle_submission_exp_015d_v18_artifact_submit.ipynb`: about `0.540`
+- What is genuinely useful here:
+  - explicit reproducibility fixes for PyTorch init / augmentation / dropout
+  - a documented two-stage workflow:
+    - set `ProtoSSM_PATH = None`, `ProtoSSM_JSON = None`, `ResidualSSM_PATH = None`
+    - train locally first
+    - then reattach the notebook and skip training at inference time
+- This is conceptually aligned with our artifact split:
+  - local/offline downstream training
+  - thinner inference later
+- What it still does poorly:
+  - remains monolithic
+  - still mixes training and submission logic in one notebook via `MODE`
+  - still depends on manual path editing instead of a clean artifact dataset contract
+  - still writes raw `.pt` checkpoints rather than a robust packaged artifact schema
+
+### `bird26-reproduce-perch-protossm-resssm-inf-train.ipynb`
+
+- This notebook is effectively the paired inference/reuse version of `bird26-reprod-perch-proto-residualssm-train-s7177.ipynb`.
+- It directly hardcodes notebook-input paths back to the first notebook:
+  - `ProtoSSM_PATH = "/kaggle/input/notebooks/.../bird26-reprod-perch-proto-residualssm-train-s7177/..."`
+  - `ResidualSSM_PATH = "/kaggle/input/notebooks/.../bird26-reprod-perch-proto-residualssm-train-s7177/..."`
+- So it is not an independent recipe; it is a notebook-to-notebook reuse scaffold.
+- The only materially new engineering idea relative to the first `bird26` notebook is:
+  - a batched `temporal_shift_tta(..., max_batch_size=512)` implementation
+  - this replaces the slower one-pass-per-shift TTA loop
+- That TTA batching is the main reusable idea from this notebook.
+- The rest remains the same monolithic V18-family stack with `LightGBM`, `IsotonicRegression`, `mixup/cutmix`, `SWA`, `ResidualSSM`, and cached Perch arrays.
+- Practical interpretation:
+  - useful as corroboration that pretraining plus lighter inference is the right direction
+  - but still weaker than our cleaner `exp_015d` artifactized path as an engineering scaffold
+  - the only likely transplant candidate is the batched `temporal_shift_tta` idea, and only if we later need it in a controlled way
+
+### `exp_018a_texture_specialist_oof`
+
+- The first targeted specialist branch has now been scaffolded as:
+  - `/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/notebooks/exp_018a_texture_specialist_oof.ipynb`
+- Design choice:
+  - keep the strong native `exp_011` HGNetV2 recipe
+  - narrow the label space to the weakest texture-heavy taxa from `exp_017`
+  - start with `Amphibia + Insecta`
+- Local safe setup completed successfully without training.
+- Current target-only data footprint:
+  - `63` target classes
+  - `1017` total rows
+  - `650` isolated `train_audio` rows
+  - `367` merged `soundscape_clip` rows
+- Fold `0` setup snapshot:
+  - train rows: `748`
+  - valid rows: `269`
+  - train soundscape rows: `297`
+  - valid soundscape rows: `70`
+- Fold `0` training result:
+  - best epoch: `9`
+  - best target soundscape macro AUC: `0.8056`
+  - target soundscape scored classes: `27`
+- A direct same-taxa comparison against stored `exp_011` fold `0` soundscape predictions gives about:
+  - generic `exp_011`: `0.7934`
+  - specialist `exp_018a`: `0.8056`
+  - delta: `+0.0122`
+- Fold `1` training result:
+  - best epoch: `10`
+  - best target soundscape macro AUC: `0.8254`
+  - target soundscape scored classes: `25`
+- A direct same-taxa comparison against stored `exp_011` fold `1` soundscape predictions gives about:
+  - generic `exp_011`: `0.7720`
+  - specialist `exp_018a`: `0.8254`
+  - delta: `+0.0534`
+- Fold `2` training result:
+  - best epoch: `7`
+  - best target soundscape macro AUC: `0.7914`
+  - target soundscape scored classes: `18`
+- A direct same-taxa comparison against stored `exp_011` fold `2` soundscape predictions gives about:
+  - generic `exp_011`: `0.8293`
+  - specialist `exp_018a`: `0.7914`
+  - delta: `-0.0380`
+- Fold `3` training result:
+  - best epoch: `10`
+  - best target soundscape macro AUC: `0.8004`
+  - target soundscape scored classes: `33`
+- A direct same-taxa comparison against stored `exp_011` fold `3` soundscape predictions gives about:
+  - generic `exp_011`: `0.7548`
+  - specialist `exp_018a`: `0.8004`
+  - delta: `+0.0456`
+- Four-fold mean comparison:
+  - specialist `exp_018a`: `0.8057`
+  - same-taxa generic `exp_011`: `0.7874`
+  - delta: `+0.0183`
+- Research value:
+  - this is the first clean test of whether the native weakness highlighted by `exp_017` is concentrated enough to justify a specialist correction branch rather than another generic ensemble
+  - current status: modest but real positive signal; the next ensemble should be targeted by taxon, not global, and should be evaluated as a correction layer rather than as a full replacement model
+
+### `exp_018b_targeted_merge_benchmark`
+
+- This benchmark uses pooled aligned OOF from:
+  - generic `/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_011_hgnetv2_soundscape_supervised`
+  - specialist `/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_018a_texture_specialist_oof`
+- Alignment is exact on:
+  - `filename`
+  - `source`
+  - `clip_start_frame`
+  - `clip_end_frame`
+  - `primary_label`
+- Pooled aligned target rows:
+  - `1017`
+- Pooled aligned soundscape target rows:
+  - `367`
+- Baselines on the target classes:
+  - generic target macro AUC: `0.8486`
+  - generic target soundscape macro AUC: `0.7218`
+  - specialist target macro AUC: `0.8904`
+  - specialist target soundscape macro AUC: `0.7450`
+- Weight sweep result:
+  - the best target-only blend is not full overwrite
+  - best tested weight is `w_spec = 0.75`
+  - best target macro AUC: `0.8913`
+  - best target soundscape macro AUC: `0.7465`
+- On the aligned all-class subset, replacing only the target columns with the same `0.75` specialist blend lifts the local proxy macro AUC from:
+  - `0.8383` -> `0.8766`
+- Interpretation:
+  - the specialist branch is useful not only as a standalone target expert
+  - the stronger result is a soft targeted merge, not a hard overwrite
+  - this is now the strongest local justification for trying a later Kaggle overlay on top of `exp_015d`
+
+### `exp_018c_exp015d_texture_overlay`
+
+- This branch is the first Kaggle-facing attempt to turn the `exp_018a` specialist into a real correction layer on top of the strongest current submit path:
+  - base path: `notebooks/kaggle_submission_exp_015d_v18_artifact_submit.ipynb`
+  - overlay path: `notebooks/kaggle_submission_exp_018c_exp015d_texture_overlay.ipynb`
+- Engineering principle:
+  - keep the `exp_015d` V18 path unchanged for all non-target classes
+  - run the HGNetV2 texture specialist only for `Amphibia + Insecta`
+  - blend only those target columns into the final probability table
+- Packaged Kaggle specialist assets now exist in:
+  - `submissions/kaggle_datasets/birdclef-exp018a-texture-specialist-4fold`
+- The specialist dataset contains:
+  - `4` fold checkpoints
+  - `63` target classes
+  - `target_config.json` with the target label list
+- First planned Kaggle settings are intentionally conservative:
+  - `RUN_EXP018A_OVERLAY = True`
+  - `EXP018A_BLEND_WEIGHT = 0.35`
+  - `EXP018A_FOLD_IDS = (0, 1)`
+- Rationale:
+  - the local `exp_018b` optimum (`w_spec = 0.75`) was measured against pooled `exp_011`, not against the much stronger `exp_015d`
+  - the first public test should therefore protect both score and runtime
+  - if the overlay is positive and runtime-safe, weight can be increased later in a controlled sweep

@@ -1,0 +1,3 @@
+taxon,generic_target_macro_auc,specialist_target_macro_auc,best_merge_target_macro_auc,generic_target_soundscape_macro_auc,specialist_target_soundscape_macro_auc,best_merge_target_soundscape_macro_auc,scored_classes,soundscape_scored_classes
+Insecta,0.8664423603415392,0.9094442355997411,0.9105909864425241,0.7794045729769866,0.8157298851773789,0.8163104283904477,28,25
+Amphibia,0.8343973663381428,0.875105204368314,0.8758006163535741,0.6370350327251412,0.64107144755786,0.643740179768273,35,17

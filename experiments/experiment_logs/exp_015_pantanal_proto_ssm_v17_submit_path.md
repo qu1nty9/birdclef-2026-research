@@ -34,7 +34,10 @@ Change Introduced:
 Status:
 - notebook created
 - notebook AST-validated
-- not yet Kaggle-run
+- runtime fix applied: `CFG["full_cache_work_dir"]` is now created before cache writes
+- config fix applied: restored `probe_backend`, `mlp_params`, and safe `lgbm_params` for classwise probe stage
+- first Kaggle run completed
+- public LB: `0.925`
 
 Notebook:
 - `notebooks/kaggle_submission_exp_015_pantanal_proto_ssm_v17.ipynb`
@@ -63,7 +66,11 @@ Why This Branch Matters:
   - operationalize the high-ceiling notebook almost as-is
   - and only patch the engineering surfaces needed to make it portable in our Kaggle environment
 
+Result Interpretation:
+- The faithful operationalization worked.
+- `exp_015` became the best public path in the repository with `0.925`.
+- This slightly exceeds the reported `0.924` reference score and strongly validates the decision to preserve the external stack instead of simplifying it into another local Perch ablation.
+
 Next Step:
-- attach the required Kaggle datasets
-- run the notebook in submit mode
-- record runtime and public LB
+- compare `exp_015` against `exp_011` for blend / ensemble potential
+- keep `exp_015` as the default external Kaggle recipe until a stronger path appears

@@ -218,6 +218,52 @@
     - optional texture specialist branch
 - Success criterion:
   - public LB materially above the current native hybrid `0.737`
+
+### Phase G. Faithful External ProtoSSM Path
+
+- Goal:
+  - operationalize the strongest external `Perch + ProtoSSM + probe + residual SSM` notebook without prematurely simplifying away the components that make it competitive
+- Main experiment:
+  - `exp_015`: faithful Kaggle submit-path port of the Pantanal Distill / ProtoSSM `0.924` notebook
+- Current status:
+  - notebook created and engineering fixes applied
+  - first real Kaggle submission completed
+  - artifactized V18 continuation (`exp_015d`) now completed
+  - public LB improved to `0.929`
+  - this is now the best overall public result in the repository
+- Core ideas:
+  - frozen Perch foundation model
+  - file-level ProtoSSM temporal modeling
+  - in-model metadata handling
+  - MLP probe branch
+  - residual SSM correction
+  - strong leaderboard-oriented postprocess chain
+- Success criterion:
+  - confirm that the strongest external ceiling remains strong when ported faithfully into our own Kaggle environment
+- Current interpretation:
+  - achieved
+  - this branch is now the main Kaggle-facing path
+  - the next question is no longer whether the external stack works, but whether it complements `exp_011` well enough to justify a blend or ensemble
+
+### Phase H. Submission-Level Blend Check
+
+- Goal:
+  - test complementarity between the strongest overall path (`exp_015d = 0.929`) and the strongest repository-native path (`exp_011 = 0.850`) with minimal extra engineering risk
+- Main experiment:
+  - `exp_016`: historical CSV-blend scaffold for `exp_015 + exp_011`
+  - `exp_016b`: runtime blend on top of the artifactized V18 path plus `exp_011` 4-fold HGNet inference
+- Current status:
+  - historical notebook kept: `notebooks/kaggle_submission_exp_016_blend_exp015_exp011.ipynb`
+  - active notebook created: `notebooks/kaggle_submission_exp_016b_runtime_blend_exp015d_exp011.ipynb`
+  - default runtime blend: `0.95 * exp_015d + 0.05 * exp_011`
+  - first public run: `0.929`, exactly equal to `exp_015d`
+- Why this form:
+  - it tests complementarity directly against the current best public path
+  - it keeps the timeout-safe artifactized V18 route intact
+  - and it lets us probe whether the native branch still adds useful diversity despite the large raw score gap
+- Current interpretation:
+  - the first simple blend did not improve leaderboard score
+  - therefore plain `exp_015d + exp_011` ensembling is not currently a top-priority optimization path
   - ideally closes a meaningful part of the gap to the `0.890` reference blend
 
 ### Execution Order

@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp_017",
+  "experiment_name": "v18_error_report",
+  "rows_total": 36078,
+  "rows_soundscape": 529,
+  "rows_train_audio": 35549,
+  "macro_auc_all": 0.9467628378484564,
+  "macro_auc_soundscape": 0.7612174340954092,
+  "scored_classes_all": 234,
+  "scored_classes_soundscape": 75,
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_017_v18_error_report",
+  "v18_artifacts_found": false,
+  "v18_artifacts_dir": null,
+  "files": {
+    "classwise_auc": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_017_v18_error_report/exp011_classwise_auc.csv",
+    "weak_soundscape_classes": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_017_v18_error_report/exp011_weak_soundscape_classes.csv",
+    "taxon_summary": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_017_v18_error_report/exp011_taxon_summary.csv",
+    "site_macro_auc": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_017_v18_error_report/exp011_soundscape_site_macro_auc.csv",
+    "site_confidence": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_017_v18_error_report/exp011_soundscape_site_confidence.csv",
+    "hour_macro_auc": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_017_v18_error_report/exp011_soundscape_hour_macro_auc.csv",
+    "hour_confidence": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_017_v18_error_report/exp011_soundscape_hour_confidence.csv",
+    "v18_artifact_classwise_crosswalk": null,
+    "v18_artifact_summary": null
+  }
+}

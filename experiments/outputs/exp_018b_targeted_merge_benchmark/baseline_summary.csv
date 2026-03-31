@@ -1,0 +1,3 @@
+variant,target_macro_auc,target_soundscape_macro_auc,scored_classes,soundscape_scored_classes
+generic_exp011_target_only,0.8486395858952078,0.7217788066845731,63,42
+specialist_exp018a_target_only,0.8903669960267262,0.7450348032837641,63,42
