@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp_026b",
+  "experiment_name": "openvino_hgnet_benchmark",
+  "fold": 0,
+  "source": "train_soundscapes",
+  "n_files": 64,
+  "n_waves": 768,
+  "consistency": {
+    "eager_vs_traced": {
+      "max_abs_diff": 2.09808349609375e-05,
+      "mean_abs_diff": 4.1570419853087515e-06
+    }
+  },
+  "openvino": {
+    "enabled": false,
+    "missing_deps": [
+      "onnx",
+      "openvino"
+    ]
+  },
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_026b_openvino_hgnet_benchmark/fold_00",
+  "best_backend_rows": [
+    {
+      "backend": "torch_eager",
+      "threads": 8,
+      "mean_seconds": 45.75417427766661,
+      "rows_per_second": 16.78535373273852
+    },
+    {
+      "backend": "torchscript_trace",
+      "threads": 8,
+      "mean_seconds": 44.898462889335256,
+      "rows_per_second": 17.105262643243478
+    }
+  ]
+}

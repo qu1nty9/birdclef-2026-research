@@ -1,0 +1,32 @@
+# `exp_026a_torchscript_hgnet_benchmark`
+
+- Status:
+  - completed first local benchmark run
+- Goal:
+  - benchmark eager Torch vs `torch.jit.trace` / `optimize_for_inference` on our own local `exp_011` HGNetV2 checkpoint using fixed cached Mel batches
+- Outputs:
+  - `variant_results.csv`
+  - `report_snapshot.json`
+  - `consistency_checks.json`
+  - `mel_cache_summary.json`
+  - `mel_batch_rows.csv`
+- Current environment notes:
+  - local `.venv` already has `torch`, `timm`, `torchaudio`, and `soundfile`
+- Hardening notes:
+  - fixed the initial runtime ordering bug where `check_output_diff(...)` was called before definition
+  - notebook now saves consistency diagnostics immediately after eager-vs-traced comparison
+- Decision rule:
+  - if TorchScript gives a meaningful CPU gain on our own checkpoint with negligible output drift, it becomes the preferred first engineering step for any future native CPU-safe submit line
+- First run result:
+  - best eager Torch runtime:
+    - `45.845s` at `8` threads
+  - best TorchScript runtime:
+    - `44.941s` at `8` threads
+  - relative speedup:
+    - about `1.97%`
+  - per-thread result:
+    - TorchScript was consistently faster at `1 / 2 / 4 / 8` threads, but only modestly so
+- Interpretation:
+  - this is a real low-risk engineering gain
+  - but it is far too small to change the overall project direction on its own
+  - TorchScript should be treated as a nice native inference optimization, not as a new route around the current `0.929` public-score ceiling

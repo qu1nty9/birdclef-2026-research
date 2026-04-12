@@ -1,0 +1,23 @@
+{
+  "teacher_folds": [
+    1,
+    2,
+    3
+  ],
+  "manifest_rows": 127104,
+  "manifest_files": 10592,
+  "pseudo_rows": 4895,
+  "pseudo_files": 2310,
+  "retain_rate": 0.03851176988922457,
+  "confidence_mean": 0.6507785304147936,
+  "confidence_p75": 0.7889905571937561,
+  "agreement_mean": 0.9927136533878106,
+  "agreement_p75": 1.0,
+  "teacher_top_std_mean": 0.1003738966883437,
+  "pseudo_min_confidence": 0.4,
+  "pseudo_vote_threshold": 0.3,
+  "pseudo_min_teacher_votes": 2,
+  "pseudo_max_teacher_std": 0.18,
+  "max_pseudo_segments_per_file": 3,
+  "max_pseudo_segments_total": 8000
+}

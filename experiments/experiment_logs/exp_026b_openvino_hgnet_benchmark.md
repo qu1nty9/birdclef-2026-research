@@ -1,0 +1,34 @@
+# `exp_026b_openvino_hgnet_benchmark`
+
+- Status:
+  - completed first fallback-mode local run; still awaiting optional conversion/runtime dependencies for the OpenVINO-specific path
+- Goal:
+  - benchmark eager Torch, TorchScript, and optional ONNX/OpenVINO CPU inference on our own local `exp_011` HGNetV2 checkpoint using fixed cached Mel batches
+- Outputs:
+  - `variant_results.csv`
+  - `report_snapshot.json`
+  - `consistency_checks.json`
+  - `dependency_status.json`
+  - `mel_cache_summary.json`
+  - `mel_batch_rows.csv`
+- Current environment notes:
+  - local `.venv` currently lacks `onnx`, `onnxruntime`, and `openvino`
+  - because of that, first runs will still benchmark Torch and TorchScript, but will intentionally skip the OpenVINO export/compile/async section
+- Hardening notes:
+  - fixed the initial runtime ordering bug where `check_output_diff(...)` was called before definition
+  - notebook now persists `consistency_checks.json` both before and after any OpenVINO comparison updates
+- Decision rule:
+  - only consider an OpenVINO-native deployment branch if the benchmark shows a material speedup on our own checkpoint and the numerical drift versus eager Torch remains acceptably small
+- First run result:
+  - because local `.venv` still lacks `onnx`, `onnxruntime`, and `openvino`, the notebook correctly skipped the OpenVINO-specific branch
+  - the remaining eager Torch vs TorchScript timings closely matched `exp_026a`
+  - best eager Torch runtime:
+    - `45.754s` at `8` threads
+  - best TorchScript runtime:
+    - `44.898s` at `8` threads
+  - relative speedup:
+    - again about `1.87%`
+- Interpretation:
+  - this run validates the graceful fallback behavior and confirms that the small TorchScript gain is reproducible
+  - but it is not yet an OpenVINO benchmark in the substantive sense
+  - until we install the missing packages and measure real OpenVINO speed plus drift, this branch should remain low priority

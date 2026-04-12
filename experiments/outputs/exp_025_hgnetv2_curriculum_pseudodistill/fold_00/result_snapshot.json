@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp_025",
+  "experiment_name": "hgnetv2_curriculum_pseudodistill",
+  "fold": 0,
+  "best_epoch": 1,
+  "best_selection_metric": 0.8514555341003908,
+  "best_macro_auc": 0.9714980177882296,
+  "best_soundscape_macro_auc": 0.8514555341003908,
+  "train_rows_labeled": 26991,
+  "valid_rows": 9087,
+  "pseudo_rows": 4895,
+  "pseudo_rows_ranked": 4895,
+  "pseudo_files": 2310,
+  "teacher_folds": [
+    1,
+    2,
+    3
+  ],
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_025_hgnetv2_curriculum_pseudodistill/fold_00",
+  "resume_mode": "init_from_exp011_fold",
+  "pseudo_start_epoch": 4,
+  "pseudo_curriculum_ramp_epochs": 3
+}

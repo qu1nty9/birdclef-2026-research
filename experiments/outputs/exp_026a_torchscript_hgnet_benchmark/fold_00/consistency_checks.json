@@ -1,0 +1,6 @@
+{
+  "eager_vs_traced": {
+    "max_abs_diff": 2.09808349609375e-05,
+    "mean_abs_diff": 4.1570419853087515e-06
+  }
+}

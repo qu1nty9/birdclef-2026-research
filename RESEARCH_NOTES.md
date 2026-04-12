@@ -2394,6 +2394,62 @@ Research implication:
   - but still weaker than our cleaner `exp_015d` artifactized path as an engineering scaffold
   - the only likely transplant candidate is the batched `temporal_shift_tta` idea, and only if we later need it in a controlled way
 
+### `birdclef-26-protossm-v5-resboosting-0-927-lb.ipynb`
+
+- This notebook is not a new modeling family.
+- Code overlap places it between the older `0.927` Pantanal notebook and the later monolithic V18 line:
+  - Jaccard vs `pantanal-distill-birdclef2026-improvement-0.927.ipynb`: about `0.985`
+  - Jaccard vs `luck-factor-0.928.ipynb`: about `0.970`
+  - Jaccard vs `pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb`: about `0.970`
+- The active config is effectively V18-like:
+  - `ProtoSSM`: `d_model=320`, `4` SSM layers, `2` prototypes, `meta_dim=24`, `8` cross-attention heads
+  - `ResidualSSM`: `d_model=128`, `d_state=16`, `2` layers, `correction_weight=0.35`
+  - stronger probe config: `pca_dim=128`, `hidden_layer_sizes=(256, 128)`, `alpha=0.45`
+  - updated fusion lambdas and threshold grid
+  - more aggressive TTA shifts: `[0, 1, -1, 2, -2]`
+- But the engineering scaffold is still weaker than `exp_015d`:
+  - hardcoded `DEVICE = torch.device("cpu")`
+  - hardcoded full-cache input path
+  - no artifact split
+  - submit path still depends on in-notebook `ResidualSSM` training gated by wall time (`if _wall_min < 4.0`)
+- Several headline additions appear to be mostly unwired from the active path:
+  - `mixup_cutmix(...)` is defined but not called elsewhere
+  - `species_focal_loss(...)` is defined but not called elsewhere
+  - `get_cosine_restart_scheduler(...)` is defined but not called elsewhere
+  - isotonic threshold helper is defined, but submit mode still falls back to default `0.5` thresholds
+- Practical interpretation:
+  - this is confirmatory evidence for the same V18 ProtoSSM family
+  - it does **not** create a new top-priority port beyond `exp_015d`
+  - the only active distinctive difference worth remembering is the more aggressive multi-shift TTA, and even that should only be benchmarked in a controlled way
+
+### `birdclef-2026-improved-ensemble-0.929.ipynb`
+
+- This notebook also does **not** open a new modeling family.
+- Code overlap places it extremely close to the same monolithic V18 ProtoSSM line:
+  - Jaccard vs `birdclef-26-protossm-v5-resboosting-0-927-lb.ipynb`: about `0.980`
+  - Jaccard vs `pantanal-distill-birdclef2026-improvement-0.927.ipynb`: about `0.970`
+  - Jaccard vs `luck-factor-0.928.ipynb`: about `0.955`
+  - Jaccard vs `pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb`: about `0.955`
+- The active path is still V18-like:
+  - `ProtoSSM` upgrade to `d_model=320`, `4` SSM layers, `2` prototypes, `meta_dim=24`, `8` heads
+  - broader TTA shifts: `[0, 1, -1, 2, -2]`
+  - familiar post-processing stack with `rank_aware_power`, `delta_shift_alpha`, `file_level_top_k`, and per-class thresholds
+  - the notebook writes extra `LOGS["improvements"]` diagnostics and `/kaggle/working/logs.json`
+- Several headline ingredients still look mostly unwired from the final active path:
+  - `mixup_cutmix(...)` appears only in its definition cell
+  - `species_focal_loss(...)` appears only in its definition cell
+  - `get_cosine_restart_scheduler(...)` appears only in its definition cell
+  - isotonic / threshold helper code is defined, but submit remains monolithic and still hardcodes a `PER_CLASS_THRESHOLDS` stage late in the notebook
+- Engineering-wise it remains weaker than `exp_015d`:
+  - hardcoded `full_cache_input_dir`
+  - monolithic submit path with no artifact split
+  - `ResidualSSM` still trained inside the notebook behind a wall-time gate (`if _wall_min < 4.0`)
+  - CPU-oriented structure rather than a clean thin-submit design
+- Practical interpretation:
+  - this is another confirmation that the V18 ProtoSSM family is robust around the `0.927-0.930` range
+  - it does **not** create a new porting priority beyond `exp_015d`
+  - the only active idea worth remembering separately is the broader multi-shift TTA, and even that should be benchmarked in isolation rather than copied as a new monolith
+
 ### `exp_018a_texture_specialist_oof`
 
 - The first targeted specialist branch has now been scaffolded as:
@@ -2508,3 +2564,603 @@ Research implication:
   - the local `exp_018b` optimum (`w_spec = 0.75`) was measured against pooled `exp_011`, not against the much stronger `exp_015d`
   - the first public test should therefore protect both score and runtime
   - if the overlay is positive and runtime-safe, weight can be increased later in a controlled sweep
+
+### `exp_018d_exp015d_texture_overlay_guarded`
+
+- The first Kaggle-facing `exp_018c` overlay attempt timed out.
+- That is an important result by itself:
+  - even a relatively conservative two-fold HGNetV2 specialist branch is still expensive when added after the full `exp_015d` path in one code-competition notebook
+- The correct response is not to assume the idea failed.
+- Instead, the next branch is:
+  - `notebooks/kaggle_submission_exp_018d_exp015d_texture_overlay_guarded.ipynb`
+- Main safety changes:
+  - save a valid pure-`exp_015d` `submission.csv` before any specialist work
+  - use only the single strongest specialist fold (`1`)
+  - lower the first public specialist weight to `0.25`
+  - add start-wall and abort-wall guards around the overlay loop
+  - if the overlay overruns, keep the baseline submit rather than timing out blindly
+- Research value:
+  - if `exp_018d` completes and improves score, then the overlay idea is real and the original failure was mostly engineering/runtime
+  - if `exp_018d` still cannot complete or never runs the overlay within budget, then runtime HGNetV2 correction on top of `exp_015d` is probably the wrong deployment form, even if the local idea remains valid
+- First Kaggle result:
+  - `0.929`, exactly matching `exp_015d`
+- Interpretation:
+  - the guarded branch is already an engineering improvement over the original timeout in `exp_018c`
+  - but it does not provide immediate public-LB value
+  - without `exp_018d_texture_overlay_logs.json` we cannot cleanly distinguish “guarded skip to baseline” from “true neutral overlay”
+  - however, both outcomes point to the same practical decision: runtime overlay should move behind the stable `exp_015d` path in priority
+
+### `exp_018e_exp015d_texture_overlay_accel`
+
+- Notebook:
+  - `notebooks/kaggle_submission_exp_018e_exp015d_texture_overlay_accel.ipynb`
+- Motivation:
+  - `exp_018c` timed out
+  - `exp_018d` survived but gave no gain, and we never recovered the runtime log needed to separate:
+    - overlay skipped by guards
+    - overlay truly neutral
+  - later local benchmarks showed that TorchScript gives only a small HGNet CPU gain on our own checkpoint, but OpenVINO remains unmeasured on our own environment
+- Design:
+  - keep the strongest external `exp_015d` path untouched
+  - keep the same conservative single-fold specialist overlay shape from `exp_018d`
+  - upgrade only the specialist runtime stack:
+    - requested backend can be `auto`, `openvino`, `torchscript`, or `eager`
+    - `auto` tries `openvino -> torchscript -> eager`
+    - optional prebuilt OpenVINO IR files are reused if present inside the specialist dataset
+    - otherwise inline `ov.convert_model(...)` export is attempted
+  - write richer runtime logs:
+    - requested backend
+    - selected backend
+    - fallback errors
+    - IR file sources
+    - final overlay execution stats
+- Why this is still worth one try:
+  - among all runtime-blocked branches, the texture specialist overlay remains the strongest in research terms:
+    - positive `exp_018a` specialist signal
+    - positive `exp_018b` targeted merge benchmark
+  - this new notebook is the cleanest way to test whether the old no-gain result was partly an execution-form artifact
+- Important caution:
+  - local `exp_026a` showed only about a `2%` TorchScript gain on our own HGNet checkpoint
+  - therefore `exp_018e` only becomes meaningfully different from `exp_018d` if Kaggle can actually use the OpenVINO path or if the new logs prove that the previous overlay was mostly being skipped
+- First Kaggle result:
+  - public LB:
+    - `0.929`
+  - runtime setup:
+    - `requested_backend = auto`
+    - `selected_backend = torchscript`
+    - `openvino` fallback error:
+      - `ModuleNotFoundError: No module named 'openvino'`
+  - overlay execution:
+    - `active = true`
+    - `elapsed_seconds ≈ 18.89`
+    - `elapsed_before_overlay ≈ 348.43`
+  - snapshots:
+    - `submission_before_exp018a_overlay.csv` written
+    - `submission_after_exp018a_overlay.csv` written
+- Interpretation:
+  - this is the cleanest answer we have ever had for the runtime-texture branch
+  - the overlay really executed; it was not merely skipped by wall-time guards
+  - even under the accelerated TorchScript path, the current deployable single-fold overlay remained neutral on public LB
+  - that means the remaining limitation is no longer mainly runtime engineering
+  - instead, the current overlay form itself looks too weak or too poorly aligned to add public value on top of `exp_015d`
+
+### `exp_019_v18_postproc_ablation`
+
+- New notebook:
+  - `notebooks/exp_019_v18_postproc_ablation.ipynb`
+- Motivation:
+  - `exp_015h = 0.920` showed that the calibration-refresh submit line is not competitive enough
+  - `exp_018d = 0.929` showed that runtime texture overlay is not producing immediate public-LB value
+  - so the next best move is to keep the strong `exp_015d` model family fixed and test only cheap postprocess changes
+- Design:
+  - load the fixed `exp_015d` artifacts
+  - load cached trusted full-file Perch outputs
+  - replay the frozen V18 stack
+  - benchmark a small set of low-risk postprocess variants
+- Planned low-risk variant classes:
+  - remove threshold sharpening
+  - remove file-level scaling
+  - remove rank-aware scaling
+  - remove delta smoothing
+  - mild `top_k=3` file scaling
+  - mild `rank_power` changes (`0.35`, `0.45`)
+  - lighter `delta_alpha=0.10`
+  - mild Aves-only smoothing
+  - optional temporal-shift TTA variants
+- Important caveat:
+  - this notebook is a proxy benchmark on cached labeled rows, not a full honest OOF benchmark
+  - it should be used to rank cheap ideas before spending leaderboard attempts, not as final proof by itself
+- First run details:
+  - artifact dataset used: `exp_015c_v18_artifacts`
+  - calibrators present: no
+  - tested variants: `12`
+- Main proxy ranking:
+  - best row-level variant: `no_file_scale`
+    - row macro AUC `0.993906`
+    - baseline row macro AUC `0.993120`
+    - delta `+0.000786`
+  - second-best and cleaner variant: `no_rank_aware`
+    - row macro AUC `0.993606`
+    - file macro AUC unchanged versus baseline
+- Important nuance:
+  - `no_file_scale` improved row-level proxy AUC but hurt file-level proxy AUC
+  - this makes it a higher-risk public test despite being the top row-level proxy winner
+- Immediate practical takeaway:
+  - the safest next thin submit patch is `no_rank_aware`
+  - `no_file_scale` remains an optional higher-risk follow-up
+
+### `exp_019a_exp015d_no_rank_aware`
+
+- New notebook:
+  - `notebooks/kaggle_submission_exp_019a_exp015d_no_rank_aware.ipynb`
+- Motivation:
+  - direct public test of the safest cheap winner from `exp_019`
+- Design:
+  - keep the fixed `exp_015d` artifactized V18 stack unchanged
+  - override only:
+    - `CFG["rank_aware_scale"] = False`
+    - `CFG["rank_aware_power"] = 0.0`
+  - do this after artifact manifest load so the patch is explicit and independent of artifact defaults
+- Research value:
+  - if this helps, the current V18 path is likely slightly over-postprocessed
+  - if not, rank-aware scaling should stay part of the stable recipe
+- First public result:
+  - `exp_019a = 0.928`
+  - `exp_015d = 0.929`
+  - delta: `-0.001`
+- Interpretation:
+  - the proxy benchmark from `exp_019` was not predictive enough to justify removing rank-aware scaling
+  - rank-aware scaling should remain part of the stable `exp_015d` submit recipe
+
+### `exp_019b_exp015d_no_file_scale`
+
+- New notebook:
+  - `notebooks/kaggle_submission_exp_019b_exp015d_no_file_scale.ipynb`
+- Motivation:
+  - direct public test of the highest-upside but riskier proxy winner from `exp_019`
+- Design:
+  - keep the fixed `exp_015d` artifactized V18 stack unchanged
+  - override only:
+    - `CFG["file_level_top_k"] = 0`
+  - do this after artifact manifest load so the patch is explicit and independent of artifact defaults
+- Research value:
+  - if this helps, the current V18 path is likely over-postprocessed specifically at the file-level confidence scaling stage
+  - if not, then the strongest row-level proxy winner from `exp_019` should be treated as a misleading public signal and file-level scaling should remain part of the stable recipe
+- First public runtime status:
+  - first Kaggle attempt timed out
+  - second Kaggle attempt timed out
+- Interpretation:
+  - because the only change is a late `file_level_top_k = 0` override, the repeated timeout is still better interpreted as deployment fragility near the code-competition budget than as a direct model-side failure
+  - however, after two retries the practical conclusion is no longer “inconclusive”
+  - the branch should be considered operationally closed, and the cheap postprocess-deletion line should pause here
+
+### `exp_020a_texture_artifact_correction_oof`
+
+- New notebook:
+  - `notebooks/exp_020a_texture_artifact_correction_oof.ipynb`
+- Motivation:
+  - convert the positive local `exp_018a/018b` specialist signal into a deployable artifact form instead of another runtime overlay
+- Design:
+  - replay the fixed `exp_015d` V18 stack on cached trusted full rows
+  - keep the base scorer unchanged
+  - train lightweight per-class correction models only for `Amphibia + Insecta`
+  - choose a target-only correction blend weight by grouped OOF
+  - export reusable correction artifacts for a later thin submit notebook
+- Why this matters:
+  - it is the cleanest next test of the specialist hypothesis after `exp_018d = 0.929`
+  - unlike the failed runtime overlay path, it tries to spend almost all heavy compute offline
+  - if it works locally, it becomes the strongest next candidate for a deployable `0.930+` attempt beyond the stable `exp_015d` baseline
+- Run result:
+  - baseline overall row macro AUC: `0.993120`
+  - baseline overall file macro AUC: `0.992126`
+  - baseline target row macro AUC: `0.997988`
+  - baseline target file macro AUC: `0.998281`
+  - correction-only target row macro AUC: `0.482546`
+  - best blend weight: `0.00`
+  - trained target models: `36`
+  - skipped low-support labels: `6`
+- Weight sweep interpretation:
+  - every positive correction weight made the result worse
+  - both overall and target metrics degraded as correction weight increased
+  - the branch therefore failed as a thin-correction proxy in its current form
+- Classwise interpretation:
+  - only `1` trained target class improved at all
+  - `29` trained target classes got worse
+  - `6` were unchanged
+- Practical interpretation:
+  - this does **not** kill the broader specialist idea by itself
+  - but it does show that this exact proxy is misaligned with the earlier specialist signal
+  - the most likely reason is that trusted full-row replay is already too easy and too close to ceiling for the target taxa, so it does not recreate the real soundscape weakness seen in `exp_017` / `exp_018`
+  - therefore the current `exp_020a` output should **not** be promoted into a submit overlay
+  - if the artifactized correction idea is revisited later, it should be redesigned around soundscape-aware or grouped file-level targets instead of full-row macro AUC
+
+### `exp_020b_texture_soundscape_file_correction_oof`
+
+- New notebook:
+  - `notebooks/exp_020b_texture_soundscape_file_correction_oof.ipynb`
+- Motivation:
+  - `exp_020a` failed on a proxy that was already near-saturated for the target taxa
+  - the next correct test is therefore not another runtime specialist notebook, but a better-aligned thin correction benchmark
+- Design:
+  - keep the fixed `exp_015d` V18 stack unchanged
+  - keep the correction branch artifactized and lightweight
+  - switch the learning target from trusted full-row macro AUC to grouped soundscape file targets
+  - train target-only per-class `LogisticRegression` models on pooled per-file features
+  - evaluate candidate blend weights by grouped file-level macro AUC
+  - model the future deployable overlay as file-level target rescaling rather than a second full model inside submit mode
+- Feature strategy:
+  - per-file mean / max / top-k summaries of:
+    - raw Perch score
+    - prior score
+    - base fused score
+    - ProtoSSM score
+    - MLP score
+    - final V18 score
+    - baseline postprocessed probability
+  - pooled embedding summaries:
+    - file-level mean of `Z_FULL`
+    - file-level max of `Z_FULL`
+  - simple site / hour context features
+- Why this matters:
+  - this is the cleanest next test of whether the earlier specialist signal can be turned into a truly deployable thin overlay
+  - it directly targets the alignment problem exposed by `exp_020a`
+  - if it is still neutral, that will be much stronger evidence that the specialist-correction line belongs in the research bucket rather than the production path
+- Run result:
+  - baseline overall row macro AUC: `0.993120`
+  - baseline overall file macro AUC: `0.992126`
+  - baseline target row macro AUC: `0.997988`
+  - baseline target file macro AUC: `0.998281`
+  - correction-only target file macro AUC: `0.991418`
+  - best blend weight: `0.00`
+  - trained target models: `10`
+  - skipped low-support labels: `32`
+- Weight sweep interpretation:
+  - every positive correction weight made the result worse
+  - both overall and target file-level metrics degraded monotonically as correction weight increased
+  - so even the better-aligned grouped file proxy still did not validate the correction layer
+- Classwise interpretation:
+  - only `10` target classes had enough file-level support to train
+  - all `10` trained classes got worse
+  - `0` improved
+  - most `Insecta` labels were skipped entirely because the grouped file-level support was too low
+- Practical interpretation:
+  - this is a stronger negative control than `exp_020a`
+  - after fixing the proxy alignment problem, the deployable-form correction idea still failed
+  - that means the current `exp_020` line should be treated as closed in production form
+  - if the specialist idea is revisited later, it likely needs a materially different supervision source, broader target design, or a different correction mechanism instead of another thin `LogisticRegression` overlay on this proxy
+
+### `exp_021_v18_multishift_tta_benchmark`
+
+- New notebook:
+  - `notebooks/exp_021_v18_multishift_tta_benchmark.ipynb`
+- Motivation:
+  - after `exp_019` and `exp_020` closed, the only still-plausible low-risk idea repeatedly visible in the monolithic `0.927-0.930` references is broader temporal-shift TTA
+- Design:
+  - keep the fixed `exp_015d` V18 replay path
+  - keep the manifest postprocess unchanged
+  - compare only different `tta_shifts` sets
+  - record both quality and replay wall time so the result is interpretable in deployment terms
+- Tested shift families:
+  - manifest baseline
+  - `(0, 1)`
+  - `(0, 1, -1)`
+  - `(0, 2, -2)`
+  - `(0, 1, -1, 2, -2)`
+- Why this matters:
+  - this is the cheapest remaining controlled benchmark derived from the monolithic V18 references
+  - if it is neutral, we can close multi-shift TTA as another high-overlap reference detail that does not really move our artifactized path
+  - if it is positive without a large replay-time tax, it becomes the cleanest next thin patch to test publicly
+- Run result:
+  - baseline row macro AUC: `0.993120`
+  - baseline file macro AUC: `0.992126`
+  - best file-level variant: `(0, 1)`
+  - `(0, 1)` row macro AUC: `0.993041`
+  - `(0, 1)` file macro AUC: `0.992144`
+  - delta vs baseline:
+    - row: about `-0.000079`
+    - file: about `+0.000019`
+- Variant interpretation:
+  - `(0, 1)` was the only shift set with a visible positive file-level delta
+  - `(0, 1, -1)`, `(0, 2, -2)`, and `(0, 1, -1, 2, -2)` were neutral or slightly worse
+  - replay wall time increased with the number of shifts, but quality did not improve materially
+- Practical interpretation:
+  - this is not a convincing local win
+  - the repeated broader TTA idea from the monolithic references does not really transfer to the fixed `exp_015d` stack in a meaningful way
+  - if we want one last cheap public confirmation later, only the narrow `(0, 1)` variant is even remotely defensible
+  - otherwise the multi-shift TTA line can be considered effectively closed
+
+### `exp_022_hgnetv2_oof_pseudodistill_agreement`
+
+- New notebook:
+  - `notebooks/exp_022_hgnetv2_oof_pseudodistill_agreement.ipynb`
+- Motivation:
+  - `exp_019`, `exp_020`, and `exp_021` mostly closed the thin patch / overlay lines
+  - the strongest remaining native research direction is therefore no longer a tiny patch, but a cleaner second attempt at pseudo/distillation
+  - `exp_014` and `exp_014b` already showed that pseudo labels can help on top of strong `HGNetV2`, but the recipe was still unstable
+- Design:
+  - start from the strong `exp_011` grouped supervised base
+  - initialize from the matching `exp_011` fold checkpoint
+  - use OOF teachers from the other folds
+  - keep only pseudo windows that pass:
+    - minimum ensemble confidence
+    - minimum teacher vote count on the top class
+    - maximum teacher disagreement (`teacher_top_std`)
+  - apply a stronger probability power transform
+  - reduce pseudo dominance through smaller caps and softer pseudo weighting
+- Main recipe changes vs `exp_014b`:
+  - `pseudo_min_confidence = 0.40`
+  - `pseudo_power = 1.25`
+  - `pseudo_vote_threshold = 0.30`
+  - `pseudo_min_teacher_votes = 2`
+  - `pseudo_max_teacher_std = 0.18`
+  - `pseudo_loss_weight = 0.20`
+  - `pseudo_sampler_power = 1.5`
+  - `max_pseudo_segments_per_file = 3`
+  - `max_pseudo_segments_total = 8000`
+- New pseudo metadata:
+  - `teacher_vote_count`
+  - `teacher_vote_ratio`
+  - `teacher_top_std`
+  - `pseudo_rank_score`
+  - `pseudo_top_label`
+- Why this matters:
+  - this is now the strongest remaining native research branch with a real chance of saying something new
+  - if it works, we learn that pseudo-labeling was limited mainly by recipe aggressiveness
+  - if it still fails, the current HGNetV2 pseudo line becomes much easier to deprioritize with confidence
+- Fold `0` result:
+  - pseudo rows / files: `4895 / 2310`
+  - pseudo retain rate: `3.85%`
+  - confidence mean / p75: `0.6508 / 0.7890`
+  - teacher agreement mean: `0.9927`
+  - teacher top-std mean: `0.1004`
+  - best soundscape macro AUC: `0.851456`
+  - best epoch: `1`
+- Comparison:
+  - vs `exp_011` fold `0`: only about `+0.000603`
+  - vs `exp_014b` fold `0`: about `-0.016802`
+- Most important behavioral signal:
+  - epoch `1` was still `labeled_only`
+  - pseudo training started only at epoch `2`
+  - after pseudo activation, the soundscape metric declined and never recovered
+- Practical interpretation:
+  - this is a very useful causal result
+  - the pseudo cache quality is no longer the obvious problem
+  - instead, the current failure mode is that even a very clean pseudo cache still hurts once it is mixed into the strong supervised branch
+  - that points to the training schedule / integration strategy as the remaining bottleneck, not just pseudo noise
+  - therefore the exact `exp_022` recipe should **not** be continued to more folds
+  - if native pseudo is revisited later, it should be through a materially different schedule, such as later pseudo activation, much weaker pseudo weighting, or a two-stage fine-tuning design
+
+### `exp_015h_v18_timed_refresh_submit`
+
+- The user found `data/scripts/submissions-timer-script.ipynb` from Kaggle discussions.
+- Careful inspection shows that it is not a true timeout fix for code competitions.
+- What it actually does:
+  - polls Kaggle submissions externally via `kaggle competitions submissions -v ...`
+  - updates local CSV trackers for pending / finished submissions
+- This is useful as an external monitor, but not as an in-notebook runtime solution because:
+  - competition notebooks have internet disabled
+  - Kaggle CLI polling is outside the scoring runtime
+  - it does not change the notebook's internal wall-time behavior
+- The useful idea to keep is not the polling itself, but explicit time awareness.
+- That idea has now been ported into:
+  - `notebooks/kaggle_submission_exp_015h_v18_timed_refresh_submit.ipynb`
+- Main engineering changes in `exp_015h`:
+  - explicit wall-time budget config
+  - stage logging via `record_stage_event(...)`
+  - per-stage timer guards via `timer_allows(...)`
+  - optional early-safe `submission.csv` snapshots after each major postprocess step
+- Research value:
+  - if `exp_015h` still times out, we learn that the branch is fundamentally too heavy even with graceful degradation
+  - if it finishes but skips late stages, we learn exactly which stage is causing the timeout pressure
+- The first Kaggle run did still time out.
+- Combined with the passing `exp_015g_smoke_submit`, this now points to a more specific interpretation:
+  - the branch is still too heavy before the guarded late stages
+  - and forcing CPU in `exp_015h` likely makes the gap worse relative to the already working `exp_015d` baseline
+- One concrete engineering risk was also identified:
+  - the first revision wrote multiple full-size debug `submission*.csv` files by default
+  - that debug-heavy mode is now disabled by default because repeated full CSV writes are a plausible runtime tax near the Kaggle limit
+- A later Kaggle rerun did complete and scored `0.920`.
+- This is the most useful final interpretation of the branch:
+  - the runtime fixes were enough to let the notebook finish
+  - but the resulting calibration-refresh path is still weaker than `exp_015d = 0.929`
+  - therefore the `exp_015f/015h` line should stay closed as a negative result in both the engineering and leaderboard senses
+- Practical consequence:
+  - `exp_015h` should stay paused
+  - future effort is better spent on the stable `exp_015d` line and on targeted overlay branches rather than more timer-only rescue attempts here
+
+### `exp_023a_v18x_dmodel384_artifact_export`
+
+- New notebook:
+  - `notebooks/exp_023a_v18x_dmodel384_artifact_export.ipynb`
+- Motivation:
+  - `pantanal-distill-birdclef2026-v18x-dmodel-0.929.ipynb` turned out to be more interesting than the recent near-duplicate `0.927-0.930` monolithic references
+  - but careful comparison also showed that most of its active training recipe was already present in our `exp_015c` export scaffold
+  - the cleanest remaining active difference is the larger `ProtoSSM` width
+- Design:
+  - clone `exp_015c_v18_artifact_export.ipynb`
+  - keep the same artifactized export structure
+  - change `CFG["proto_ssm"]["d_model"]` from `320` to `384`
+  - widen `CFG["tta_shifts"]` from `[0]` to `[0, 1, -1, 2, -2]`
+  - write outputs under a dedicated artifact namespace:
+    - `exp_023a`
+    - `v18x_dmodel384_artifact_export`
+    - `exp_023a_v18x_dmodel384_artifacts`
+- Why this matters:
+  - this is a much cleaner causal test than porting another CPU-only monolithic submit notebook
+  - if it works, it tells us the main remaining upside in the `v18x` reference was probably model width rather than another postprocess detail
+  - if it fails, we can treat the larger-width `ProtoSSM` idea as mostly exhausted without spending public Kaggle attempts first
+- First run result:
+  - artifact export completed successfully
+  - saved files:
+    - `proto_ssm_state.pt`
+    - `sklearn_artifacts.pkl`
+    - `prior_tables.pkl`
+    - `per_class_thresholds.npy`
+    - `oof_meta_features.npz`
+    - `artifacts_manifest.json`
+    - `artifact_export_logs.json`
+  - `ProtoSSM` OOF macro AUC: `0.653477`
+  - downstream ensemble AUC: `0.961724`
+  - `mlp_only_auc`: `0.961724`
+  - selected `ensemble_weight`: `0.0`
+  - final train time: about `95.8s`
+  - OOF time: about `229.9s`
+  - parameter count: `8,110,842`
+  - residual branch skipped after about `9.24` minutes wall time
+- Interpretation:
+  - this is a strong negative local result for the simple `d_model=384` hypothesis
+  - the larger-width `ProtoSSM` did not provide useful enough signal for the downstream fusion to keep
+  - the operational path still worked, but the causal hypothesis failed
+  - therefore `exp_023a` should not be promoted into an `exp_023b` thin submit branch
+
+### `exp_024_geo_regime_ablation`
+
+- New notebook:
+  - `notebooks/exp_024_geo_regime_ablation.ipynb`
+- Motivation:
+  - the project already uses metadata deeply inside the strongest path:
+    - `site/hour/site-hour` prior tables
+    - in-model `site/hour` embeddings
+    - metadata-aware downstream fusion
+  - so a new standalone geo notebook would likely be redundant
+  - the cleaner remaining question is whether weak-regime geo signal still exists beyond the current `exp_015d` recipe
+- Design:
+  - start from the fixed-artifact replay scaffold in `exp_019`
+  - keep the entire `exp_015d` scorer unchanged
+  - test controlled weak-regime variants only in the final benchmark stage
+  - weak regimes are seeded from `exp_017`:
+    - sites: `S19`, `S08`, `S03`, `S13`, `S15`
+    - hours: `07`, `19`, `21`, `06`, `02`
+  - benchmark:
+    - weak-site geo boosts
+    - weak-hour geo boosts
+    - weak `site+hour` geo boosts
+    - taxon-aware boosts for `Amphibia` and `Insecta`
+    - optional cheap geo-only OOF `LogisticRegression` correction
+- Intended output:
+  - `variant_results.csv`
+  - `site_hour_report.csv`
+  - `taxon_geo_report.csv`
+  - `report_snapshot.json`
+- Why this matters:
+  - if all variants remain neutral, we get a strong causal answer that `exp_015d` has already extracted most useful geo signal
+  - if a weak-regime variant wins, it becomes a credible thin-patch candidate without introducing a new heavy submit path
+- First run result:
+  - baseline file macro AUC: `0.992126`
+  - best overall variant: `manifest_baseline`
+  - best weak-regime variant: `manifest_baseline`
+  - baseline weak `site+hour` file macro AUC: `0.995090`
+  - the closest targeted variants (`weak_site_insecta_w15`, `weak_hour_insecta_w15`) still dropped to `0.992002`
+- Geo-only LR correction summary:
+  - trained classes: `36`
+  - improved: `1`
+  - worsened: `28`
+  - neutral: `7`
+  - mean AUC delta: about `-0.08096`
+  - median AUC delta: about `-0.01738`
+  - severe failures included:
+    - `22961`: about `-0.772`
+    - `47158son01`: about `-0.548`
+    - `47158son03`: about `-0.266`
+- Interpretation:
+  - this is a strong negative result for the current geo-regime branch
+  - it suggests that the stable `exp_015d` path has already absorbed most of the useful deployable metadata signal
+  - therefore no thin public geo patch should be promoted from this line
+  - future work should move back toward new modeling / supervision branches rather than extra geo ablations
+
+### `exp_025_hgnetv2_curriculum_pseudodistill`
+
+- Notebook:
+  - `notebooks/exp_025_hgnetv2_curriculum_pseudodistill.ipynb`
+- Motivation:
+  - `exp_022` showed that the pseudo cache itself was already clean
+  - but the best epoch still stayed in the `labeled_only` phase
+  - once pseudo supervision switched on, the soundscape metric declined
+- Design:
+  - keep the same OOF-teacher pseudo generation recipe as `exp_022`
+  - sort retained pseudo rows by `pseudo_rank_score`
+  - delay pseudo start to `epoch 4`
+  - lower the final pseudo loss weight from `0.20` to `0.10`
+  - introduce pseudo through a curriculum:
+    - start from the top-ranked `20%` of retained pseudo rows
+    - ramp both pseudo weight and pseudo pool size over `3` epochs
+- Intended interpretation:
+  - if this branch beats the last `labeled_only` stage from `exp_022`, then the schedule was the real bottleneck
+  - if it still fails, that is much stronger evidence that the current native HGNet pseudo line is largely exhausted in this form
+- Fold `0` result:
+  - pseudo rows / files: `4895 / 2310`
+  - best epoch: `1`
+  - best soundscape macro AUC: `0.851456`
+  - best macro AUC: `0.971498`
+- Comparison:
+  - essentially unchanged versus `exp_022` fold `0` on the selection metric
+  - still only about `+0.000603` over the corresponding `exp_011` fold
+- Curriculum behavior:
+  - pseudo stayed off for epochs `1-3`
+  - once pseudo switched on at `epoch 4`, soundscape AUC dropped to:
+    - `0.838077`
+    - `0.840747`
+    - `0.838425`
+    - `0.843304`
+    - `0.842653`
+- Interpretation:
+  - this is a stronger negative result than `exp_022` alone
+  - the delayed curriculum still failed to make pseudo supervision helpful
+  - so the current native HGNet pseudo line now looks exhausted in this form
+  - future revisits should be bigger redesigns:
+    - two-stage fine-tuning
+    - offline distillation targets
+    - or a materially different target-domain pseudo construction
+
+### `exp_026a_torchscript_hgnet_benchmark` and `exp_026b_openvino_hgnet_benchmark`
+
+- Motivation:
+  - a forum benchmark reported that `torch.jit.trace` was slightly faster than eager Torch on CPU and OpenVINO was often around `~2x` faster on HGNetV2-like inference, with the caveat that OpenVINO outputs can drift slightly from Torch
+  - this is relevant only as an engineering question for our native branches, not as a direct explanation for the current `0.929` public-score ceiling of the V18/ProtoSSM family
+- Design:
+  - `exp_026a` benchmarks eager Torch vs `torch.jit.trace` / `optimize_for_inference` on our own local `exp_011` HGNetV2 checkpoint
+  - `exp_026b` extends the same setup to ONNX/OpenVINO export and CPU sync/async inference when the needed packages are present
+  - both notebooks first build a fixed Mel cache from the same selected soundscape files, then benchmark all backends on exactly the same input tensors
+  - both also save output-drift summaries so we can separate speed wins from numerical divergence
+- Hardening status:
+  - both notebooks initially had a runtime bug where `check_output_diff(...)` was called before the helper was defined
+  - that ordering issue has been fixed
+  - `exp_026b` now also persists `consistency_checks.json` after any OpenVINO comparison updates
+- Current environment state:
+  - local `.venv` already has:
+    - `torch`
+    - `timm`
+    - `torchaudio`
+    - `soundfile`
+  - local `.venv` still lacks:
+    - `onnx`
+    - `onnxruntime`
+    - `openvino`
+- Interpretation:
+  - `exp_026a` is ready for immediate first runs and is the safest low-risk engineering benchmark
+  - `exp_026b` is still useful right now, but only for the Torch-vs-TorchScript part until the missing conversion/runtime packages are installed
+  - if TorchScript already gives a meaningful gain on our own native checkpoint, it may be enough for future CPU-safe native submit work without taking on OpenVINO drift and packaging overhead
+- `exp_026a` first run:
+  - eager Torch best runtime:
+    - `45.845s` at `8` threads
+  - TorchScript best runtime:
+    - `44.941s` at `8` threads
+  - relative gain:
+    - about `1.97%` at the best setting
+  - per-thread pattern:
+    - `1` thread: traced faster by about `3.35%`
+    - `2` threads: traced faster by about `3.10%`
+    - `4` threads: traced faster by about `1.90%`
+    - `8` threads: traced faster by about `1.97%`
+- Interpretation of `exp_026a`:
+  - the gain is real and consistent, but modest
+  - this is useful as an engineering optimization, not as a new score source
+  - TorchScript alone does not look strong enough to justify reworking the current project around a native CPU-submit path
+- `exp_026b` first run:
+  - because `onnx`, `onnxruntime`, and `openvino` are still missing locally, the notebook stayed in its intended fallback mode
+  - the observed Torch/TorchScript timings closely matched `exp_026a`
+  - therefore the main value of this run is validation of the fallback harness, not a conclusion about OpenVINO itself
+- Practical consequence:
+  - `exp_026a` can be considered complete as a low-risk engineering benchmark
+  - `exp_026b` should only be pushed further if we later have a native branch that is genuinely worth CPU deployment work
+  - until then, OpenVINO remains a low-priority side branch rather than a main answer to the current `0.929` ceiling

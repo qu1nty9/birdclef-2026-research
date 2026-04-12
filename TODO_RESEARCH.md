@@ -158,6 +158,11 @@
 - [ ] Decide whether to pause `exp_015f` after repeated timeout behavior despite a passing `exp_015g` smoke-submit
 - [x] Scaffold `exp_015g_smoke_submit` as a minimal Kaggle timeout diagnostic notebook
 - [x] Run `exp_015g_smoke_submit` in the exact same Kaggle settings that previously timed out
+- [x] Scaffold `kaggle_submission_exp_015h_v18_timed_refresh_submit` as a timer-guarded variant of `exp_015f`
+- [x] Run the first Kaggle submission for `kaggle_submission_exp_015h_v18_timed_refresh_submit`
+- [x] Inspect `v18_timed_refresh_submit_logs.json` and snapshot artifacts to see which late stage was skipped or completed under Kaggle wall-time
+- [x] Pause `exp_015h` after the first Kaggle timeout because the branch still overruns even with timer guards and a passing `exp_015g` smoke-submit
+- [x] Record the later successful `exp_015h` rerun at `0.920` and keep the branch paused because it still underperforms `exp_015d = 0.929`
 - [x] Scaffold `exp_017_v18_error_report` as a pooled native error-analysis notebook
 - [x] Run `exp_017_v18_error_report` locally on pooled `exp_011` outputs
 - [ ] Attach a V18 artifact dataset to `exp_017_v18_error_report` and generate the optional external-path threshold/calibration crosswalk
@@ -174,11 +179,67 @@
 - [x] If promoted, build a submit notebook that runs specialist inference only for `Amphibia/Insecta` columns and blends them into `exp_015d`
 - [ ] Run the first Kaggle submission for `kaggle_submission_exp_018c_exp015d_texture_overlay`
 - [ ] Sweep conservative overlay weights around the first `exp_018c` run, starting with `0.25 / 0.35 / 0.45`, only if the first submit is runtime-safe
+- [x] Observe and record that the first `exp_018c` Kaggle-facing overlay attempt timed out
+- [x] Scaffold `kaggle_submission_exp_018d_exp015d_texture_overlay_guarded` as the timeout-safe follow-up
+- [x] Run the first Kaggle submission for `kaggle_submission_exp_018d_exp015d_texture_overlay_guarded`
+- [ ] Inspect `exp_018d_texture_overlay_logs.json` and snapshot CSVs to see whether the specialist branch actually ran or was skipped by the wall-time guards
+- [x] Record that the first public `exp_018d` result matched `exp_015d` exactly at `0.929`, so the guarded overlay produced no immediate leaderboard gain
+- [x] Scaffold `kaggle_submission_exp_018e_exp015d_texture_overlay_accel` as the acceleration-focused rescue branch for the strongest runtime-blocked specialist overlay idea
+- [x] Run the first Kaggle submission for `kaggle_submission_exp_018e_exp015d_texture_overlay_accel.ipynb`
+- [x] Inspect `exp_018e_texture_overlay_accel_logs.json` to see which backend actually ran: `openvino`, `torchscript`, or eager Torch
+- [x] Record that `exp_018e` still scored `0.929` even though the overlay genuinely executed under `torchscript`
+- [ ] If `exp_018e` still falls back away from OpenVINO, decide whether packaging prebuilt IR files into the specialist dataset is worth one more engineering attempt
 - [x] Review whether the newly added `luck-factor-0.928.ipynb` introduces a new top-priority path beyond the current `exp_015d` / V18 family
 - [x] Review whether `pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb` adds source-code novelty beyond `luck-factor-0.928.ipynb`
+- [x] Scaffold `exp_019_v18_postproc_ablation` as a low-risk V18 postprocess benchmark notebook
+- [x] Run `exp_019_v18_postproc_ablation.ipynb` against an attached V18 artifact dataset and full Perch cache
+- [x] Identify the first cheap `exp_019` candidates for public testing: `no_rank_aware` as the safer patch and `no_file_scale` as the higher-risk upside patch
+- [x] Build a thin public submit patch for the safest `exp_019` winner (`no_rank_aware`) on top of `exp_015d`
+- [x] Run the first Kaggle submission for `kaggle_submission_exp_019a_exp015d_no_rank_aware.ipynb`
+- [x] Record that `exp_019a` scored `0.928`, so disabling rank-aware scaling underperformed the stable `exp_015d = 0.929` recipe
+- [x] Scaffold the higher-risk thin public follow-up `kaggle_submission_exp_019b_exp015d_no_file_scale.ipynb`
+- [x] Record that the first public `exp_019b` attempt timed out and is currently runtime-inconclusive
+- [x] Retry `no_file_scale` once after the first timeout to distinguish runtime noise from a persistent deployment problem
+- [x] Record that the second public `exp_019b` attempt also timed out, and close the cheap `no_file_scale` submit line for now
+- [x] Scaffold `exp_020a_texture_artifact_correction_oof` as the next artifactized specialist branch on top of fixed `exp_015d` artifacts
+- [x] Run `exp_020a_texture_artifact_correction_oof.ipynb` against an attached `exp_015d` artifact dataset and full Perch cache
+- [x] Decide not to promote the current `exp_020a` output into a thin submit overlay because the best local blend weight stayed at `0.00`
+- [x] Redesign the texture-correction proxy around soundscape-aware grouped file-level targets as `exp_020b_texture_soundscape_file_correction_oof`
+- [x] Run `exp_020b_texture_soundscape_file_correction_oof.ipynb` against an attached `exp_015d` artifact dataset and full Perch cache
+- [x] Decide not to promote `exp_020b` into a thin file-level rescale overlay because the best local blend weight again stayed at `0.00`
+- [ ] If revisiting the specialist-correction idea later, change the supervision source or broaden the target design rather than repeating the current thin correction proxy
+- [x] Scaffold `exp_021_v18_multishift_tta_benchmark` as the next low-risk test from the monolithic V18 references
+- [x] Run `exp_021_v18_multishift_tta_benchmark.ipynb` against an attached `exp_015d` artifact dataset and full Perch cache
+- [x] Decide not to promote multi-shift TTA immediately because the best local file-level lift was tiny and came with a row-level drop
+- [ ] If we want one final cheap confirmation later, test only the narrow `(0,1)` TTA set as a single thin public patch; otherwise keep the multi-shift line closed
+- [x] Scaffold `exp_022_hgnetv2_oof_pseudodistill_agreement` as the next serious native pseudo/distillation branch
+- [x] Run `exp_022_hgnetv2_oof_pseudodistill_agreement.ipynb` on fold `0`
+- [x] Decide not to continue the current `exp_022` recipe to fold `1`, because the best epoch stayed `labeled_only` and pseudo activation hurt afterward
+- [ ] If we revisit native pseudo later, redesign the schedule itself instead of only filtering the pseudo cache more aggressively
+- [x] Scaffold `exp_023a_v18x_dmodel384_artifact_export` as the first focused heavy external branch after `exp_022` stalled
+- [x] Run `exp_023a_v18x_dmodel384_artifact_export.ipynb`
+- [x] Compare `exp_023a` against the current V18 artifact export baseline before deciding whether a matching thin submit branch is justified
+- [x] Decide not to promote `exp_023a` into `exp_023b`, because the larger `ProtoSSM` branch collapsed to `ensemble_weight = 0.0`
+- [x] Scaffold `exp_024_geo_regime_ablation` as the first explicit weak-regime geo benchmark on top of fixed `exp_015d` artifacts
+- [x] Run `exp_024_geo_regime_ablation.ipynb`
+- [x] Decide that no current geo-regime variant is strong enough to justify a thin public patch on top of `exp_015d`
 - [x] Review `0-928-luck-factor-just-edit-run-instantly.ipynb`
 - [x] Review `bird26-reprod-perch-proto-residualssm-train-s7177.ipynb`
 - [x] Review `bird26-reproduce-perch-protossm-resssm-inf-train.ipynb`
+- [x] Review `birdclef-26-protossm-v5-resboosting-0-927-lb.ipynb`
+- [x] Review `birdclef-2026-improved-ensemble-0.929.ipynb`
+- [x] Scaffold `exp_025_hgnetv2_curriculum_pseudodistill` as the schedule-first continuation of `exp_022`
+- [x] Run `exp_025_hgnetv2_curriculum_pseudodistill.ipynb` on fold `0`
+- [x] Compare `exp_025` fold `0` against both `exp_022` fold `0` and the corresponding `exp_011` fold before deciding whether the native pseudo line still has upside
+- [x] Decide not to continue the current `exp_025` recipe to more folds, because the best epoch again stayed in the labeled-only phase and pseudo activation still hurt afterward
+- [x] Scaffold `exp_026a_torchscript_hgnet_benchmark` as the first local benchmark for native HGNet CPU inference engineering
+- [x] Scaffold `exp_026b_openvino_hgnet_benchmark` as the optional ONNX/OpenVINO extension of the same benchmark
+- [x] Fix the initial helper-order runtime bug in both `exp_026a` and `exp_026b`
+- [x] Run `exp_026a_torchscript_hgnet_benchmark.ipynb` locally and compare eager Torch vs TorchScript on our own `exp_011` checkpoint
+- [x] Decide that TorchScript alone is not enough to justify a future native CPU-submit engineering branch right now, because the gain stayed modest at roughly `2%`
+- [x] Run `exp_026b_openvino_hgnet_benchmark.ipynb` in fallback mode and confirm that it reproduces the same Torch/TorchScript pattern when OpenVINO deps are absent
+- [ ] If a future native branch becomes CPU-runtime-bound, install or attach `onnx` / `onnxruntime` / `openvino` and rerun `exp_026b_openvino_hgnet_benchmark.ipynb` for a real OpenVINO measurement
+- [ ] Compare OpenVINO speedup against output drift before deciding whether an OpenVINO-native submit line is worth the packaging complexity
 - [ ] Decide whether batched `temporal_shift_tta` from the second `bird26` notebook is worth porting into a controlled local benchmark
 - [x] Freeze the original `exp_016` as a historical scaffold and move the active blend plan to `exp_016b = exp_015d + exp_011`
 - [ ] Reproduce target-domain pseudo-labeling with overlapping `5s` windows, `2.5s` hop, temporal smoothing, and classwise quantile filtering in a notebook-only experiment

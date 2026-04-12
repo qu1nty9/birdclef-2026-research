@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp_026a",
+  "experiment_name": "torchscript_hgnet_benchmark",
+  "fold": 0,
+  "source": "train_soundscapes",
+  "n_files": 64,
+  "n_waves": 768,
+  "best_torch_eager_seconds": 45.84536152799895,
+  "best_torchscript_seconds": 44.94131275000109,
+  "best_torchscript_speedup": 1.0201162076200776,
+  "consistency": {
+    "eager_vs_traced": {
+      "max_abs_diff": 2.09808349609375e-05,
+      "mean_abs_diff": 4.1570419853087515e-06
+    }
+  },
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_026a_torchscript_hgnet_benchmark/fold_00"
+}
