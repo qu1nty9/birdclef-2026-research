@@ -1,0 +1,25 @@
+# `exp_029b_exp015d_runtime_port`
+
+- Status:
+  - scaffolded
+- Goal:
+  - port only the strongest runtime optimizations from `bird26-reproduce-perch-protossm-resssm-inf-train.ipynb` into the fixed `exp_015d` submit scaffold without changing the V18 model stack itself
+- Notebook:
+  - `notebooks/kaggle_submission_exp_029b_exp015d_runtime_port.ipynb`
+- Baseline:
+  - `notebooks/kaggle_submission_exp_015d_v18_artifact_submit.ipynb`
+- Runtime changes included:
+  - optional ONNX Perch backend with graceful fallback to TensorFlow Perch
+  - asynchronous audio prefetch using `ThreadPoolExecutor`
+  - vectorized MLP probe inference
+  - batched temporal-shift TTA implementation
+  - explicit runtime diagnostics in `/kaggle/working/v18_runtime_port_submit_logs.json`
+- Inputs:
+  - same inputs as `exp_015d`
+  - optional extra ONNX Perch dataset or model path resolvable via `PERCH_ONNX_HINT`
+- Important note:
+  - this notebook is intentionally a runtime rescue branch, not a new model branch
+  - if it helps, the expected win is deployment headroom and timeout safety, not direct score gain from new supervision
+- Decision rule:
+  - if it preserves the baseline score while materially improving runtime or timeout robustness, it is a useful engineering promotion
+  - if score drops or ONNX drift changes the downstream behavior too much, keep `exp_015d` as the safer production path

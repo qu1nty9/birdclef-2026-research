@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp_031",
+  "experiment_name": "overlap_aware_soundscape_supervision",
+  "fold": 0,
+  "best_epoch": 2,
+  "best_selection_metric": 0.9611732971023959,
+  "best_macro_auc": 0.9611732971023959,
+  "best_soundscape_macro_auc": 0.9611732971023959,
+  "scored_classes": 43,
+  "soundscape_scored_classes": 43,
+  "best_valid_loss": 0.24321282451803033,
+  "train_rows": 1035,
+  "valid_rows": 168,
+  "resume_mode": "init_from_exp011_fold",
+  "teacher_dir": "/Users/yaroslav/Downloads/exp_027a_exp015d_teacher_cache",
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_031_overlap_aware_soundscape_supervision/fold_00",
+  "model_name": "hgnetv2_b0.ssld_stage2_ft_in1k",
+  "distill_weight": 0.25,
+  "device": "mps",
+  "train_base_rows": 540,
+  "train_overlap_rows": 495,
+  "valid_base_rows": 168
+}

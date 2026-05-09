@@ -1,0 +1,53 @@
+# `exp_032_top_solution_delta_audit`
+
+- Status:
+  - completed_local_audit
+- Goal:
+  - audit the strongest local `0.928-0.940` reference notebooks and separate genuinely new model families from code-near variants of the current V18 / ProtoSSM line before starting another research branch
+- Inputs:
+  - `references/private-notebooks/`
+  - current production scaffold:
+    - `notebooks/kaggle_submission_exp_029c_exp015d_onnx_first_runtime_port.ipynb`
+- Files reviewed most closely:
+  - `references/private-notebooks/bird26-reproduce-perch-protossm-resssm-inf-train.ipynb`
+  - `references/private-notebooks/birdclef-2026-improved-ensemble-0.929.ipynb`
+  - `references/private-notebooks/birdclef-26-protossm-v5-resboosting-0-927-lb.ipynb`
+  - `references/private-notebooks/luck-factor-0.928.ipynb`
+  - `references/private-notebooks/pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb`
+  - `references/private-notebooks/pantanal-distill-birdclef2026-v18x-dmodel-0.929.ipynb`
+  - `references/private-notebooks/birdclef-2026-smart-audio-bird-detector.ipynb`
+  - `references/private-notebooks/birdclef-2026-perch-v2-0.907.ipynb`
+  - `references/private-notebooks/perch-v2embedprobe-bayesian-0-912.ipynb`
+- Quick audit method:
+  - compare code-token overlap against `bird26-reproduce-perch-protossm-resssm-inf-train.ipynb`
+  - inspect whether the active inference / training path still revolves around:
+    - Perch logits and embeddings
+    - `ProtoSSM`
+    - `ResidualSSM`
+    - V18-style priors / probe / postprocess layers
+- Main result:
+  - the apparent top-reference cluster is still overwhelmingly one family:
+    - `birdclef-2026-improved-ensemble-0.929.ipynb`: overlap `0.884`
+    - `birdclef-26-protossm-v5-resboosting-0-927-lb.ipynb`: overlap `0.891`
+    - `luck-factor-0.928.ipynb`: overlap `0.888`
+    - `pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb`: overlap `0.888`
+  - `pantanal-distill-birdclef2026-v18x-dmodel-0.929.ipynb` is only moderately different (`0.543`) but still the same fundamental family, and the main new idea there, larger-width `ProtoSSM`, already failed in `exp_023a`
+  - the only clearly distinct local families are:
+    - `birdclef-2026-smart-audio-bird-detector.ipynb`
+      - overlap only `0.068`
+      - timm / EfficientNet-style acoustic backbone with attention head and checkpoint blending
+      - no meaningful `ProtoSSM` / `ResidualSSM` stack
+    - `birdclef-2026-perch-v2-0.907.ipynb`
+      - overlap `0.235`
+      - frozen Perch + priors + PCA + per-class logistic probe family
+    - `perch-v2embedprobe-bayesian-0-912.ipynb`
+      - overlap `0.249`
+      - same broad Perch-probe family with richer probe features
+- Interpretation:
+  - most local top-looking notebooks do **not** provide a new score direction; they mostly repeat the family already operationalized in `exp_015d` and now engineered more safely in `exp_029c`
+  - the most promising next truly new scouting candidate is the `smart-audio-bird-detector` family because it is the most structurally different from the current Perch + ProtoSSM recipe
+  - the Perch-probe pair is also distinct, but it is closer to the ideas we have already partially absorbed into our current stack
+- Next decision:
+  - keep `exp_029c` as the production scaffold
+  - do not spend more effort on another V18-family port unless it contains a clearly new signal
+  - if we open one new score-oriented branch, it should be a small local benchmark around the `smart-audio-bird-detector` family

@@ -1,0 +1,16 @@
+{
+  "rows": 708,
+  "files": 59,
+  "variants": [
+    "finetuned_only",
+    "baseline_only",
+    "prob_ft80_base20",
+    "prob_ft70_base30",
+    "prob_ft50_base50",
+    "logit_ft80_base20",
+    "logit_ft70_base30",
+    "logit_ft50_base50"
+  ],
+  "audio_workers": 4,
+  "use_fp16": false
+}

@@ -1,0 +1,21 @@
+# `exp_027c_exp015d_native_student_blend_benchmark`
+
+- Status:
+  - scaffolded
+- Goal:
+  - test whether the `exp_027b` native student adds complementary local signal on top of the fixed `exp_015d` teacher
+- Notebook:
+  - `notebooks/exp_027c_exp015d_native_student_blend_benchmark.ipynb`
+- Planned outputs:
+  - `baseline_summary.csv`
+  - `weight_sweep.csv`
+  - `taxon_summary.csv`
+  - `report_snapshot.json`
+- Design notes:
+  - this is the gatekeeper before any Kaggle promotion
+  - teacher scores are from fixed `exp_015d` replay on fully labeled soundscape rows, so the benchmark is direction-finding rather than a perfect fold-safe OOF proxy
+- Hardening note:
+  - the notebook now auto-resolves both teacher and student outputs from `experiments/outputs` and `~/Downloads`
+  - if needed, use `CFG.teacher_dir_override` or `CFG.student_dir_override`
+- Decision rule:
+  - if the best blend weight stays near pure teacher or pure student, the branch is probably not ensemble-worthy

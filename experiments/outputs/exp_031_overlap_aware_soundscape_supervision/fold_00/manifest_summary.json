@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp_031",
+  "fold": 0,
+  "train_rows_total": 1035,
+  "valid_rows_total": 168,
+  "train_base_rows": 540,
+  "train_overlap_rows": 495,
+  "valid_base_rows": 168,
+  "train_files": 45,
+  "valid_files": 14,
+  "mean_train_teacher_confidence": 0.9709991729201902,
+  "mean_valid_teacher_confidence": 0.9788637757301331,
+  "overlap_hop_seconds": 2.5
+}

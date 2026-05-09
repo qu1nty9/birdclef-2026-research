@@ -1,0 +1,9 @@
+{
+  "experiment_id": "exp_033",
+  "experiment_name": "smart_audio_family_benchmark",
+  "rows": 708,
+  "files": 59,
+  "teacher_dir": "/Users/yaroslav/Downloads/exp_027a_exp015d_teacher_cache",
+  "smart_model_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/data/BirdCLEF-2026-model",
+  "device": "mps"
+}

@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp_040",
+  "experiment_name": "v18_strict_filelevel_proxy_audit",
+  "artifacts_dir": "/kaggle/input/datasets/yaroslavkholmirzayev/artifact-export-for-exp-015d/exp_015c_v18_artifacts",
+  "cache_meta": "/kaggle/input/datasets/jaejohn/perch-meta/full_perch_meta.parquet",
+  "device": "cpu",
+  "n_variants": 13,
+  "baseline_variant": "manifest_baseline",
+  "baseline_file_macro_auc": 0.9921255113051967,
+  "baseline_row_macro_auc": 0.9931198940227716,
+  "best_by_strict_file_score": "manifest_baseline",
+  "best_strict_file_score": 0.9921255113051967,
+  "best_file_macro_auc": 0.9921255113051967,
+  "best_file_macro_auc_delta": 0.0,
+  "strict_public_candidate": null,
+  "strict_public_candidate_file_macro_auc_delta": null,
+  "strict_public_candidate_worst_file_regime_delta": null,
+  "known_public_negatives": {
+    "no_rank_aware": 0.928,
+    "no_file_scale": 0.922
+  },
+  "selection_note": "Primary selection is file/regime stability, not row macro AUC."
+}

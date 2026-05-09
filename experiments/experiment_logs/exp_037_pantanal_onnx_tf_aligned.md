@@ -1,0 +1,47 @@
+# `exp_037_pantanal_onnx_tf_aligned`
+
+- Status:
+  - scaffolded for first Kaggle run
+- Source:
+  - `exp_036_pantanal_tf_exact_replay`
+  - `references/private-notebooks/pantanal-distill-birdclef2026-onnx-0.93.ipynb`
+- Notebook:
+  - `notebooks/kaggle_submission_exp_037_pantanal_onnx_tf_aligned.ipynb`
+- Goal:
+  - use ONNX Perch to speed up the Pantanal reference notebook without repeating the `exp_035 = 0.926` score loss
+- Hypothesis:
+  - `exp_035` likely changed too much at once:
+    - real ONNX Perch test features
+    - added global seed / changed stochastic training trajectory
+    - stricter path and runtime code changes
+  - the most important modeling risk is train/test backend mismatch:
+    - downstream stack trains on cached TensorFlow Perch features from `perch_meta`
+    - hidden test features came from raw ONNX Perch
+- Design:
+  - keep the Pantanal training recipe unchanged
+  - do not add `seed_everything`
+  - keep TensorFlow Perch loaded for original labels/mapping and fallback
+  - use ONNX only inside `infer_perch_with_embeddings`
+  - fit per-column affine ONNX-to-TF alignment on cached full-file `perch_meta` rows:
+    - mapped 234-class score space
+    - 1536-d embedding space
+  - apply that alignment to hidden-test ONNX outputs before ProtoSSM / MLP / Residual inference
+- Expected inputs:
+  - BirdCLEF+ 2026 competition data
+  - `perch_meta`
+  - Perch classifier TensorFlow model
+  - `tf_wheels`
+  - Perch ONNX dataset with:
+    - `perch_v2.onnx`
+    - `onnxruntime-*.whl`
+- Validation:
+  - generated notebook exists
+  - saved outputs are cleared
+  - ONNX session is present
+  - alignment cell is present
+  - no added global seed function is present
+  - the only local AST issue is the expected Kaggle `!pip install` magic cell
+- Decision rule:
+  - if score returns to `0.929-0.930`, ONNX can be kept alive with alignment
+  - if score stays near `0.926`, raw ONNX drift is not the only issue or the alignment is insufficient
+  - if exact TF `exp_036` beats `exp_037`, prioritize score-first TF replay before further runtime work

@@ -1,0 +1,53 @@
+# `exp_039_pantanal_onnx_fast_no_file_scale`
+
+- Status:
+  - completed first Kaggle run
+- Source:
+  - `exp_038_pantanal_onnx_fast_noalign`
+  - `exp_019_v18_postproc_ablation`
+  - `exp_019b_exp015d_no_file_scale`
+- Notebook:
+  - `notebooks/kaggle_submission_exp_039_pantanal_onnx_fast_no_file_scale.ipynb`
+- Build script:
+  - `tmp/jupyter-notebook/build_exp_039.py`
+- Goal:
+  - retest the strongest `exp_019` proxy postprocess candidate on the timeout-safe `exp_038` ONNX base
+- Public result:
+  - `0.922`
+- Why this exists:
+  - `exp_019` found `no_file_scale` as the best trusted-row proxy variant by row macro AUC:
+    - baseline row macro AUC: `0.993120`
+    - `no_file_scale` row macro AUC: `0.993906`
+    - delta: `+0.000786`
+  - the original public branch `exp_019b` timed out twice before producing a score
+  - `exp_038` restored the stable `0.929` score with much better runtime safety
+- Patch design:
+  - base notebook is `exp_038`
+  - keep ONNX Perch, cache auto-resolution, rank adapter, async audio prefetch, and batched TTA unchanged
+  - change only:
+    - `FORCE_DISABLE_FILE_SCALE = True`
+    - `CFG["file_level_top_k"] = 0`
+- Expected inputs:
+  - same as `exp_038`
+  - BirdCLEF+ 2026 competition data
+  - `perch_meta`
+  - Perch classifier TensorFlow model
+  - `tf_wheels`
+  - Perch ONNX dataset with `perch_v2.onnx` and `onnxruntime-*.whl`
+- Validation:
+  - generated notebook exists
+  - saved outputs are cleared
+  - build script compiles
+  - JSON notebook loads
+  - `resolve_full_cache_input_dir` is present
+  - `_format_onnx_input` is present
+  - `CFG["file_level_top_k"] = 0` override is present
+- Outcome:
+  - notebook completed, so the previous `exp_019b` timeout ambiguity is resolved
+  - public score dropped from the stable `0.929` base to `0.922`
+  - the trusted-row proxy row-AUC gain did not transfer to hidden public data
+  - file-level confidence scaling should remain enabled in the stable recipe
+- Decision rule:
+  - close the `no_file_scale` hypothesis
+  - keep `exp_038` unchanged as the fast baseline
+  - be more skeptical of trusted-row row-level proxy gains when file-level proxy or public stability disagrees

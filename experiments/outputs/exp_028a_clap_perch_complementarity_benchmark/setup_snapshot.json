@@ -1,0 +1,15 @@
+{
+  "experiment_id": "exp_028a",
+  "experiment_name": "clap_perch_complementarity_benchmark",
+  "teacher_rows": 708,
+  "teacher_files": 59,
+  "n_classes": 234,
+  "clap_embedding_key": "clap_emb_full",
+  "clap_embedding_dim": 512,
+  "folds": [
+    0,
+    1,
+    2,
+    3
+  ]
+}

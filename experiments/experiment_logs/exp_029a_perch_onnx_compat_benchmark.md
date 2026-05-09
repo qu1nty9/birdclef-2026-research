@@ -1,0 +1,32 @@
+# `exp_029a_perch_onnx_compat_benchmark`
+
+- Status:
+  - scaffolded
+- Goal:
+  - benchmark whether an ONNX-exported `Perch v2` cache is close enough to the current official/TensorFlow Perch cache that the fixed `exp_015d` artifact stack still behaves the same
+- Notebook:
+  - `notebooks/exp_029a_perch_onnx_compat_benchmark.ipynb`
+- Planned inputs:
+  - completed `exp_027a` teacher cache
+  - official Perch cache:
+    - `full_perch_meta.parquet`
+    - `full_perch_arrays.npz`
+  - ONNX Perch cache:
+    - either standard names under an `onnx`-like directory, or
+    - explicit override via `CFG.onnx_perch_dir_override`
+  - fixed `exp_015d` artifact directory containing `artifacts_manifest.json`
+- Planned outputs:
+  - `setup_snapshot.json`
+  - `raw_compat_metrics.json`
+  - `downstream_metrics.json`
+  - `classwise_auc_comparison.csv`
+  - `taxon_summary.csv`
+  - `report_snapshot.json`
+- Design notes:
+  - this is a compatibility benchmark, not a new submit path
+  - the benchmark aligns official and ONNX caches to the same trusted rows from `exp_027a`
+  - it first measures raw drift on `scores_full_raw` and `emb_full`
+  - it then replays the fixed `exp_015d` stack on top of both caches and compares downstream AUC plus final-score drift
+- Decision rule:
+  - if raw drift is small and downstream deltas stay near zero, ONNX Perch is engineering-safe enough for future runtime-oriented branches
+  - if downstream AUC degrades meaningfully, the ONNX swap should be considered unsafe for the current `exp_015d` artifact stack even if it is faster

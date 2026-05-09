@@ -7,6 +7,29 @@
 - [x] Identify first experiment and a local validation strategy based on labeled soundscapes
 - [x] Confirm that `train_soundscapes_labels.csv` contains duplicated identical rows per segment and should be deduplicated during evaluation
 
+## Current Frontier After Exp_032
+
+- [x] Audit the strongest local `0.928-0.940` reference notebooks and separate genuinely new families from code-near V18 / `ProtoSSM` variants
+- [x] Record that most top-looking local references still collapse back to the same Perch + `ProtoSSM` + `ResidualSSM` family already operationalized in `exp_029c`
+- [x] Prototype one small local benchmark around `birdclef-2026-smart-audio-bird-detector.ipynb`, because it is the most structurally distinct remaining family
+- [x] Run `exp_033_smart_audio_family_benchmark.ipynb`
+- [x] Decide whether the best smart-audio variant or a non-zero `teacher + smart-audio` blend beats pure teacher on trusted rows
+- [x] Decide whether the smart-audio family adds any trusted-row complementarity to the current production path before spending a Kaggle attempt
+- [x] Build a pure smart-audio Kaggle-facing benchmark from the locally winning `finetuned_only` variant
+- [x] Run `kaggle_submission_exp_034_smart_audio_submit_benchmark.ipynb`
+- [x] Record that `exp_034` scored `0.887`, so the smart-audio trusted-row win did not transfer to public LB in pure-submit form
+- [x] Analyze `pantanal-distill-birdclef2026-onnx-0.93.ipynb` and confirm that the notebook name is misleading: the reference itself does not use `onnxruntime`
+- [x] Scaffold `kaggle_submission_exp_035_pantanal_onnx093_replay.ipynb` as a strict real-ONNX replay of the Pantanal `0.930` recipe
+- [x] Run `kaggle_submission_exp_035_pantanal_onnx093_replay.ipynb`
+- [x] Record that `exp_035` scored `0.926`, so the strict real-ONNX replay is not score-equivalent to the TensorFlow reference
+- [x] Scaffold `kaggle_submission_exp_036_pantanal_tf_exact_replay.ipynb` as a code-identical TensorFlow replay of the Pantanal reference
+- [x] Scaffold `kaggle_submission_exp_037_pantanal_onnx_tf_aligned.ipynb` as a minimal ONNX retry with ONNX-to-TF feature alignment
+- [ ] Run `kaggle_submission_exp_036_pantanal_tf_exact_replay.ipynb`
+- [ ] Decide whether the original TensorFlow Pantanal recipe really reproduces `0.930` before making any more runtime changes
+- [ ] Run `kaggle_submission_exp_037_pantanal_onnx_tf_aligned.ipynb` after `exp_036` or as the next ONNX-speed test
+- [ ] Compare `exp_037` against `exp_036` to decide whether ONNX can be used without public score loss
+- [ ] Run `exp_029a_perch_onnx_compat_benchmark.ipynb` as an engineering safety check for official vs ONNX Perch drift now that `exp_029c` is the production scaffold
+
 ## Immediate Next Steps
 
 - [x] Submit the reference blend baseline to Kaggle and record the first public LB
@@ -201,6 +224,16 @@
 - [x] Record that the first public `exp_019b` attempt timed out and is currently runtime-inconclusive
 - [x] Retry `no_file_scale` once after the first timeout to distinguish runtime noise from a persistent deployment problem
 - [x] Record that the second public `exp_019b` attempt also timed out, and close the cheap `no_file_scale` submit line for now
+- [x] Retest `no_file_scale` on the timeout-safe `exp_038` base as `exp_039`
+- [x] Record that `exp_039` completed at `0.922`, closing `no_file_scale` as a true public negative rather than just a timeout artifact
+- [x] Run `exp_040_v18_strict_filelevel_proxy_audit` to replace row-AUC-first proxy selection with file/regime-aware candidate gates
+- [x] Record that `exp_040` found no strict public candidate and that global thin postprocess submits should stop for now
+- [x] Scaffold `exp_041_v18_texture_targeted_graft_audit` to test texture-only grafts instead of global postprocess deletion
+- [x] Run `exp_041_v18_texture_targeted_graft_audit.ipynb` and promote only if a texture graft passes strict file/regime gates
+- [x] Build the first thin public patch from `exp_041`: apply `texture_graft_no_file_scale_w100` only to `Amphibia + Insecta` columns on top of the stable fast `exp_038`/V18 submit path
+- [x] Run the first Kaggle submission for `kaggle_submission_exp_042_v18_texture_graft_no_file_scale.ipynb` and compare against the stable `0.929` plateau
+- [x] Record that `exp_042` scored `0.926`, so even strict texture-only `no_file_scale` grafting remains public-negative
+- [ ] Stop submitting file-scale/rank/top-k postprocess variants unless a new validation protocol explains the public mismatch
 - [x] Scaffold `exp_020a_texture_artifact_correction_oof` as the next artifactized specialist branch on top of fixed `exp_015d` artifacts
 - [x] Run `exp_020a_texture_artifact_correction_oof.ipynb` against an attached `exp_015d` artifact dataset and full Perch cache
 - [x] Decide not to promote the current `exp_020a` output into a thin submit overlay because the best local blend weight stayed at `0.00`
@@ -240,6 +273,53 @@
 - [x] Run `exp_026b_openvino_hgnet_benchmark.ipynb` in fallback mode and confirm that it reproduces the same Torch/TorchScript pattern when OpenVINO deps are absent
 - [ ] If a future native branch becomes CPU-runtime-bound, install or attach `onnx` / `onnxruntime` / `openvino` and rerun `exp_026b_openvino_hgnet_benchmark.ipynb` for a real OpenVINO measurement
 - [ ] Compare OpenVINO speedup against output drift before deciding whether an OpenVINO-native submit line is worth the packaging complexity
+- [x] Scaffold `exp_027a_exp015d_teacher_cache` as the first teacher-student branch that uses the strongest public path as a reusable local teacher
+- [x] Scaffold `exp_027b_hgnetv2_soundscape_distill_from_exp015d` as the soundscape-only native student branch initialized from `exp_011`
+- [x] Scaffold `exp_027c_exp015d_native_student_blend_benchmark` as the local complementarity check before any Kaggle promotion
+- [ ] Run `exp_027a_exp015d_teacher_cache.ipynb` and inspect `report_snapshot.json` plus `fold_summary.csv`
+- [x] Run `exp_027a_exp015d_teacher_cache.ipynb` and inspect `report_snapshot.json` plus `fold_summary.csv`
+- [x] Run `exp_027b_hgnetv2_soundscape_distill_from_exp015d.ipynb` on fold `0`
+- [x] Compare `exp_027b` fold `0` against the aligned `exp_015d` teacher and inspect whether the student creates local blend upside
+- [ ] Decide whether to run `exp_027c` formally as a notebook artifact or close the current direct teacher-student line now that the quick local sweep already prefers pure teacher (`w_student = 0.00`)
+- [x] Scaffold `exp_028a_clap_perch_complementarity_benchmark` as the next genuinely new external-family scouting notebook
+- [x] Attach or prepare an aligned CLAP cache with row-level `row_id` keys matching the trusted `exp_027a` teacher cache
+- [x] Run `exp_028a_clap_perch_complementarity_benchmark.ipynb`
+- [x] Decide whether CLAP shows any local complementarity over pure `exp_015d` teacher before spending time on a larger CLAP integration path
+- [x] Scaffold `exp_029a_perch_onnx_compat_benchmark` as the first safety benchmark for replacing official Perch cache inputs with an ONNX-exported Perch cache
+- [ ] Attach or generate an aligned ONNX Perch cache for the same trusted rows used by `exp_027a`
+- [ ] Run `exp_029a_perch_onnx_compat_benchmark.ipynb`
+- [ ] Decide whether ONNX Perch is safe enough for the current `exp_015d` artifact stack by checking both raw drift and downstream replay deltas
+- [x] Scaffold `exp_029b_exp015d_runtime_port` as a submit-facing runtime branch that ports ONNX Perch, async prefetch, vectorized MLP probes, and batched TTA into the fixed `exp_015d` scaffold
+- [x] Run `kaggle_submission_exp_029b_exp015d_runtime_port.ipynb`
+- [x] Record that `exp_029b` still timed out and likely never activated a true ONNX-first path because `onnxruntime` was not installed from the attached dataset
+- [x] Scaffold `exp_029c_exp015d_onnx_first_runtime_port` as a stricter retry that installs `onnxruntime` from the ONNX dataset and fails early if ONNX cannot activate
+- [x] Run `kaggle_submission_exp_029c_exp015d_onnx_first_runtime_port.ipynb`
+- [x] Record that `exp_029c` matched `exp_015d` at `0.929` while finishing in about `23` minutes, making it the new best deployment-oriented V18 scaffold
+- [x] Compare `exp_029c` against `exp_015d` on both score and timeout robustness before deciding whether the runtime-port line is worth promoting
+- [x] Scaffold `exp_030_exp029c_texture_overlay_multifold` as the first stronger score-side follow-up on top of the ONNX-first runtime scaffold
+- [x] Run `kaggle_submission_exp_030_exp029c_texture_overlay_multifold.ipynb`
+- [x] Record that multi-fold texture overlay produced a strong public regression (`0.920`) even though the ONNX base and torchscript specialist overlay both executed cleanly
+- [x] Close the submit-facing texture-overlay line as a modeling negative result rather than a runtime casualty
+- [x] Scaffold `exp_0280_clap_cache_build` as the CLAP cache preparation notebook aligned to `exp_027a` trusted rows
+- [x] Run `exp_0280_clap_cache_build.ipynb`
+- [x] Run `exp_028a_clap_perch_complementarity_benchmark.ipynb` after the CLAP cache is ready
+- [x] Record that `exp_028a` is a strong local negative and close the current CLAP branch before any larger integration work
+- [x] Scaffold `exp_031_overlap_aware_soundscape_supervision` as the next supervision-side native branch
+- [x] Run `exp_031_overlap_aware_soundscape_supervision.ipynb` on fold `0`
+- [x] Compare `exp_031` fold `0` directly against `exp_027b` fold `0` on the same trusted holdout rows
+- [x] Decide whether overlap-aware supervision creates any real native upside before expanding beyond fold `0`
+- [x] Choose the controlled follow-up for `exp_031`: run an ablation that isolates `base_only` vs `base_plus_overlap` vs `overlap_only`
+- [x] Scaffold `exp_031b_overlap_ablation`
+- [x] Run `exp_031b_overlap_ablation.ipynb` on fold `0`
+- [x] Decide whether `base_plus_overlap` remains the best regime on the same trusted holdout
+- [x] Decide on the narrow follow-up: compare the lighter `exp_031` base-only recipe against the older `exp_027b` base recipe
+- [x] Scaffold `exp_031c_base_only_recipe_ablation`
+- [x] Run `exp_031c_base_only_recipe_ablation.ipynb` on fold `0`
+- [x] Decide whether the lighter base-only recipe actually beats the older `exp_027b`-style base recipe
+- [x] Decide whether this tiny base-only gain is worth one confirmation fold or whether the native branch is too weak to keep prioritizing
+- [x] Run the confirmation fold for `exp_031c`
+- [x] Re-evaluate the native follow-up line after the winner flipped across folds
+- [ ] If `exp_029a` stays clean, benchmark whether `ThreadPoolExecutor` prefetch + vectorized MLP probe inference from `bird26-reproduce-perch-protossm-resssm-inf-train.ipynb` can reduce runtime in our own fixed `exp_015d` replay without changing scores
 - [ ] Decide whether batched `temporal_shift_tta` from the second `bird26` notebook is worth porting into a controlled local benchmark
 - [x] Freeze the original `exp_016` as a historical scaffold and move the active blend plan to `exp_016b = exp_015d + exp_011`
 - [ ] Reproduce target-domain pseudo-labeling with overlapping `5s` windows, `2.5s` hop, temporal smoothing, and classwise quantile filtering in a notebook-only experiment

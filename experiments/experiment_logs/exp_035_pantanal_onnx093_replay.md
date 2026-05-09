@@ -1,0 +1,41 @@
+# `exp_035_pantanal_onnx093_replay`
+
+- Status:
+  - completed public negative
+- Source reference:
+  - `references/private-notebooks/pantanal-distill-birdclef2026-onnx-0.93.ipynb`
+- Notebook:
+  - `notebooks/kaggle_submission_exp_035_pantanal_onnx093_replay.ipynb`
+- Goal:
+  - reproduce the newly added Pantanal `0.930` reference, then decide whether the tiny edge over the current `0.929` production path is real
+- Audit finding:
+  - the source notebook name is misleading: it contains no `onnxruntime`, no `InferenceSession`, and no `perch_v2.onnx` usage
+  - it loads Perch through `tf.saved_model.load`
+  - it is almost identical to the existing Pantanal `0.930` / improved-ensemble family; token overlap with `pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb` is about `0.994`
+- Modeling recipe preserved:
+  - V18 `ProtoSSM` config
+  - submit-time ProtoSSM training
+  - submit-time `ResidualSSM` correction
+  - `ENSEMBLE_WEIGHT_PROTO = 0.5` in submit mode
+  - default `0.5` per-class thresholds in submit mode
+  - same temperature, file-level scaling, rank-aware scaling, and delta-shift smoothing stack
+- Engineering changes:
+  - installs `onnxruntime-*.whl` from attached Kaggle input
+  - resolves `perch_v2.onnx` and `labels.csv` automatically
+  - forces `REQUIRE_ONNX_PERCH = True` by default
+  - treats TensorFlow as optional fallback plumbing rather than a hard dependency when ONNX is active
+  - uses `ThreadPoolExecutor` for asynchronous audio loading while ONNX runs on CPU
+  - saves `/kaggle/working/exp_035_pantanal_onnx093_replay_logs.json`
+- Validation:
+  - notebook JSON generated successfully
+  - all code cells parse with Python `ast`
+  - feature checks confirmed strict ONNX, `ThreadPoolExecutor`, and the new log path are present
+  - saved cell outputs were cleared to avoid stale reference-run diagnostics
+- First Kaggle result:
+  - public LB: `0.926`
+  - interpretation:
+    - the strict real-ONNX replay underperformed both the stable `exp_029c = 0.929` path and the reported Pantanal `0.930`
+    - because the source reference itself is TensorFlow-based despite its filename, this result should be read as an ONNX-port negative, not as proof that the Pantanal recipe cannot reproduce `0.930`
+- Decision rule:
+  - close the strict ONNX replay for now
+  - next control is `exp_036`, a code-identical TensorFlow replay of the source reference

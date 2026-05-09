@@ -1,0 +1,78 @@
+# `exp_041_v18_texture_targeted_graft_audit`
+
+- Status:
+  - completed local/Kaggle-style proxy run with strict public candidate
+- Source:
+  - `exp_040_v18_strict_filelevel_proxy_audit`
+  - public negative `exp_039 = 0.922`
+- Notebook:
+  - `notebooks/exp_041_v18_texture_targeted_graft_audit.ipynb`
+- Build script:
+  - `tmp/jupyter-notebook/build_exp_041.py`
+- Goal:
+  - test whether the tiny texture gain from `no_file_scale/topk1` can be used without the Aves/event damage that made the global patch fail
+- Why this exists:
+  - `exp_040` showed `no_file_scale/topk1` improved texture file AUC by about `+0.000303`
+  - the same global patch reduced event/Aves regimes and scored `0.922` publicly
+  - therefore the next plausible postprocess question is targeted column grafting, not another global deletion
+- Design:
+  - reuse the fixed V18 artifact replay from `exp_040`
+  - build baseline probabilities once
+  - build donor probabilities for:
+    - `no_file_scale`
+    - `topk1`
+    - `topk3`
+    - `rank035`
+    - `no_rank_aware`
+  - create texture-only graft variants:
+    - keep baseline probabilities for all non-texture taxa
+    - replace or blend only `Amphibia + Insecta` columns from each donor
+    - test graft weights `0.25`, `0.50`, `0.75`, `1.00`
+  - keep full donor variants only as diagnostics; they cannot become public candidates
+- Candidate gate:
+  - `strict_public_candidate = True` only for `texture_graft` variants
+  - file macro AUC must improve by more than `0.00010`
+  - worst file-regime delta must be at least `-0.00010`
+- Expected inputs:
+  - BirdCLEF+ 2026 competition data
+  - full Perch cache with `full_perch_meta.parquet` and `full_perch_arrays.npz`
+  - V18 artifact dataset with `artifacts_manifest.json`
+- Outputs:
+  - `experiments/outputs/exp_041_v18_texture_targeted_graft_audit/texture_graft_variant_results.csv`
+  - `experiments/outputs/exp_041_v18_texture_targeted_graft_audit/taxon_file_auc.csv`
+  - `experiments/outputs/exp_041_v18_texture_targeted_graft_audit/taxon_file_auc_pivot.csv`
+  - `experiments/outputs/exp_041_v18_texture_targeted_graft_audit/report_snapshot.json`
+- Results:
+  - baseline file macro AUC: `0.9921255113`
+  - baseline texture file AUC: `0.9982806211`
+  - baseline event file AUC: `0.9832112144`
+  - best strict candidate: `texture_graft_no_file_scale_w100`
+  - best file macro AUC: `0.9923045885`
+  - file macro delta: `+0.0001790772`
+  - texture file delta: `+0.000303`
+  - event file delta: `+0.000000`
+  - worst file-regime delta: `+0.000000`
+  - other passing variants:
+    - `texture_graft_topk1_w100`
+    - `texture_graft_no_file_scale_w075`
+    - `texture_graft_topk1_w075`
+    - `texture_graft_no_file_scale_w050`
+    - `texture_graft_topk1_w050`
+    - `texture_graft_topk1_w025`
+    - `texture_graft_no_file_scale_w025`
+- Validation:
+  - generated notebook exists
+  - saved outputs are cleared
+  - build script compiles
+  - JSON notebook loads
+  - `graft_columns` is present
+  - `TEXTURE_ALL_IDX` is present
+  - `strict_public_candidate` is present
+  - output files were copied from the Kaggle run into `experiments/outputs/exp_041_v18_texture_targeted_graft_audit`
+- Decision rule:
+  - if no texture graft passes the strict gate, stop postprocess work and keep `exp_038`
+  - if a texture graft passes, build a thin submit patch on top of `exp_038` that changes only `Amphibia/Insecta` postprocess columns
+- Decision:
+  - promote to a thin Kaggle submit patch
+  - preferred first public patch: apply the `no_file_scale` donor only to `Amphibia + Insecta` columns, keep all other taxa/event columns on the stable V18 manifest baseline
+  - this is materially different from the closed public negative `exp_039`, because `exp_039` disabled file-level scaling globally and hurt Aves/event regimes, while this graft leaves those columns unchanged

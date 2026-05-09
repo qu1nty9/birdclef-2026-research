@@ -1,0 +1,31 @@
+# `exp_031b_overlap_ablation`
+
+- Status:
+  - completed_fold0_overlap_hypothesis_negative
+- Goal:
+  - isolate whether the small `exp_031` gain came from overlap-aware supervision itself or simply from changed train-set size / composition
+- Notebook:
+  - `notebooks/exp_031b_overlap_ablation.ipynb`
+- Inputs:
+  - completed `exp_027a` teacher cache
+  - local or Kaggle access to the matching soundscape audio files
+  - existing `exp_011` fold checkpoints for initialization
+- Design:
+  - reuse the exact trusted holdout and overlap construction from `exp_031`
+  - train three regimes on the same fold:
+    - `base_only`
+    - `base_plus_overlap`
+    - `overlap_only`
+  - compare all three under the same HGNetV2-B0 training scaffold
+- Fold `0` result:
+  - best regime: `base_only`
+  - `base_only = 0.961637`
+  - `overlap_only = 0.960023`
+  - `base_plus_overlap = 0.958346`
+- Interpretation:
+  - the overlap hypothesis is locally negative in this setup
+  - adding overlap rows hurts relative to the matched base-only regime
+  - the earlier `exp_031` bump should therefore not be interpreted as evidence that overlap-aware supervision itself is helping
+- Next decision:
+  - close the overlap-specific hypothesis
+  - if we want one more native follow-up here, make it about the lighter base-only recipe rather than about overlap windows

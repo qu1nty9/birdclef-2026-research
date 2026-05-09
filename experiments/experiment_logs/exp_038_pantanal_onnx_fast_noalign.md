@@ -1,0 +1,53 @@
+# `exp_038_pantanal_onnx_fast_noalign`
+
+- Status:
+  - completed first Kaggle run
+- Source:
+  - `references/private-notebooks/pantanal-distill-birdclef2026-onnx-0.93.ipynb`
+  - `references/private-notebooks/bird26-reproduce-perch-protossm-resssm-inf-train.ipynb` runtime ideas
+- Notebook:
+  - `notebooks/kaggle_submission_exp_038_pantanal_onnx_fast_noalign.ipynb`
+- Build script:
+  - `tmp/jupyter-notebook/build_exp_038.py`
+- Goal:
+  - keep the Pantanal scoring recipe close to the reference while removing the timeout risk from the previous ONNX/alignment attempt
+- Public result:
+  - `0.929`
+- Why this exists:
+  - the exact/reference-style Pantanal branch currently reaches about `0.926` in our Kaggle runs
+  - the latest ONNX submit timed out, likely because the ONNX-to-TF alignment branch added an extra full-cache Perch inference pass before hidden-test inference
+  - for submit, runtime safety is more important than alignment research, so this branch disables alignment entirely
+- Design:
+  - install `onnxruntime-*.whl` from an attached Perch ONNX dataset
+  - require ONNX Perch activation and fail early if `perch_v2.onnx` is not resolved
+  - auto-resolve `full_perch_meta.parquet + full_perch_arrays.npz` anywhere under `/kaggle/input` so submit does not unnecessarily recompute the full Perch cache
+  - adapt ONNX input rank automatically for exports that expect rank `2`, `3`, or `4`; rank-4 exports receive waveform as `(batch, samples, 1, 1)` when the sample axis is dynamic/ambiguous
+  - avoid loading the heavy TensorFlow SavedModel when ONNX is active
+  - keep the original TensorFlow model dataset for Perch `labels.csv`
+  - add audio prefetch with `ThreadPoolExecutor(max_workers=4)`
+  - batch temporal-shift TTA into larger PyTorch chunks with `FAST_TTA_MAX_BATCH_SIZE = 512`
+  - do not run ONNX-to-TF alignment during submit
+- Expected inputs:
+  - BirdCLEF+ 2026 competition data
+  - `perch_meta`
+  - Perch classifier TensorFlow model
+  - `tf_wheels`
+  - Perch ONNX dataset with:
+    - `perch_v2.onnx`
+    - `onnxruntime-*.whl`
+- Validation:
+  - generated notebook exists
+  - saved outputs are cleared
+  - ONNX session code is present
+  - audio prefetch code is present
+  - batched TTA code is present
+  - no `Fitting ONNX->TF alignment` submit path is present
+- Outcome:
+  - fixed the earlier ONNX input-rank/runtime issue
+  - avoided the timeout-producing alignment pass
+  - restored the stable public plateau at `0.929`
+  - did not improve above the current project ceiling
+- Decision rule:
+  - promote as a safe fast base alongside `exp_029c`
+  - stop treating ONNX itself as a likely score lever
+  - use the regained runtime headroom for new score-side hypotheses rather than more ONNX compatibility work

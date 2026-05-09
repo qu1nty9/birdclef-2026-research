@@ -1,5 +1,215 @@
 # Research Notes
 
+## 2026-04-14 Exp_032 Top-Solution Delta Audit
+
+### Why This Audit Was Needed
+
+- By this point, most thin branches around the current best public recipe were already closed:
+  - texture overlay
+  - cheap postprocess deletions
+  - geo boosts
+  - broader TTA
+  - CLAP scouting
+  - native overlap and recipe follow-ups
+- The next mistake to avoid was opening yet another branch that only *looked* new but was still another V18 / `ProtoSSM` variant.
+
+### Reference Cluster Reviewed
+
+- `references/private-notebooks/bird26-reproduce-perch-protossm-resssm-inf-train.ipynb`
+- `references/private-notebooks/birdclef-2026-improved-ensemble-0.929.ipynb`
+- `references/private-notebooks/birdclef-26-protossm-v5-resboosting-0-927-lb.ipynb`
+- `references/private-notebooks/luck-factor-0.928.ipynb`
+- `references/private-notebooks/pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb`
+- `references/private-notebooks/pantanal-distill-birdclef2026-v18x-dmodel-0.929.ipynb`
+- `references/private-notebooks/birdclef-2026-smart-audio-bird-detector.ipynb`
+- `references/private-notebooks/birdclef-2026-perch-v2-0.907.ipynb`
+- `references/private-notebooks/perch-v2embedprobe-bayesian-0-912.ipynb`
+
+### What The Audit Showed
+
+- The apparent top-reference cluster is still overwhelmingly one family.
+- Using a quick code-token overlap against `bird26-reproduce-perch-protossm-resssm-inf-train.ipynb`, the following references stayed tightly grouped:
+  - `birdclef-2026-improved-ensemble-0.929.ipynb`: `0.884`
+  - `birdclef-26-protossm-v5-resboosting-0-927-lb.ipynb`: `0.891`
+  - `luck-factor-0.928.ipynb`: `0.888`
+  - `pantanal-distill-birdclef2026-improvement-a4dc68-0.930.ipynb`: `0.888`
+- `pantanal-distill-birdclef2026-v18x-dmodel-0.929.ipynb` is only moderately different at `0.543`, but it is still the same broad Perch + `ProtoSSM` + `ResidualSSM` stack. Its most concrete new idea, larger-width `ProtoSSM`, has already been tested negatively in `exp_023a`.
+
+### The Actually Distinct Families
+
+- `birdclef-2026-smart-audio-bird-detector.ipynb`
+  - overlap only `0.068`
+  - uses a timm / EfficientNet-style acoustic model with attention head and checkpoint blending
+  - importantly, it does **not** depend on the Perch + `ProtoSSM` + `ResidualSSM` stack
+- `birdclef-2026-perch-v2-0.907.ipynb`
+  - overlap `0.235`
+  - frozen Perch + priors + PCA + per-class logistic probe family
+- `perch-v2embedprobe-bayesian-0-912.ipynb`
+  - overlap `0.249`
+  - the same broad Perch-probe family with richer probe features
+
+### Interpretation
+
+- Most local `0.928-0.940` solutions are not new score directions for this project.
+- They mostly repeat the same family already operationalized in:
+  - `notebooks/kaggle_submission_exp_015d_v18_artifact_submit.ipynb`
+  - and now engineered more safely in
+  - `notebooks/kaggle_submission_exp_029c_exp015d_onnx_first_runtime_port.ipynb`
+- The most credible next score-side scouting candidate is now the `smart-audio-bird-detector` family because it is the most structurally different from the current production recipe.
+- The Perch-probe pair is also distinct, but it is closer to ideas that the current production stack already partially subsumes.
+
+### Decision After The Audit
+
+- Keep `exp_029c` as the production scaffold.
+- Stop treating near-V18 reference notebooks as independent high-upside branches unless they introduce a clearly new signal.
+- If only one new scoring branch is opened next, it should be a small local benchmark around the `smart-audio-bird-detector` family before any Kaggle promotion.
+
+### Immediate Follow-Up
+
+- That follow-up is now scaffolded as:
+  - `notebooks/exp_033_smart_audio_family_benchmark.ipynb`
+- Design:
+  - reuse the trusted `exp_027a` teacher cache
+  - replay the local smart-audio checkpoints:
+    - `data/BirdCLEF-2026-model/LB862.pt`
+    - `data/BirdCLEF-2026-model/LB872.pt`
+  - compare:
+    - smart-audio baseline only
+    - smart-audio finetuned only
+    - the reference notebook's own internal blend variants
+    - late `teacher + smart-audio` blend sweeps
+- Why this is the right next filter:
+  - it tests the most distinct remaining family without forcing a training project first
+  - it gives a fast yes/no answer on complementarity
+  - and it avoids spending a Kaggle attempt before the family has shown any trusted-row evidence at all
+
+### Exp_033 Result
+
+- `exp_033` turned into the first strong positive scouting result from a genuinely new family after the long run of closed V18-adjacent branches.
+- Best internal smart-audio variant:
+  - `finetuned_only = 0.996936`
+- Fixed teacher on the same trusted rows:
+  - `teacher = 0.993120`
+- Texture subset also improved:
+  - smart-audio `0.998080`
+  - teacher `0.997365`
+- Late `teacher + smart-audio` sweeps did **not** reveal complementarity in the usual sense:
+  - best blend stayed at pure smart-audio with `best_weight_smart = 1.0`
+
+### Interpretation
+
+- This branch is different from the recent CLAP or native follow-up lines.
+- The meaningful signal is not:
+  - “teacher plus a little extra model is slightly better”
+- It is:
+  - “the new family itself is locally stronger than the current fixed teacher on trusted rows”
+- That changes the next action:
+  - the right follow-up is now a pure smart-audio Kaggle-facing benchmark
+  - not another late-blend notebook around `exp_015d`
+
+### Submit Follow-Up
+
+- That follow-up is now scaffolded as:
+  - `notebooks/kaggle_submission_exp_034_smart_audio_submit_benchmark.ipynb`
+- Important design choice:
+  - the notebook defaults to `finetuned_only`
+  - not because blends are impossible
+  - but because the local benchmark already showed that:
+    - `finetuned_only` beats every internal smart-audio blend
+    - and even the best `teacher + smart` late blend still prefers pure smart-audio
+- So `exp_034` is intentionally a **clean first public benchmark of the new family itself**, not another mixed-family experiment.
+
+## 2026-04-12 Exp_027 Teacher-Student Direction
+
+### Why This Branch Exists
+
+- The project now has a stable public anchor at `0.929` through `exp_015d`.
+- A long sequence of thin follow-ups around that path has already been tested and mostly closed:
+  - texture overlay
+  - cheap postprocess deletions
+  - thin texture correction
+  - broader TTA
+  - geo-regime boosts
+  - larger-width `ProtoSSM`
+  - the current HGNet pseudo/distillation schedule line
+- The repeated pattern is now clear:
+  - small patches around the V18 family are not opening a new score regime
+  - the next credible gain needs a genuinely different source of signal
+
+### New Hypothesis
+
+- Instead of trying to beat `exp_015d` with another variant of the same external family, use it as a **teacher** for a native soundscape model.
+- This changes the problem from:
+  - “can a small tweak improve the existing V18 path?”
+- into:
+  - “can `exp_015d` transfer its target-domain behavior into a second model family that later becomes ensemble-worthy?”
+
+### Scaffolded Notebooks
+
+- `notebooks/exp_027a_exp015d_teacher_cache.ipynb`
+  - replay the fixed `exp_015d` artifact stack on fully labeled soundscape rows
+  - save aligned teacher logits, submit-like probabilities, labels, and fold assignments
+- `notebooks/exp_027b_hgnetv2_soundscape_distill_from_exp015d.ipynb`
+  - initialize an HGNetV2 student from the matching `exp_011` fold checkpoint
+  - train on soundscape rows only with supervised BCE plus teacher-target distillation
+- `notebooks/exp_027c_exp015d_native_student_blend_benchmark.ipynb`
+  - compare teacher-only, student-only, and blended probabilities locally before any Kaggle promotion
+
+### Intended Decision Rule
+
+- If `exp_027b` cannot produce a student with useful local validation signal, then the branch closes early with little extra cost.
+- If `exp_027b` is decent but `exp_027c` shows no complementary blend gain, then the student is probably just imitating the teacher too closely to matter.
+- If both steps are positive, this becomes the cleanest remaining path toward a real post-`0.929` submission candidate.
+
+### Fold 0 Reality Check
+
+- `exp_027a` teacher cache on the trusted fully labeled subset looks healthy:
+  - `708` rows
+  - `59` files
+  - teacher probability macro AUC about `0.99312`
+- `exp_027b` fold `0` then trained a soundscape-only HGNetV2 student on that derived split:
+  - best epoch `5`
+  - best validation macro AUC `0.961055`
+  - `43` scored classes
+  - `540 / 168` train / valid rows
+
+Important interpretation:
+
+- the raw `0.9611` looks strong, but it is on a much easier trusted subset than the broader native validation protocol
+- on the exact same validation rows, the aligned `exp_015d` teacher still scores about `0.996472`
+- simple local blends between teacher and student degrade immediately, with the best tested weight staying at pure teacher
+
+Current update:
+
+- this is a useful negative result, not a promotion signal
+- the student is learning something real, but not something complementary enough yet
+- unless the student recipe changes materially, the direct teacher-student path does not currently look like the branch that will break the `0.929` public ceiling
+
+### Next Minimal Scouting Branch
+
+- The next remaining high-value question is no longer “can we imitate `exp_015d` better?”
+- It is:
+  - “can a genuinely new external family add complementary signal where the direct student failed?”
+
+That leads to a narrower benchmark-first branch:
+
+- `notebooks/exp_028a_clap_perch_complementarity_benchmark.ipynb`
+
+Design:
+
+- use the completed `exp_027a` teacher cache as the fixed baseline
+- attach an aligned CLAP cache on the same trusted rows
+- fit a small fold-aware CLAP probe OOF
+- measure:
+  - pure teacher
+  - pure CLAP probe
+  - late blends `teacher + CLAP`
+
+Decision rule:
+
+- if CLAP cannot improve over pure teacher on this small trusted benchmark, it should not be promoted into a larger integration effort
+- if it does improve or show targeted taxon complementarity, then CLAP becomes the most credible remaining post-`0.929` exploration track
+
 ## 2026-03-17 Initial Project Read
 
 ### Repository State
@@ -2733,6 +2943,37 @@ Research implication:
   - because the only change is a late `file_level_top_k = 0` override, the repeated timeout is still better interpreted as deployment fragility near the code-competition budget than as a direct model-side failure
   - however, after two retries the practical conclusion is no longer “inconclusive”
   - the branch should be considered operationally closed, and the cheap postprocess-deletion line should pause here
+- Follow-up resolution via `exp_039`:
+  - the same `no_file_scale` hypothesis was retested on the timeout-safe `exp_038` ONNX-fast base
+  - `exp_039` completed and scored `0.922`
+  - this resolves the earlier timeout ambiguity as a real public negative
+  - file-level confidence scaling should remain enabled in the stable `0.929` recipe
+
+### `exp_040_v18_strict_filelevel_proxy_audit`
+
+- New notebook:
+  - `notebooks/exp_040_v18_strict_filelevel_proxy_audit.ipynb`
+- Motivation:
+  - row-level proxy selection has now failed twice:
+    - `no_rank_aware` looked locally attractive but scored `0.928`
+    - `no_file_scale` looked best by row AUC but scored `0.922`
+  - therefore postprocess variants should be judged primarily by file/regime stability before any further public submit
+- First run result:
+  - baseline variant: `manifest_baseline`
+  - baseline file macro AUC: `0.9921255113`
+  - baseline row macro AUC: `0.9931198940`
+  - best by strict file score: `manifest_baseline`
+  - strict public candidate: `None`
+  - tested variants: `13`
+- Important observations:
+  - rank-power and delta-smoothing tweaks were file-level neutral
+  - `no_rank_aware` again improved row AUC but had no file-level gain and is already public-negative
+  - `no_file_scale` / `topk1` improved texture file AUC slightly but hurt event/Aves enough to reduce file macro AUC by about `-0.001020`
+  - `topk3` also hurt file macro AUC and worsened the weakest taxon regime
+- Practical conclusion:
+  - stop global thin postprocess submits
+  - keep `exp_038` as the stable fast baseline
+  - if postprocess is revisited, it should be targeted/taxon-aware rather than a global deletion/tuning patch
 
 ### `exp_020a_texture_artifact_correction_oof`
 
@@ -3164,3 +3405,203 @@ Research implication:
   - `exp_026a` can be considered complete as a low-risk engineering benchmark
   - `exp_026b` should only be pushed further if we later have a native branch that is genuinely worth CPU deployment work
   - until then, OpenVINO remains a low-priority side branch rather than a main answer to the current `0.929` ceiling
+- `exp_029a_perch_onnx_compat_benchmark` is now scaffolded as the first strict compatibility test for the forum idea "just use Perch v2 in ONNX version".
+  The notebook is intentionally framed as a safety benchmark rather than a score branch:
+  - it aligns official and ONNX Perch caches to the same trusted rows from `exp_027a`
+  - it measures raw drift on both `scores_full_raw` and `emb_full`
+  - it then replays the fixed `exp_015d` stack on top of both caches to see whether the backend swap preserves downstream behavior
+  The main reason for this design is that the current artifact stack was trained on a very specific Perch input distribution, so even small embedding/logit drift can matter more than raw runtime wins.
+- Reviewed `bird26-reproduce-perch-protossm-resssm-inf-train.ipynb` as a runtime-focused reference.
+  Main conclusion:
+  - unlike the earlier `bird26-reprod-perch-proto-residualssm-train-s7177.ipynb`, this notebook really does activate the key speed ideas rather than only describing them
+  - the most important active pieces are:
+    - ONNX Perch inference through `onnxruntime` with `CPUExecutionProvider` and `intra_op_num_threads = 4`
+    - `ThreadPoolExecutor(max_workers=4)` for overlapped audio loading
+    - batched `temporal_shift_tta(...)` that concatenates all shifts and runs model inference in chunks instead of five separate full passes
+    - vectorized MLP probe inference through a PyTorch wrapper around the trained sklearn probe weights
+    - explicit loading of pretrained `ProtoSSM` and `ResidualSSM`, so submit mode skips in-notebook training
+  Architecture-wise this is still the same V18-family:
+  - `ProtoSSM`: `d_model = 320`, `d_state = 32`, `4` SSM layers, `2` prototypes, `meta_dim = 24`, `8` heads
+  - `ResidualSSM`: `d_model = 128`, `d_state = 16`, `correction_weight = 0.35`
+  - `tta_shifts = [0, 1, -1, 2, -2]`
+  - `rank_aware_power = 0.4`
+  - `delta_shift_alpha = 0.20`
+  Practical interpretation:
+  - this notebook is valuable as an engineering/runtime reference, not as a genuinely new score family
+  - its direct score (`~0.928`) is still in the same `0.927-0.929` ceiling cluster we have already mapped
+  - the strongest transferable ideas for our project are ONNX Perch, async I/O prefetch, and vectorized MLP probe inference
+  - batched TTA is real here, but our own `exp_021` suggests that wider TTA alone is close to neutral on top of `exp_015d`
+- `exp_029b_exp015d_runtime_port` is now scaffolded as the submit-facing runtime continuation of that review.
+  Design goal:
+  - keep the V18 artifactized score path unchanged
+  - port only the engineering pieces that plausibly reduce runtime pressure
+  Included changes:
+  - optional ONNX Perch with TensorFlow fallback
+  - asynchronous audio prefetch
+  - vectorized MLP probe inference
+  - batched temporal-shift TTA implementation
+  Interpretation:
+  - this is the cleanest way to test whether the `bird26` runtime ideas can help our best public path without accidentally mixing in a different model family
+- After the first Kaggle try, `exp_029b` still timed out. The notebook audit strongly suggests that the branch was not truly ONNX-first:
+  - it tried to import `onnxruntime`, but did not install it from the attached ONNX wheel dataset
+  - TensorFlow was still imported up front and the branch could quietly fall back to the slower SavedModel path
+  That matters because it means the timeout is not yet evidence against ONNX Perch itself; it is evidence that the runtime port was still too permissive.
+- `exp_029c_exp015d_onnx_first_runtime_port` is now scaffolded as the stricter follow-up.
+  Main changes:
+  - install `onnxruntime-*.whl` from the attached ONNX dataset before imports
+  - resolve `perch_v2.onnx` and `labels.csv` directly from the ONNX bundle
+  - make TensorFlow optional instead of mandatory
+  - require ONNX by default and fail early if it cannot be activated
+  Interpretation:
+  - this is a better engineering experiment than simply retrying `exp_029b`
+  - it should finally separate “ONNX is not enough” from “the notebook never really switched to ONNX”
+- The first Kaggle run of `exp_029c_exp015d_onnx_first_runtime_port` has now completed successfully at `0.929` in about `23` minutes.
+  This is a very important distinction:
+  - it is not a new score gain over `exp_015d`
+  - but it is a real deployment win because the full V18 recipe now finishes with a large runtime margin instead of living near the code-competition timeout cliff
+  Practical interpretation:
+  - ONNX-first Perch looks operationally safe enough for the current public recipe
+  - the earlier `exp_029b` timeout should be interpreted as an implementation failure, not as evidence that the ONNX route is intrinsically too slow or too unstable
+  - `exp_029c` therefore becomes the new best engineering scaffold for any future V18-based experimentation that still needs room inside the Kaggle runtime budget
+- `exp_030_exp029c_texture_overlay_multifold` is now prepared as the first score-oriented beneficiary of that new runtime margin.
+  Why this branch is still interesting:
+  - the earlier public texture overlay tests were not purely negative in the research sense; they were thin deployable tests
+  - `exp_018a` and `exp_018b` still suggest real local specialist signal for `Amphibia/Insecta`
+  New design choice:
+  - keep the now-fast `exp_029c` path fixed
+  - blend multiple positive specialist folds `(0, 1, 3)` instead of only a single conservative fold
+  Interpretation:
+  - if this branch stays neutral, the deployable texture-overlay line becomes much easier to close
+  - if it improves, it will be the clearest example so far of runtime headroom converting into a real score-side opportunity
+- The first Kaggle run of `exp_030_exp029c_texture_overlay_multifold` has now completed at `0.920`, which is a strong negative result.
+  Why this matters:
+  - unlike the earlier `exp_018d/018e` tests, this was not a weak or runtime-constrained deployable form
+  - both the ONNX-first V18 base and the torchscript multi-fold specialist overlay actually executed
+  Log-based interpretation:
+  - the overlay drove target-taxonomy mean probability from about `0.0421` down to `0.0323`
+  - the specialist branch itself had a much lower target mean (`0.0143`) than the already strong baseline
+  Practical conclusion:
+  - the local specialist signal from `exp_018a/018b` does not survive this stronger public deployment test
+  - the deployable texture-overlay line should now be treated as closed rather than merely inconclusive
+- `exp_0280_clap_cache_build` is now scaffolded as the missing preparation step for the CLAP branch.
+  Design choice:
+  - do not invent a new cache format
+  - instead mirror the exact `row_id` alignment expected by `exp_028a`
+  - save both `clap_*` and `full_clap_*` file names so the downstream benchmark can resolve them automatically
+  Practical implication:
+  - after `exp_030`, the most credible remaining score-side exploration is no longer another V18 patch
+  - it is whether a genuinely new embedding family such as CLAP can add any local complementarity over the strong `exp_015d/exp_029c` teacher
+- `exp_0280_clap_cache_build` has now completed cleanly.
+  Healthy signals:
+  - all `708` trusted rows are present
+  - all `59` files are covered
+  - embedding shape is `(708, 512)`
+  - `row_id_match = True`
+  This is a good stopping point for the infrastructure layer:
+  - the CLAP branch is now blocked only by modeling quality, not by missing cache plumbing
+  - `exp_028a` is the next honest test of whether CLAP contributes any complementary signal beyond the fixed `exp_015d` teacher
+- `exp_028a_clap_perch_complementarity_benchmark` returned a strong negative scouting result.
+  Summary:
+  - pure teacher remains best at `0.993120`
+  - pure CLAP probe is weak at `0.477363`
+  - texture-only comparison is also decisively negative: `0.997988` teacher vs `0.543079` CLAP
+  - the best late-blend weight is `0.0`, meaning any CLAP contribution hurts immediately
+  Interpretation:
+  - this is not the kind of near-miss where a better merger might rescue the branch
+  - on the current trusted benchmark, CLAP does not show meaningful complementarity over the fixed `exp_015d/exp_029c` teacher
+  - the current CLAP line should therefore be closed before investing in larger integration or submit work
+- `exp_031_overlap_aware_soundscape_supervision` is now scaffolded as the next honest native research branch.
+  Design choice:
+  - reuse the stable `exp_027b` HGNetV2 training scaffold
+  - stop changing the teacher or the submit recipe
+  - change the supervision geometry instead by adding `2.5s`-hop overlap windows on the trusted soundscape files
+  Why this is still live:
+  - many recent negative results came from patching a saturated `exp_015d/exp_029c` family
+  - `exp_031` is different because it injects a genuinely different local training signal while keeping evaluation on the same trusted holdout rows
+- `exp_031` fold `0` returned a small but real local improvement over `exp_027b`.
+  Summary:
+  - `exp_027b` best soundscape macro AUC on the trusted holdout: `0.961055`
+  - `exp_031` best soundscape macro AUC on the same holdout: `0.961173`
+  - train rows increased to `1035` via `495` overlap windows on top of `540` base rows
+  Interpretation:
+  - the gain is tiny, so this is not evidence of a breakthrough
+  - but unlike many recent branches, it is at least pointing in the right direction
+  - this makes `exp_031` one of the few remaining score-oriented ideas that still looks mildly alive after fold `0`
+- `exp_031b_overlap_ablation` is now scaffolded as the next necessary control.
+  Why it matters:
+  - `exp_031` improved only a little
+  - without an ablation, we do not know whether that came from overlap-aware supervision itself or simply from having more effective train rows
+  Planned comparison:
+  - `base_only`
+  - `base_plus_overlap`
+  - `overlap_only`
+  This is a good next filter because it turns a weak positive into a more trustworthy yes/no signal.
+- `exp_031b` fold `0` resolved that ambiguity quite cleanly.
+  Result:
+  - `base_only = 0.961637`
+  - `overlap_only = 0.960023`
+  - `base_plus_overlap = 0.958346`
+  Interpretation:
+  - the overlap hypothesis is locally negative in this setup
+  - the earlier `exp_031` improvement was not caused by `base + overlap` being genuinely better than a matched base-only regime
+  - if we want to continue anywhere near this branch, the live idea is now a lighter base-only native recipe, not overlap-aware supervision itself
+- `exp_031c_base_only_recipe_ablation` is now scaffolded as the cleanest next control.
+  Purpose:
+  - keep the base-only data fixed
+  - compare the older `exp_027b`-style recipe against the lighter `exp_031`-style base-only recipe
+  Why this still matters:
+  - after `exp_031b`, overlap is no longer the interesting variable
+  - the only plausible remaining question is whether the lighter base recipe itself carries a small real gain
+- `exp_031c` fold `0` says that the lighter base-only recipe is slightly better than the older one, but only barely.
+  Result:
+  - `light_base_recipe = 0.961107`
+  - `legacy_base_recipe = 0.961055`
+  Interpretation:
+  - there is still a tiny native-side signal in the lighter recipe
+  - however, the gap is so small that it looks fragile rather than strategically strong
+  - this is not the kind of result that justifies a submit path yet; at most it justifies one more confirmation fold if we really want to probe the last remaining native niche
+- `exp_031c` fold `1` did exactly what a fragile signal often does: it flipped the winner.
+  Result:
+  - `legacy_base_recipe = 0.956123`
+  - `light_base_recipe = 0.955171`
+  Interpretation:
+  - after two folds, there is no robust evidence that the lighter base-only recipe is genuinely better
+  - the remaining native-side differences in this pocket are now best interpreted as tiny and unstable
+  - this makes the whole post-`exp_027b` native follow-up line much less worth pursuing further
+- `exp_034_smart_audio_submit_benchmark` has now produced a clear public negative result.
+  Result:
+  - public LB: `0.887`
+  - current production path: `exp_029c = 0.929`
+  - delta: `-0.042`
+  Interpretation:
+  - the local `exp_033` trusted-row win did not transfer to the public leaderboard
+  - because the miss is large, this is probably not a small calibration issue
+  - the smart-audio branch should be paused unless a concrete inference or domain-shift bug is found
+- The newly added `pantanal-distill-birdclef2026-onnx-0.93.ipynb` has been audited.
+  Audit result:
+  - despite the filename, the notebook does not use `onnxruntime`
+  - it calls `tf.saved_model.load` for Perch
+  - it is almost a duplicate of the existing Pantanal `0.930` / improved-ensemble references, with token overlap about `0.994`
+  - the practical deltas versus the nearby Pantanal `0.930` reference are submit-time `ENSEMBLE_WEIGHT_PROTO = 0.5` and default `0.5` thresholds
+  Next action:
+  - `exp_035_pantanal_onnx093_replay` keeps the Pantanal submit-trained recipe but forces a real ONNX Perch backend
+  - this is the cleanest way to test whether the reported `0.930` is reproducible signal or just same-family public-LB variance around the `0.929` plateau
+- `exp_035_pantanal_onnx093_replay` scored `0.926`.
+  Interpretation:
+  - the strict real-ONNX port is not score-equivalent to the source reference in this form
+  - this is consistent with the earlier warning that ONNX Perch can introduce small numerical differences, but here the public effect is large enough to stop the port-first plan
+  - this result should not be used to judge the original Pantanal recipe, because that recipe is actually TensorFlow-based
+  Next control:
+  - `exp_036_pantanal_tf_exact_replay` is now scaffolded as a code-identical replay of the source notebook with only saved outputs cleared
+  - the goal is to recover the reported `0.930` first, then optimize runtime one variable at a time
+- `exp_037_pantanal_onnx_tf_aligned` is now scaffolded as the careful ONNX retry.
+  Why this is different from `exp_035`:
+  - it starts from the exact Pantanal TensorFlow code path
+  - it does not add a global seed or otherwise change the stochastic training recipe
+  - it uses ONNX only for Perch inference
+  - it fits an ONNX-to-TF affine alignment on the cached `perch_meta` full-file rows before applying ONNX features to hidden test
+  The specific failure mode being tested:
+  - cached training features are TensorFlow Perch
+  - raw ONNX hidden-test features may be slightly shifted
+  - downstream ProtoSSM / MLP / Residual models can amplify that small backend mismatch
+  If this works, ONNX remains viable as a speed path. If it does not, the safer path is to recover `0.930` with `exp_036` first and delay runtime optimization.

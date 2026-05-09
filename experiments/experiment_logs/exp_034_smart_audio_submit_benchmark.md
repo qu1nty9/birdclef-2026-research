@@ -1,0 +1,63 @@
+# `exp_034_smart_audio_submit_benchmark`
+
+- Status:
+  - completed public negative
+- Goal:
+  - create the first Kaggle-facing benchmark for the smart-audio family after `exp_033` showed that `finetuned_only` beats the fixed `exp_015d` teacher on trusted rows
+- Notebook:
+  - `notebooks/kaggle_submission_exp_034_smart_audio_submit_benchmark.ipynb`
+- Inputs:
+  - competition dataset
+  - smart-audio checkpoint dataset containing:
+    - `LB872.pt`
+    - optionally `LB862.pt` for non-default submit variants
+- Default path:
+  - `SUBMIT_VARIANT = "finetuned_only"`
+- Design:
+  - derive the exact inference manifest from `sample_submission.csv`
+  - run the smart-audio mel + EfficientNet inference on those `5s` windows
+  - keep the notebook's temporal smoothing and file-level leakage heuristics
+  - save `submission.csv` plus `exp_034_smart_audio_submit_logs.json`
+- Robustness update:
+  - model resolution now supports:
+    - `SMART_MODEL_DIR_OVERRIDE`
+    - `SMART_FINETUNED_WEIGHT_OVERRIDE`
+    - recursive search for `LB872.pt`
+    - explicit `/kaggle/input` diagnostics via `PRINT_INPUT_DIAGNOSTICS`
+  - this removes the earlier fragile assumption that the attached Kaggle dataset root itself must be named exactly like the local model folder
+- Local smoke test:
+  - passed locally on `2026-04-16`
+  - config:
+    - `LOCAL_SMOKE_TEST = True`
+    - `LOCAL_SMOKE_FILES = 1`
+    - `SUBMIT_VARIANT = "finetuned_only"`
+  - resolved local weights:
+    - `data/BirdCLEF-2026-model/LB872.pt`
+  - produced:
+    - `12` rows
+    - `1` file
+    - elapsed time about `4.62s` on CPU
+  - conclusion:
+    - model loading, mel pipeline, inference, smoothing/leakage postprocess, and submission writing all work locally
+- Local no-audio fallback test:
+  - passed locally on `2026-04-17`
+  - config:
+    - `LOCAL_SMOKE_TEST = False`
+    - `ALLOW_MISSING_TEST_AUDIO_FALLBACK = True`
+  - reproduced the Kaggle-style condition where `sample_submission.csv` references `BC2026_Test_*` rows but matching `.ogg` files are not mounted
+  - result:
+    - notebook wrote a valid `submission.csv`
+    - runtime log reported `no_audio_fallback = true`
+  - interpretation:
+    - this fallback is only for interactive / non-hidden notebook runs
+    - a real hidden scoring run should have `no_audio_fallback = false`; otherwise the model did not actually infer on test audio
+- First Kaggle result:
+  - public LB: `0.887`
+  - reported on `2026-04-17`
+  - delta vs production `exp_029c = 0.929`: `-0.042`
+  - interpretation:
+    - the trusted-row `exp_033` signal did not transfer to the public test distribution in pure-submit form
+    - this is not a close miss; the smart-audio family should be paused unless we identify a concrete inference/domain-shift bug
+- Decision rule:
+  - closed for now as a public negative
+  - do not spend more Kaggle attempts on smart-audio blends until we can explain the `0.887` collapse

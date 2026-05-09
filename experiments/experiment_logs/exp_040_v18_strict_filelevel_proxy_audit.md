@@ -1,0 +1,69 @@
+# `exp_040_v18_strict_filelevel_proxy_audit`
+
+- Status:
+  - completed first local/Kaggle-style run
+- Source:
+  - `exp_019_v18_postproc_ablation`
+  - public negatives from `exp_019a` and `exp_039`
+- Notebook:
+  - `notebooks/exp_040_v18_strict_filelevel_proxy_audit.ipynb`
+- Build script:
+  - `tmp/jupyter-notebook/build_exp_040.py`
+- Goal:
+  - replace row-AUC-first proxy selection with stricter file-level and regime-aware selection before spending more submissions
+- Why this exists:
+  - `exp_019a` showed that `no_rank_aware` looked safe locally but dropped public score to `0.928`
+  - `exp_039` showed that `no_file_scale` looked best by trusted-row row AUC but dropped public score to `0.922`
+  - therefore row-level proxy gains are not reliable enough near the `0.929` plateau
+- Design:
+  - reuse the fixed V18 artifact replay from `exp_019`
+  - keep `RUN_TTA_VARIANTS = False` by default to focus on cheap postprocess variants
+  - evaluate variants on:
+    - row macro AUC
+    - file macro AUC
+    - file texture AUC
+    - file event AUC
+    - taxon-level file AUC
+    - minimum taxon file AUC
+  - compute `strict_file_score`, penalizing variants that improve file AUC but degrade texture/event/taxon regimes
+  - mark `strict_public_candidate = True` only if:
+    - file macro AUC improves by more than `0.00010`
+    - worst file-regime delta is not below `-0.00010`
+    - the variant is not a known public-negative deletion patch
+- Known public negatives carried into the audit:
+  - `no_rank_aware = 0.928`
+  - `no_file_scale = 0.922`
+- Expected inputs:
+  - BirdCLEF+ 2026 competition data
+  - full Perch cache with `full_perch_meta.parquet` and `full_perch_arrays.npz`
+  - V18 artifact dataset with `artifacts_manifest.json`
+- Outputs:
+  - `experiments/outputs/exp_040_v18_strict_filelevel_proxy_audit/strict_variant_results.csv`
+  - `experiments/outputs/exp_040_v18_strict_filelevel_proxy_audit/taxon_file_auc.csv`
+  - `experiments/outputs/exp_040_v18_strict_filelevel_proxy_audit/taxon_file_auc_pivot.csv`
+  - `experiments/outputs/exp_040_v18_strict_filelevel_proxy_audit/report_snapshot.json`
+- Result:
+  - baseline variant: `manifest_baseline`
+  - baseline file macro AUC: `0.9921255113`
+  - baseline row macro AUC: `0.9931198940`
+  - best by strict file score: `manifest_baseline`
+  - strict public candidate: `None`
+  - number of tested variants: `13`
+- Key observations:
+  - all rank-power and delta-smoothing variants were file-level neutral on this proxy
+  - `no_rank_aware` still improved row AUC locally but had no file-level gain and is already public-negative at `0.928`
+  - `no_file_scale` / `topk1` improved file texture AUC by about `+0.000303`, but reduced event/Aves regimes enough to drop file macro by about `-0.001020`; public retest scored `0.922`
+  - `topk3` also degraded file macro by about `-0.000311` and hurt the weakest taxon regime by about `-0.005582`
+- Validation:
+  - generated notebook exists
+  - saved outputs are cleared
+  - build script compiles
+  - JSON notebook loads
+  - `strict_file_score` is present
+  - `strict_public_candidate` is present
+  - taxon-level output paths are present
+- Decision rule:
+  - no variant passed the strict file/regime gates
+  - stop thin global postprocess deletion submits
+  - keep `exp_038` as the stable fast baseline
+  - if postprocess is revisited, use targeted taxon-aware variants rather than global scaling deletion

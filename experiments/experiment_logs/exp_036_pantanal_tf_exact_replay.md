@@ -1,0 +1,32 @@
+# `exp_036_pantanal_tf_exact_replay`
+
+- Status:
+  - scaffolded for first Kaggle run
+- Source reference:
+  - `references/private-notebooks/pantanal-distill-birdclef2026-onnx-0.93.ipynb`
+- Notebook:
+  - `notebooks/kaggle_submission_exp_036_pantanal_tf_exact_replay.ipynb`
+- Goal:
+  - run the Pantanal reference recipe exactly before making more runtime changes
+- Why this exists:
+  - `exp_035` added a real ONNX Perch backend and scored `0.926`
+  - the source reference is named `onnx`, but its code is actually TensorFlow Perch via `tf.saved_model.load`
+  - therefore the correct next control is to reproduce the original TensorFlow path first
+- Implementation:
+  - source code is intentionally unchanged from the reference notebook
+  - saved outputs and execution counts are cleared
+  - no ONNX dependencies are added
+  - expected inputs match the original reference:
+    - BirdCLEF+ 2026 competition data
+    - `perch_meta`
+    - Perch classifier TensorFlow model
+    - `tf_wheels`
+- Validation:
+  - generated notebook exists
+  - code text is identical to the source reference
+  - saved outputs are cleared
+  - the only local AST issue is the expected Kaggle `!pip install` magic cell, which is valid in notebook execution
+- Decision rule:
+  - if this reaches `0.930`, then the score recipe is reproducible and future optimization should change only one runtime detail at a time
+  - if it lands near `0.929`, then the reported `0.930` may be public-run variance within the same V18 family
+  - if it underperforms, compare the attached Kaggle inputs and notebook version against the original author's exact environment before opening more branches

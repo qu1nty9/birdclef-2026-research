@@ -1,0 +1,11 @@
+{
+  "experiment_id": "exp_0280",
+  "experiment_name": "clap_cache_build",
+  "teacher_rows": 708,
+  "teacher_files": 59,
+  "clap_model_source": "laion/larger_clap_general",
+  "device": "mps",
+  "target_sr": 48000,
+  "batch_size": 16,
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_0280_clap_cache_build"
+}

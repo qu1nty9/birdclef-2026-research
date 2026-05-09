@@ -1,0 +1,15 @@
+{
+  "experiment_id": "exp_031c",
+  "fold": 1,
+  "regime_name": "legacy_base_recipe",
+  "train_rows_total": 528,
+  "valid_rows_total": 180,
+  "train_base_rows": 528,
+  "train_overlap_rows": 0,
+  "valid_base_rows": 180,
+  "train_files": 44,
+  "valid_files": 15,
+  "mean_train_teacher_confidence": 0.9730278849601746,
+  "mean_valid_teacher_confidence": 0.9720861911773682,
+  "regime_distill_weight": 0.35
+}

@@ -1,0 +1,61 @@
+# `exp_042_v18_texture_graft_no_file_scale`
+
+- Status:
+  - completed public negative
+- Source:
+  - stable fast submit base: `exp_038 = 0.929`
+  - proxy gate: `exp_041_v18_texture_targeted_graft_audit`
+- Notebook:
+  - `notebooks/kaggle_submission_exp_042_v18_texture_graft_no_file_scale.ipynb`
+- Build script:
+  - `tmp/jupyter-notebook/build_exp_042.py`
+- Goal:
+  - test the first strict-gated postprocess candidate after the public negatives
+  - keep the stable V18/ONNX-fast inference stack unchanged
+  - apply only a texture-taxonomy graft selected by `exp_041`
+- Active patch:
+  - baseline postprocess uses the stable manifest/V18 settings, including file-level confidence scaling
+  - donor postprocess differs only by `file_level_top_k = 0`
+  - final `submission.csv` replaces only `Amphibia + Insecta` columns with the donor probabilities
+  - all non-texture columns are asserted unchanged from baseline
+- Why this is not `exp_039`:
+  - `exp_039` disabled file-level confidence scaling globally and scored `0.922`
+  - `exp_042` leaves Aves/event/non-texture columns unchanged
+  - `exp_041` proxy showed texture file AUC gain without event/taxon-regime damage
+- Proxy anchor:
+  - best candidate: `texture_graft_no_file_scale_w100`
+  - baseline file macro AUC: `0.9921255113`
+  - candidate file macro AUC: `0.9923045885`
+  - file macro delta: `+0.0001790772`
+  - texture file delta: `+0.000303`
+  - event file delta: `+0.000000`
+  - worst file-regime delta: `+0.000000`
+- Expected Kaggle attachments:
+  - BirdCLEF+ 2026 competition data
+  - `perch_meta`
+  - Perch ONNX dataset with `perch_v2.onnx` and `onnxruntime-*.whl`
+  - TensorFlow wheels notebook/dataset used by `exp_038`
+  - V18 artifact export dataset used by the stable submit base
+- Output:
+  - `submission.csv`
+  - `/kaggle/working/exp_042_v18_texture_graft_no_file_scale_logs.json`
+- Result:
+  - Kaggle public LB: `0.926`
+  - delta vs stable fast base `exp_038 = 0.929`: `-0.003`
+  - delta vs global `no_file_scale` public negative `exp_039 = 0.922`: `+0.004`
+  - interpretation: targeted graft reduces the damage from global `no_file_scale`, but still underperforms the stable baseline
+- Validation:
+  - notebook generated
+  - outputs cleared
+  - build script generated
+  - patched config/postprocess/logging cells parse with `ast`
+  - graft code asserts non-graft columns remain unchanged
+- Decision rule:
+  - if public LB improves over `0.929`, keep this as the new thin postprocess default
+  - if public LB ties `0.929`, keep `exp_038` as the safer default unless logs show a reason to tune graft weight
+  - if public LB drops, close targeted no-file-scale graft and stop postprocess submit patches for now
+- Decision:
+  - close this branch as a public negative
+  - do not submit smaller graft weights or `topk1` variants unless a new validation signal explains why `w100` failed
+  - keep `exp_038` / `exp_029c` as the stable production path at `0.929`
+  - treat `exp_041` as evidence that the trusted-row/file proxy can still select public-negative postprocess tweaks, even under strict regime gates

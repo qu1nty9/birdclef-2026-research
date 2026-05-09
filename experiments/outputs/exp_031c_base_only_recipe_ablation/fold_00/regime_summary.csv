@@ -1,0 +1,3 @@
+experiment_id,fold,regime_name,train_rows_total,valid_rows_total,train_base_rows,train_overlap_rows,valid_base_rows,train_files,valid_files,mean_train_teacher_confidence,mean_valid_teacher_confidence,regime_distill_weight,best_epoch,best_selection_metric,best_macro_auc,best_soundscape_macro_auc,best_valid_loss
+exp_031c,0,light_base_recipe,540,168,540,0,168,45,14,0.9708983302116394,0.9788637757301331,0.25,4,0.9611071348706877,0.9611071348706877,0.9611071348706877,0.24204274063760584
+exp_031c,0,legacy_base_recipe,540,168,540,0,168,45,14,0.9708983302116394,0.9788637757301331,0.35,5,0.9610550772798211,0.9610550772798211,0.9610550772798211,0.30462846159935

@@ -1,0 +1,3 @@
+variant,macro_auc,texture_macro_auc,scored_classes,texture_scored_classes
+teacher_exp015d,0.9931198940227716,0.9979878993444548,71,42
+clap_probe_oof,0.47736304746546354,0.5430790678591991,71,42

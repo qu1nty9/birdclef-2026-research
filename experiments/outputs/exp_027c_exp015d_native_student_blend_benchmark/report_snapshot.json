@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp_027c",
+  "experiment_name": "exp015d_native_student_blend_benchmark",
+  "rows": 168,
+  "files": 14,
+  "teacher_macro_auc": 0.9964723302655292,
+  "student_macro_auc": 0.9610550772798211,
+  "teacher_texture_macro_auc": 0.9958434292356916,
+  "student_texture_macro_auc": 0.9582944669911316,
+  "best_weight_student": 0.0,
+  "best_macro_auc": 0.9964723302655292,
+  "best_texture_macro_auc": 0.9958434292356916,
+  "note": "Teacher scores come from fixed exp_015d replay on fully labeled soundscape rows, not from a fold-safe retraining process."
+}

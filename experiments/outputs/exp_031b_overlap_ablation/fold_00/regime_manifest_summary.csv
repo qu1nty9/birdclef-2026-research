@@ -1,0 +1,4 @@
+experiment_id,fold,regime_name,train_rows_total,valid_rows_total,train_base_rows,train_overlap_rows,valid_base_rows,train_files,valid_files,mean_train_teacher_confidence,mean_valid_teacher_confidence,overlap_hop_seconds
+exp_031b,0,base_only,540,168,540,0,168,45,14,0.9708983302116394,0.9788637757301331,2.5
+exp_031b,0,base_plus_overlap,1035,168,540,495,168,45,14,0.9709991729201902,0.9788637757301331,2.5
+exp_031b,0,overlap_only,495,168,0,495,168,45,14,0.9711091647244463,0.9788637757301331,2.5

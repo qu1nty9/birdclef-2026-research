@@ -1,0 +1,32 @@
+# `exp_031_overlap_aware_soundscape_supervision`
+
+- Status:
+  - completed_fold0_small_positive_vs_exp027b
+- Goal:
+  - test whether overlap-aware supervision on trusted soundscape files creates new local signal beyond the saturated fixed-`5s` training setup
+- Notebook:
+  - `notebooks/exp_031_overlap_aware_soundscape_supervision.ipynb`
+- Inputs:
+  - completed `exp_027a` teacher cache
+  - local or Kaggle access to the matching soundscape audio files
+  - existing `exp_011` fold checkpoints for initialization
+- Design:
+  - keep the HGNetV2-B0 training scaffold from `exp_027b`
+  - add synthetic `5s` windows with `2.5s` hop on train-fold files only
+  - derive soft overlap labels and teacher targets by weighted interpolation of adjacent trusted rows
+  - still validate on the original trusted `5s` holdout rows so the decision boundary stays comparable to prior native branches
+- Fold `0` result:
+  - best epoch: `2`
+  - best soundscape macro AUC: `0.961173`
+  - `exp_027b` on the same holdout: `0.961055`
+  - train rows: `1035`
+  - train base rows: `540`
+  - train overlap rows: `495`
+  - valid base rows: `168`
+- Interpretation:
+  - this is not a large gain, but it is a real directional improvement over the direct teacher-student baseline
+  - overlap-aware supervision therefore remains mildly alive as a native research line
+  - it is still far below the aligned teacher, so no submit-facing promotion is justified yet
+- Next decision:
+  - run one controlled follow-up only
+  - either repeat the same recipe on another fold or isolate whether the gain comes from `base + overlap` versus an overlap-only regime

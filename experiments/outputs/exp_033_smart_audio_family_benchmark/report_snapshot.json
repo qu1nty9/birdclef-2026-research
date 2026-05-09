@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp_033",
+  "experiment_name": "smart_audio_family_benchmark",
+  "rows": 708,
+  "files": 59,
+  "teacher_macro_auc": 0.9931198940227716,
+  "teacher_texture_macro_auc": 0.99736543492579,
+  "best_smart_variant": "finetuned_only",
+  "best_smart_macro_auc": 0.9969362763665756,
+  "best_smart_texture_macro_auc": 0.9980800599536866,
+  "best_weight_smart": 1.0,
+  "best_weight_teacher": 0.0,
+  "best_macro_auc": 0.9969362763665756,
+  "best_texture_macro_auc": 0.9980800599536866,
+  "note": "This is a trusted-row scouting benchmark for a new family, not a deployable submit path."
+}

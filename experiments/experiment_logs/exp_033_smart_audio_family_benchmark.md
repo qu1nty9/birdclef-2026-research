@@ -1,0 +1,44 @@
+# `exp_033_smart_audio_family_benchmark`
+
+- Status:
+  - completed_local_strong_positive_new_family
+- Goal:
+  - benchmark the most structurally distinct remaining local top-solution family, `birdclef-2026-smart-audio-bird-detector.ipynb`, on the same trusted rows used by `exp_027a`
+- Notebook:
+  - `notebooks/exp_033_smart_audio_family_benchmark.ipynb`
+- Inputs:
+  - completed `exp_027a` teacher cache
+  - local smart-audio checkpoints:
+    - `data/BirdCLEF-2026-model/LB862.pt`
+    - `data/BirdCLEF-2026-model/LB872.pt`
+  - local `train_soundscapes` audio
+- Design:
+  - replay the smart-audio EfficientNet family on the trusted `5s` soundscape rows
+  - compare:
+    - `baseline_only`
+    - `finetuned_only`
+    - reference notebook blend variants
+  - then run a late `teacher + smart-audio` sweep against the fixed `exp_015d` teacher probabilities
+- Outputs:
+  - `report_snapshot.json`
+  - `variant_results.csv`
+  - `teacher_blend_weight_sweep.csv`
+  - `taxon_summary.csv`
+  - `classwise_comparison.csv`
+- Decision rule:
+  - if the best smart-audio variant or a non-zero `teacher + smart-audio` blend improves over pure teacher on trusted rows, the family stays alive as the next real score-side candidate
+  - if the best blend again stays at pure teacher, this branch should be closed quickly like the recent CLAP scouting branch
+- Result:
+  - best smart-audio variant: `finetuned_only`
+  - `finetuned_only` macro AUC: `0.996936`
+  - teacher macro AUC: `0.993120`
+  - best smart texture macro AUC: `0.998080`
+  - teacher texture macro AUC: `0.997365`
+  - best late blend stayed at pure smart-audio:
+    - `best_weight_smart = 1.0`
+    - `best_weight_teacher = 0.0`
+- Interpretation:
+  - this is the first strong positive scouting result from a genuinely new family after the long run of closed V18-adjacent branches
+  - the key signal is not complementarity through late blending
+  - the key signal is that the smart-audio family itself beats the fixed `exp_015d` teacher on the trusted rows
+  - the next rational step is therefore a pure smart-audio Kaggle-facing benchmark, not another `teacher + smart` blend sweep

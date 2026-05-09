@@ -1,0 +1,35 @@
+# `exp_031c_base_only_recipe_ablation`
+
+- Status:
+  - completed_folds01_mixed_no_robust_signal
+- Goal:
+  - isolate whether anything useful remains in the native branch once the overlap hypothesis is removed, by comparing the older `exp_027b`-style base recipe against the lighter `exp_031`-style base recipe
+- Notebook:
+  - `notebooks/exp_031c_base_only_recipe_ablation.ipynb`
+- Inputs:
+  - completed `exp_027a` teacher cache
+  - local or Kaggle access to the matching soundscape audio files
+  - existing `exp_011` fold checkpoints for initialization
+- Design:
+  - reuse the same trusted base-only split used by `exp_027b/exp_031`
+  - train two regimes on the same fold:
+    - `legacy_base_recipe`
+    - `light_base_recipe`
+  - keep the data fixed and change only the recipe-level training weight
+- Fold `0` result:
+  - best regime: `light_base_recipe`
+  - `light_base_recipe = 0.961107`
+  - `legacy_base_recipe = 0.961055`
+  - same trusted split: `540` train rows and `168` valid rows
+- Fold `1` result:
+  - best regime: `legacy_base_recipe`
+  - `legacy_base_recipe = 0.956123`
+  - `light_base_recipe = 0.955171`
+  - same trusted split shape: `528` train rows and `180` valid rows
+- Interpretation:
+  - the winner flips across folds
+  - this means the remaining recipe-level gap is too small and unstable to trust as a meaningful new direction
+  - the native follow-up line no longer looks strong enough to prioritize over the stable `exp_029c` production path
+- Next decision:
+  - close or deprioritize the current native follow-up line
+  - only revisit if a genuinely new supervision or modeling signal appears

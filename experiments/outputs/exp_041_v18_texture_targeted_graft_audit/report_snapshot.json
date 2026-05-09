@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp_041",
+  "experiment_name": "v18_texture_targeted_graft_audit",
+  "artifacts_dir": "/kaggle/input/datasets/yaroslavkholmirzayev/artifact-export-for-exp-015d/exp_015c_v18_artifacts",
+  "cache_meta": "/kaggle/input/datasets/jaejohn/perch-meta/full_perch_meta.parquet",
+  "device": "cpu",
+  "n_variants": 26,
+  "baseline_variant": "manifest_baseline",
+  "baseline_file_macro_auc": 0.9921255113051967,
+  "baseline_file_texture_auc": 0.9982806210708282,
+  "baseline_file_event_auc": 0.9832112144032477,
+  "best_by_strict_file_score": "texture_graft_no_file_scale_w100",
+  "best_strict_file_score": 0.9923045884672244,
+  "best_file_macro_auc": 0.9923045884672244,
+  "best_file_macro_auc_delta": 0.00017907716202769652,
+  "strict_public_candidate": "texture_graft_no_file_scale_w100",
+  "strict_public_candidate_file_macro_auc_delta": 0.00017907716202769652,
+  "strict_public_candidate_worst_file_regime_delta": 0.0,
+  "texture_columns": 63,
+  "event_columns": 171,
+  "known_public_negatives": {
+    "full_no_rank_aware": 0.928,
+    "full_no_file_scale": 0.922
+  },
+  "selection_note": "Only texture_graft variants can be public candidates; full donor variants are diagnostics."
+}

@@ -1,0 +1,17 @@
+{
+  "experiment_id": "exp_028a",
+  "experiment_name": "clap_perch_complementarity_benchmark",
+  "rows": 708,
+  "files": 59,
+  "teacher_macro_auc": 0.9931198940227716,
+  "clap_macro_auc": 0.47736304746546354,
+  "teacher_texture_macro_auc": 0.9979878993444548,
+  "clap_texture_macro_auc": 0.5430790678591991,
+  "best_weight_clap": 0.0,
+  "best_macro_auc": 0.9931198940227716,
+  "best_texture_macro_auc": 0.9979878993444548,
+  "trained_classes_any_fold": 52,
+  "clap_embedding_key": "clap_emb_full",
+  "clap_embedding_dim": 512,
+  "note": "Teacher scores come from fixed exp_015d replay on trusted rows. This notebook is a scouting benchmark for new-family complementarity, not a deployable submit path."
+}

@@ -1,0 +1,31 @@
+# `exp_028a_clap_perch_complementarity_benchmark`
+
+- Status:
+  - completed_local_strong_negative
+- Goal:
+  - test whether a genuinely new external embedding family (`CLAP`) adds any local complementary signal over the fixed `exp_015d` teacher cache on trusted fully labeled soundscape rows
+- Notebook:
+  - `notebooks/exp_028a_clap_perch_complementarity_benchmark.ipynb`
+- Inputs:
+  - completed `exp_027a` teacher cache
+  - aligned CLAP cache from `exp_0280`
+- Outputs:
+  - `weight_sweep.csv`
+  - `taxon_summary.csv`
+  - `classwise_gain.csv`
+  - `report_snapshot.json`
+- Result summary:
+  - rows: `708`
+  - files: `59`
+  - `teacher_macro_auc = 0.993120`
+  - `clap_macro_auc = 0.477363`
+  - `teacher_texture_macro_auc = 0.997988`
+  - `clap_texture_macro_auc = 0.543079`
+  - `best_weight_clap = 0.0`
+- Interpretation:
+  - pure teacher remains decisively best
+  - even tiny late-blend weights degrade both overall and texture metrics immediately
+  - this is a strong scouting negative rather than a near-miss
+- Decision:
+  - close the current CLAP line
+  - do not promote CLAP into a larger integration or submit-facing path without a materially different design

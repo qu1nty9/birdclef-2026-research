@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp_031c",
+  "experiment_name": "base_only_recipe_ablation",
+  "fold": 1,
+  "regimes": [
+    "legacy_base_recipe",
+    "light_base_recipe"
+  ],
+  "best_regime": "legacy_base_recipe",
+  "best_selection_metric": 0.9561229732329963,
+  "rows_compared": 2,
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_031c_base_only_recipe_ablation/fold_01"
+}

@@ -80,6 +80,7 @@ If it matches or underperforms `0.929`, then file-level confidence scaling shoul
 
 ## Final Current Verdict
 
-- no public score obtained
-- two consecutive Kaggle timeouts
-- branch is practically closed for now
+- original branch produced no public score after two consecutive Kaggle timeouts
+- the same hypothesis was later retested on the timeout-safe `exp_038` base as `exp_039`
+- `exp_039` completed and scored `0.922`
+- therefore the `no_file_scale` hypothesis is closed as a modeling negative, not merely an operational timeout

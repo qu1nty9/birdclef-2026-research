@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp_031b",
+  "experiment_name": "overlap_ablation",
+  "fold": 0,
+  "regimes": [
+    "base_only",
+    "base_plus_overlap",
+    "overlap_only"
+  ],
+  "best_regime": "base_only",
+  "best_selection_metric": 0.9616368150959717,
+  "rows_compared": 3,
+  "output_dir": "/Users/yaroslav/Documents/Kaggle/BirdCLEF_2026/experiments/outputs/exp_031b_overlap_ablation/fold_00"
+}
