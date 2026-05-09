@@ -42,7 +42,7 @@ wandb/
 *.log
 *.out
 
-*.ipynb
+# *.ipynb
 
 # =========================
 # KAGGLE SUBMISSIONS
